@@ -6,6 +6,7 @@
 import Phaser from 'phaser';
 import { CONFIG } from '@/core/Config';
 import { Player } from '@/entities/Player';
+import { SPRITES_BY_CATEGORY } from '@/art/spriteManifest';
 import { Npc, buildNpcStates } from '@/entities/NPC';
 import { NPCS } from '@/data/npcs';
 import { InteractionSystem } from '@/systems/InteractionSystem';
@@ -48,22 +49,44 @@ export class VillageScene extends Phaser.Scene {
     void backdrop;
 
     // Painted building billboards.
-    this.placeBuilding(18, 14, 'crop:buildings_00', 3 * TILE, 3 * TILE);
-    this.placeBuilding(12, 14, 'crop:buildings_01', 2.5 * TILE, 2.5 * TILE);
-    this.placeBuilding(24, 14, 'crop:buildings_02', 3 * TILE, 3 * TILE);
-    this.placeBuilding(20, 8, 'crop:buildings_03', 2 * TILE, 2 * TILE);
-    this.placeBuilding(16, 20, 'crop:buildings_04', 2.5 * TILE, 2 * TILE);
-    this.placeBuilding(22, 20, 'crop:buildings_05', 2.5 * TILE, 2 * TILE);
-    this.placeBuilding(20, 22, 'crop:buildings_06', 2 * TILE, 2 * TILE);
-
-    // Painted trees and vegetation.
-    const treeKeys = ['crop:trees_00','crop:trees_02','crop:trees_04','crop:trees_06','crop:trees_08','crop:trees_10','crop:trees_12','crop:trees_14'];
-    const treePositions = [[5,5],[8,22],[34,20],[28,26],[3,12],[36,8],[10,3],[30,3]];
-    treePositions.forEach((p, i) => {
-      const k = treeKeys[i % treeKeys.length]!;
-      const w = 2.5 * TILE, h = 3 * TILE;
-      this.add.image((p[0] as number) * TILE, (p[1] as number) * TILE, k).setDisplaySize(w, h).setOrigin(0.5, 1).setDepth((p[1] as number) * TILE);
+    const buildingSprites = SPRITES_BY_CATEGORY['building'] ?? [];
+    const buildingPositions = [[18,14],[12,14],[24,14],[20,8],[16,20],[22,20],[20,22]];
+    buildingPositions.forEach((p, i) => {
+      const s = buildingSprites[i % buildingSprites.length];
+      if (!s) return;
+      const scale = 2 + (i % 3) * 0.5;
+      this.add.image((p[0] as number) * TILE, (p[1] as number) * TILE, s.key)
+        .setScale(scale).setOrigin(0.5, 1).setDepth((p[1] as number) * TILE + 200);
     });
+
+    // Extracted sprite trees and vegetation (from assests/ posters).
+    const treeSprites = SPRITES_BY_CATEGORY['tree'] ?? [];
+    const treePositions = [[5,5],[8,22],[34,20],[28,26],[3,12],[36,8],[10,3],[30,3],[6,16],[33,10]];
+    treePositions.forEach((p, i) => {
+      const s = treeSprites[i % treeSprites.length];
+      if (!s) return;
+      const scale = 1.5 + (i % 3) * 0.5;
+      this.add.image((p[0] as number) * TILE, (p[1] as number) * TILE, s.key)
+        .setScale(scale).setOrigin(0.5, 1).setDepth((p[1] as number) * TILE);
+    });
+
+    // Extra extracted sprites scattered as ambient detail.
+    const animalSprites = SPRITES_BY_CATEGORY['animal'] ?? [];
+    const fxSprites = SPRITES_BY_CATEGORY['fx'] ?? [];
+    for (let i = 0; i < 12; i++) {
+      const s = animalSprites[i % animalSprites.length];
+      if (!s) continue;
+      const x = 4 + (i * 7) % 32;
+      const y = 4 + (i * 11) % 22;
+      this.add.image(x * TILE, y * TILE, s.key).setScale(1.2).setOrigin(0.5, 1).setDepth(y * TILE);
+    }
+    for (let i = 0; i < 8; i++) {
+      const s = fxSprites[i % fxSprites.length];
+      if (!s) continue;
+      const x = 3 + (i * 9) % 34;
+      const y = 3 + (i * 13) % 24;
+      this.add.image(x * TILE, y * TILE, s.key).setScale(1).setOrigin(0.5, 0.5).setDepth(500).setAlpha(0.7);
+    }
 
     // Painted water for the pond.
     this.placeWater(30, 10, 8, 5);
@@ -170,11 +193,6 @@ export class VillageScene extends Phaser.Scene {
       if (timeEl) timeEl.textContent = formatClock(minutes);
       if (weatherEl) weatherEl.textContent = clock.weather.charAt(0).toUpperCase()+clock.weather.slice(1) + ' · ' + clock.season.charAt(0).toUpperCase()+clock.season.slice(1);
     });
-  }
-
-  private placeBuilding(tx: number, ty: number, key: string, w: number, h: number): void {
-    const spr = this.add.image(tx * TILE, ty * TILE, key).setDisplaySize(w, h).setOrigin(0.5, 1);
-    spr.setDepth(ty * TILE + h);
   }
 
   private placeWater(tx: number, ty: number, w: number, h: number): void {

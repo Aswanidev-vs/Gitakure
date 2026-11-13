@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { buildAllTextures, META } from '@/art/registry';
-import { loadCropTextures } from '@/art/cropLoader';
+import { SPRITE_MANIFEST } from '@/art/spriteManifest';
 import { CONFIG } from '@/core/Config';
 
 export class BootScene extends Phaser.Scene {
@@ -9,7 +9,11 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload(): void {
-    loadCropTextures(this);
+    for (const s of SPRITE_MANIFEST) {
+      if (!this.textures.exists(s.key)) {
+        this.load.image(s.key, s.file);
+      }
+    }
   }
 
   create(): void {
