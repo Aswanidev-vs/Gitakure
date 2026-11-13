@@ -37,3 +37,17 @@ The 12 files in `assests/` are composite AI-generated reference posters (1536×1
 - `bun run typecheck` passes.
 - `bun run build` passes (Vite production build).
 - `bun run dev` starts and serves on :5173.
+
+## Phase 2 — Living world (in progress)
+
+Completed so far:
+- NPC entity (`src/entities/NPC.ts`) with daily schedule resolution, movement toward schedule anchor, met/small-talk dialogue lines.
+- 15 villagers spawned in VillageScene (those whose home is the village), with player collision.
+- Placeholder in-game clock (8:00) driving schedules.
+
+Remaining for Phase 2:
+- Interaction system (E key) and dialogue UI overlay.
+- Inventory system and hotbar.
+- Farming system (plant/water/harvest) with in-game-time growth.
+- Weather + day/night cycle visuals.
+- Audio.
