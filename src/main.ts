@@ -8,6 +8,7 @@ import { ForestScene } from '@/scenes/ForestScene';
 import { RiversideScene } from '@/scenes/RiversideScene';
 import { FarmlandScene } from '@/scenes/FarmlandScene';
 import { ShrineScene } from '@/scenes/ShrineScene';
+import { HideawayScene } from '@/scenes/HideawayScene';
 
 const root = document.getElementById('game-root');
 if (!root) throw new Error('Missing #game-root');
@@ -22,6 +23,7 @@ game.scene.add('ForestScene', ForestScene, false);
 game.scene.add('RiversideScene', RiversideScene, false);
 game.scene.add('FarmlandScene', FarmlandScene, false);
 game.scene.add('ShrineScene', ShrineScene, false);
+game.scene.add('HideawayScene', HideawayScene, false);
 
 game.scene.start(CONFIG.scenes.boot);
 

@@ -173,6 +173,7 @@ export class VillageScene extends Phaser.Scene {
     this.placeFlora(8, 22, 'coconut');
     this.placeFlora(34, 20, 'bamboo');
     this.placeFlora(28, 26, 'mango');
+    this.loadGame();
 
     // HUD
     const ui2 = document.getElementById('ui-root')!;
@@ -206,12 +207,12 @@ export class VillageScene extends Phaser.Scene {
     document.getElementById('ui-root')!.appendChild(mapModal);
     const renderMap = () => {
       const list = mapModal.querySelector('#map-list') as HTMLElement;
-      const locs = ['village','forest','riverside','farmland','shrine'];
+      const locs = ['village','forest','riverside','farmland','shrine','hideaway'];
       list.innerHTML = locs.map((l) => `<button data-loc="${l}" style="display:block;margin:4px 0;background:#332c3c;color:#e8dcc0;border:1px solid #3a3240;padding:6px 10px;width:100%;cursor:pointer;text-align:left;">${l.charAt(0).toUpperCase()+l.slice(1)}</button>`).join('');
       list.querySelectorAll('button').forEach((b) => {
         b.addEventListener('click', () => {
           const loc = b.getAttribute('data-loc')!;
-          const key = loc === 'village' ? 'VillageScene' : loc === 'forest' ? 'ForestScene' : loc === 'riverside' ? 'RiversideScene' : loc === 'farmland' ? 'FarmlandScene' : 'ShrineScene';
+          const key = loc === 'village' ? 'VillageScene' : loc === 'forest' ? 'ForestScene' : loc === 'riverside' ? 'RiversideScene' : loc === 'farmland' ? 'FarmlandScene' : loc === 'shrine' ? 'ShrineScene' : 'HideawayScene';
           mapModal.style.display = 'none';
           this.scene.start(key);
         });
@@ -334,6 +335,18 @@ export class VillageScene extends Phaser.Scene {
       solids.add(r);
       this.physics.add.collider(this.player, solids);
     }
+  }
+
+  private async loadGame(): Promise<void> {
+    try {
+      const save = await this.saves.load();
+      if (save) {
+        this.player.setPosition(save.player.x, save.player.y);
+        this.clock_ = new (await import('@/systems/TimeSystem')).TimeSystem(save.clock);
+        if (save.appliedEvents) for (const id of save.appliedEvents) this.appliedEvents.add(id);
+        console.log('loaded save');
+      }
+    } catch (e) { console.warn('load failed', e); }
   }
 
   private async saveGame(): Promise<void> {
