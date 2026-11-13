@@ -8,7 +8,6 @@ export class AudioSystem {
   private ctx: AudioContext | null = null;
   private masterGain: GainNode | null = null;
   private ambientOsc: OscillatorNode | null = null;
-  private ambientGain: GainNode | null = null;
   private muted = false;
   private volumes = { master: 0.6, music: 0.4, sfx: 0.7 };
 
@@ -50,7 +49,6 @@ export class AudioSystem {
     gain.connect(this.masterGain);
     osc.start();
     this.ambientOsc = osc;
-    this.ambientGain = gain;
 
     // Add a slow LFO for movement.
     const lfo = this.ctx.createOscillator();
@@ -68,7 +66,6 @@ export class AudioSystem {
       try { this.ambientOsc.stop(); } catch {}
       this.ambientOsc = null;
     }
-    this.ambientGain = null;
   }
 
   /** Play a short SFX. */
