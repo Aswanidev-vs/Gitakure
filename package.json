@@ -1,27 +1,24 @@
 {
   "name": "gitakure",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
-  "description": "A peaceful countryside RPG whose world grows from your GitHub history.",
   "type": "module",
+  "description": "A peaceful countryside RPG whose valley grows from a real GitHub history.",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --port 4173",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "test:e2e": "playwright test",
-    "assets": "bun run scripts/generate-assets.ts"
+    "assets": "bun run scripts/build-assets.ts"
   },
   "dependencies": {
-    "phaser": "^3.90.0"
+    "phaser": "3.90.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.56.0",
-    "@types/node": "^26.6.6",
-    "typescript": "^5.9.3",
-    "vite": "^7.1.9",
-    "vitest": "^3.2.4"
+    "@types/bun": "1.3.4",
+    "typescript": "5.9.3",
+    "vite": "7.2.4",
+    "vitest": "3.2.4"
   }
 }

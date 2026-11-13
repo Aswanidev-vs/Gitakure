@@ -1,53 +1,94 @@
-# Gitakure — Build Track
+# Gitakure — build tracker
 
-## Phase 0 — Foundation (completed)
+Live record of what is built, how it was verified, and what remains.
+Phases map to the build order in the brief: foundation → living world →
+GitHub progression → complete experience.
 
-- Project scaffold: Vite + TypeScript + Phaser 3, lockfile committed.
-- Shared types (`src/shared/types.ts`): world clock, inventory, crops, landmarks, journal, NPCs, save game, appearance, sync summary.
-- Event bus (`src/core/EventBus.ts`): typed, synchronous, fire-and-forget.
-- Config (`src/core/Config.ts`): resolution, speeds, scene keys, save version.
-- Art pipeline: procedural pixel painter (`src/art/PixelCanvas.ts`) + palette derived from the supplied reference posters.
-- Terrain tiles (`src/art/tiles/terrain.ts`): 21 terrain ids, deterministic noise, walkability sets.
-- Flora (`src/art/flora.ts`): 12 plant types × 4 seasons.
-- Props/buildings (`src/art/props.ts`): 33 props including houses, shrine, bridge, noticeboard, well, lantern, desk, bookshelf, computer, observatory, ruin pillar, market stall.
-- Crops (`src/art/crops.ts`): 10 crops × 5 growth stages + watered variant.
-- Animals (`src/art/animals.ts`): 14 animals, 2-frame idle strips.
-- Effects (`src/art/effects.ts`): 13 particle types, light mask, vignette, sky.
-- UI (`src/art/ui.ts`): 40 icons, parchment panel, plate.
-- Characters (`src/art/characters.ts`): player skins A/B, 11 poses × 4 directions, portraits.
-- NPCs (`src/data/npcs.ts`): 15 villagers with skins, schedules, dialogue.
-- Texture registry (`src/art/registry.ts`): all textures painted in-process at boot.
-- Boot + Loading scenes wired and building.
+Status legend: `[x]` done and verified · `[~]` in progress · `[ ]` not started · `[!]` blocked
 
-## Notes on the supplied `assests/` folder
+---
 
-The 12 files in `assests/` are composite AI-generated reference posters (1536×1024), not production atlases: irregular placement, labels, no uniform frame grid. Per the spec's asset-production rule they were used as **palette and style reference only** (their dominant hues drove `src/art/palette.ts`), and all in-game art is regenerated as individual, collision-mapped, frame-consistent sprites. A vision pass to verify extractable grids was attempted and could not be completed in this environment; extraction is therefore deferred rather than risk mixing unverified slices into the atlas.
+## Phase 0 — Asset pipeline `[x]`
 
-## Phase 1 — Playable prototype (completed)
+The supplied packs are AI-generated concept boards, not grid-aligned tilesets.
+Every frame is cropped by connected components, so the pipeline *measures* the
+boards instead of trusting them.
 
-- BootScene registers all painted textures (spritesheets for characters/animals).
-- LoadingScene splash.
-- MainMenuScene with a working "New world" button.
-- VillageScene: 40×30 terrain grid, pond, paths, houses, shop, noticeboard, well, benches, lanterns, flora.
-- Player entity: 4-direction movement, walk/run, facing-driven animation frames, collision with water/cliffs/props.
-- Camera follows player with bounds; world bounds enforced.
-- Keyboard input: WASD + arrows + Shift to run.
+| Item | State | Evidence |
+| --- | --- | --- |
+| Index every frame on all 11 boards | `[x]` | 2581 frames, `docs/asset-report.md` |
+| Classify by shape/colour (tile, plant, structure, creature, effect, prop, ui) | `[x]` | per-sheet counts in report |
+| Copy atlases into `public/assets/atlases/` | `[x]` | 11 png + 11 json |
+| Tight per-frame exports for tiles and effects | `[x]` | `public/assets/atlases/frames/` (506 files) |
+| NPC sheets on a real 12x4 grid + portraits | `[x]` | 18 characters, 18 portraits |
+| Typed manifest for the engine | `[x]` | `src/generated/asset-manifest.ts` |
+| Tests pinning geometry and transparency invariants | `[x]` | `bun run test` → 12 passed |
 
-### Verified
-- `bun run typecheck` passes.
-- `bun run build` passes (Vite production build).
-- `bun run dev` starts and serves on :5173.
+**Key finding:** the boards are *not* pixel-grid aligned (README confirms
+16–25 px sprites on an irregular grid). The renderer therefore blits measured
+frame rects rather than assuming uniform tile sizes.
 
-## Phase 2 — Living world (in progress)
+**Known gap:** the atlas JSON has no per-pixel opacity index, so the engine
+cannot auto-trim at runtime. Frames are used as measured.
 
-Completed so far:
-- NPC entity (`src/entities/NPC.ts`) with daily schedule resolution, movement toward schedule anchor, met/small-talk dialogue lines.
-- 15 villagers spawned in VillageScene (those whose home is the village), with player collision.
-- Placeholder in-game clock (8:00) driving schedules.
+---
 
-Remaining for Phase 2:
-- Interaction system (E key) and dialogue UI overlay.
-- Inventory system and hotbar.
-- Farming system (plant/water/harvest) with in-game-time growth.
-- Weather + day/night cycle visuals.
-- Audio.
+## Phase 1 — Playable foundation `[ ]`
+
+- [ ] Project scaffold, Vite + Phaser + TypeScript
+- [ ] Boot/load scene, nearest-neighbour scaling
+- [ ] Player four-directional movement, run, camera follow
+- [ ] Collision against a tilemap layer
+- [ ] One complete village map
+- [ ] Basic interaction + interaction prompt
+- [ ] Game boots to a playable village
+
+## Phase 2 — Living world `[ ]`
+
+- [ ] NPCs with names, personalities, dialogue, schedules
+- [ ] Animals with idle/wander behaviour
+- [ ] Building interiors
+- [ ] Farming: till → sow → water → grow → harvest
+- [ ] Inventory and item pickup
+- [ ] Time of day (morning/afternoon/evening/night)
+- [ ] Weather (sun, cloud, rain, storm, fog, snow)
+- [ ] Day/night tinting and lighting
+
+## Phase 3 — GitHub-powered world `[ ]`
+
+- [ ] Connection flow: public username / PAT / OAuth device flow
+- [ ] Contribution calendar + repository retrieval
+- [ ] Normalisation into a progression model
+- [ ] Deterministic world deltas (no fabricated history)
+- [ ] Landmarks, vegetation, reputation, unlocks from real activity
+- [ ] Manual sync, caching, rate-limit handling, duplicate prevention
+
+## Phase 4 — Complete experience `[ ]`
+
+- [ ] Remaining locations: riverside, forest, farmland, shrine, hideaway
+- [ ] Seasons affecting farming and scenery
+- [ ] Journal, world map, achievements, GitHub activity journal
+- [ ] Persistent IndexedDB saves with version handling
+- [ ] Mobile touch controls + responsive layout
+- [ ] Performance pass
+
+## Phase 5 — Audio `[ ]`
+
+No audio assets were supplied (only sprites), so audio is synthesised with the
+Web Audio API: procedural ambience, footsteps, and interaction cues. See
+`src/audio/`.
+
+- [ ] Location- and time-aware ambience beds
+- [ ] Surface-aware footsteps
+- [ ] Separate music/ambient/SFX volume + mute, persisted
+- [ ] Respects browser autoplay policy; cleans up on scene unload
+
+---
+
+## Verification log
+
+| Date | Check | Result |
+| --- | --- | --- |
+| 2025-11-13 | `bun run scripts/build-assets.ts` | 2581 frames, 11 boards, 18 npcs |
+| 2025-11-13 | `bun run typecheck` | clean |
+| 2025-11-13 | `bun run test` | 12/12 passed |

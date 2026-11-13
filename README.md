@@ -1,57 +1,123 @@
 # Gitakure
 
-A peaceful, browser-based 2D RPG life simulation whose countryside world quietly grows from its owner's real GitHub contribution history.
+A peaceful countryside RPG that runs in the browser. You live in a secluded
+valley — a village, a river, a forest, rice fields, a forgotten shrine, and a
+small hideaway. The valley quietly grows in step with your real GitHub history.
 
-**Your contributions become memories, your memories become places, and those places become a living world.**
+Gitakure is a game first. GitHub activity is not a dashboard; it is the reason
+the orchard behind the shrine exists, why a particular villager moved here, and
+which paths are open.
 
-## What is Gitakure?
+---
 
-Gitakure is a secluded countryside world that develops alongside its owner's software development journey. The player walks around a village, talks to villagers, farms crops, explores a forest and riverside, discovers hidden locations, and observes how the world changes as their GitHub activity accumulates.
+## Quick start
 
-GitHub integration is woven into progression rather than displayed as a dashboard: contribution days feed vegetation growth, streaks unlock monuments, repositories become project stones, stars light lanterns.
-
-## How it works
-
-- **Rendering:** Phaser 3 (WebGL, Canvas fallback), 640×360 internal resolution, 32×32 tiles, nearest-neighbor scaling.
-- **Art:** all sprites are painted in-process from procedural painters, so the game works fully offline and every pixel is reproducible from source. The supplied reference posters in `assests/` were used as palette/style reference only.
-- **State:** IndexedDB persistence with save versioning.
-- **Time:** in-game clock (1 real minute ≈ 1 game hour) drives NPC schedules, crop growth, and weather.
-- **GitHub:** REST + GraphQL via a PAT kept in memory only. Contribution calendar and repositories are normalized into world events and applied idempotently.
-
-## Authentication
-
-For development, use a GitHub personal access token (PAT) with `read:user` scope. The token is kept in memory for the session only — never stored in localStorage and never logged. Click **Sync GitHub** in the village and enter your username and token.
-
-For production, deploy a small backend that performs the OAuth web flow and proxies the token; the client never sees the secret.
-
-If no token is provided, the game offers a public-data mode (username only, subject to rate limits).
-
-## Running locally
+Requires [Bun](https://bun.sh) 1.4+.
 
 ```bash
 bun install
-bun run dev          # http://localhost:5173
-bun run typecheck    # TypeScript
-bun run build        # production build
-bun run test         # Vitest
+bun run assets     # measure the sprite boards and emit the manifest
+bun run dev        # http://localhost:5173
 ```
 
-## Deploying
+Production build:
 
 ```bash
 bun run build
-# upload dist/ to GitHub Pages / any static host
+bun run preview
 ```
 
-Set `VITE_BASE` if deploying under a subpath.
+Other commands:
 
-## Asset organization
+| Command | What it does |
+| --- | --- |
+| `bun run assets` | Rebuild `public/assets/atlases/` and `src/generated/asset-manifest.ts` from `sprites/` |
+| `bun run typecheck` | TypeScript, no emit |
+| `bun run test` | Vitest suite (asset geometry, world logic, progression) |
+| `bun run preview` | Serve the production build |
 
-All art is generated at boot from `src/art/*` painters and registered through `src/art/registry.ts`. There are no binary sprite assets to maintain; the `assests/` folder holds the original reference posters used for palette extraction.
+---
 
-## Current limitations
+## Controls
 
-- Only the Village map is playable; Forest, Riverside, Farmland, Shrine, and Hideaway are planned.
-- Weather/day-night visuals, audio, save/load wiring, journal, world map, mobile controls, and automated tests are in progress.
-- GitHub sync applies landmarks but does not yet drive seasonal vegetation or historical world generation.
-- The in-game clock runs at a fixed rate; pausing is not yet implemented.
+| Action | Desktop | Touch |
+| --- | --- | --- |
+| Move | WASD / arrows | D-pad |
+| Run | Shift | Run toggle |
+| Interact | E | A button |
+| Inventory | I | Bag button |
+| Journal | J | Book button |
+| World map | M | Map button |
+| Pause | Esc | Menu button |
+
+---
+
+## How the world is built
+
+### Assets
+
+The supplied packs in `sprites/` are AI-generated concept boards, not
+grid-aligned tilesets — every sprite was cropped by connected components and
+sits at its own size on an irregular grid. So nothing is assumed: a build step
+decodes each board, measures every frame (bounds, opacity density, mean colour,
+saturation, aspect), classifies it by shape and colour, and emits:
+
+- `public/assets/atlases/<board>.png` — the atlas
+- `public/assets/atlases/<board>.json` — frame rects for Phaser
+- `public/assets/atlases/frames/` — tight per-frame PNGs for tiles and effects
+- `src/generated/asset-manifest.ts` — typed catalog
+- `docs/asset-report.md` — what is in each board, measured
+
+2581 frames across 11 boards, plus 18 NPCs on a true 24×28 twelve-column grid
+(down/left/right/up; idle, walk, interact) with dialogue portraits.
+
+Rendering uses `pixelArt: true` and nearest-neighbour filtering throughout, so
+the art stays crisp at any integer zoom.
+
+### Project layout
+
+```
+scripts/           asset build step and dev preview tool
+src/
+  main.ts          entry point
+  generated/       measured asset manifest (do not edit by hand)
+  core/            config, state, RNG, input, save system
+  world/           map definitions and world generation
+  render/          tiles, depth sorting, weather and season overlays
+  entities/        player, NPCs, animals
+  systems/         farming, fishing, inventory, dialogue, time, weather
+  github/          API client, normaliser, progression rules
+  ui/              menus, HUD, journal, map, mobile controls
+  audio/           procedural audio (no audio assets were supplied)
+tests/             vitest suites
+```
+
+### Determinism
+
+World generation is a pure function of `(seed, world state)`. The seed is fixed
+for the valley, so the same save always rebuilds the same village. GitHub
+activity only ever *adds* to that world through an explicit, idempotent
+progression step — replaying a sync cannot double-apply it.
+
+---
+
+## GitHub integration
+
+Three connection methods, in increasing order of access:
+
+1. **Public username** — no token, reads only public contribution data.
+2. **Personal access token** — supplied by the player, held in memory for the
+   session only, never written to `localStorage`, IndexedDB, or logs.
+3. **GitHub App / OAuth** — authorisation-code flow, handled by a backend the
+   player runs themselves. No client secret is ever embedded in the bundle.
+
+Gitakure never requests repository write scope. If the API is unreachable or
+rate-limited, the game keeps running on cached or empty data and says so
+plainly rather than fabricating activity.
+
+---
+
+## License and asset provenance
+
+The sprite boards in `sprites/` were supplied with this project. Code in this
+repository is original.
