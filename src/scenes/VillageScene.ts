@@ -18,6 +18,9 @@ import { InteractionSystem } from '@/systems/InteractionSystem';
 import { DialogueSystem } from '@/systems/DialogueSystem';
 import { createMobileControls } from '@/ui/MobileControls';
 import { TimeSystem } from '@/systems/TimeSystem';
+import { WeatherSystem } from '@/systems/WeatherSystem';
+import { SaveSystem } from '@/persistence/SaveSystem';
+import { JournalSystem } from '@/systems/JournalSystem';
 import { Authentication } from '@/github/Authentication';
 import { SyncService } from '@/github/SyncService';
 
@@ -82,6 +85,9 @@ export class VillageScene extends Phaser.Scene {
   private interactions = new InteractionSystem();
   private dialogue = new DialogueSystem();
   private clock_ = new TimeSystem({ minutes: 8*60, day: 0, season: 'spring', weather: 'sunny', phase: 'morning' });
+  private weather = new WeatherSystem(this);
+  private saves = new SaveSystem();
+  private journal = new JournalSystem();
   private auth = new Authentication();
   private syncService = new SyncService(this.auth);
   private appliedEvents = new Set<string>();
@@ -173,8 +179,26 @@ export class VillageScene extends Phaser.Scene {
     const hud = document.createElement('div');
     void ui2;
     hud.className = 'hud';
-    hud.innerHTML = '<div class="chip" id="hud-time">8:00 am</div><div class="chip" id="hud-weather">Sunny · Spring</div><button id="sync-btn" style="pointer-events:auto;background:#241f2c;color:#e8dcc0;border:1px solid #3a3240;padding:4px 8px;font-family:inherit;cursor:pointer;">Sync GitHub</button>';
+    hud.innerHTML = '<div class="chip" id="hud-time">8:00 am</div><div class="chip" id="hud-weather">Sunny · Spring</div><button id="journal-btn" style="pointer-events:auto;background:#241f2c;color:#e8dcc0;border:1px solid #3a3240;padding:4px 8px;font-family:inherit;cursor:pointer;">Journal</button><button id="sync-btn" style="pointer-events:auto;background:#241f2c;color:#e8dcc0;border:1px solid #3a3240;padding:4px 8px;font-family:inherit;cursor:pointer;">Sync GitHub</button>';
     document.getElementById('ui-root')!.appendChild(hud);
+    this.weather.setWeather('sunny');
+    const journalBtn = document.getElementById('journal-btn') as HTMLButtonElement;
+    const journalModal = document.createElement('div');
+    journalModal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:20;pointer-events:auto;';
+    journalModal.innerHTML = '<div style="background:#241f2c;border:2px solid #5a4a44;padding:16px;max-width:480px;width:90%;max-height:70vh;overflow:auto;color:#e8dcc0;font-family:Georgia,serif;"><h3 style="margin:0 0 8px;color:#c9a227;">Journal</h3><div id="journal-list"></div><button id="journal-close" style="margin-top:8px;background:#241f2c;color:#e8dcc0;border:1px solid #3a3240;padding:4px 8px;cursor:pointer;">Close</button></div>';
+    document.getElementById('ui-root')!.appendChild(journalModal);
+    const renderJournal = () => {
+      const list = journalModal.querySelector('#journal-list') as HTMLElement;
+      const entries = this.journal.getEntries();
+      list.innerHTML = entries.length === 0 ? '<p style="color:#c9bc9f;font-style:italic;">No entries yet. Sync GitHub or discover places.</p>' : entries.map((e) => `<div style="margin-bottom:8px;"><strong style="color:#c9a227;">${e.title}</strong><div style="font-size:12px;color:#c9bc9f;">${e.body}</div></div>`).join('');
+    };
+    const openJournal = () => { renderJournal(); journalModal.style.display = 'flex'; };
+    const closeJournal = () => { journalModal.style.display = 'none'; };
+    journalBtn.addEventListener('click', openJournal);
+    journalModal.querySelector('#journal-close')!.addEventListener('click', closeJournal);
+    const jKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.J);
+    jKey.on('down', () => { if (journalModal.style.display === 'flex') closeJournal(); else openJournal(); });
+
     const syncBtn = document.getElementById('sync-btn') as HTMLButtonElement;
     syncBtn.addEventListener('click', async () => {
       const username = window.prompt('GitHub username to sync (leave blank for sample mode):');
@@ -189,7 +213,9 @@ export class VillageScene extends Phaser.Scene {
         for (const lm of res.landmarks) {
           this.landmarks.push({ uid: lm.uid, tx: lm.tx, ty: lm.ty, name: lm.name });
           this.placeProp(lm.tx, lm.ty, 'project_stone');
+          this.journal.add({ day: this.clock_.getClock().day, kind: 'github', title: lm.name, body: lm.blurb });
         }
+        this.journal.add({ day: this.clock_.getClock().day, kind: 'milestone', title: 'GitHub sync', body: `${res.summary.totalContributions} contributions, ${res.summary.repositories} repositories imported.` });
         syncBtn.textContent = `Synced: ${res.summary.totalContributions} contribs`;
       } catch (e) {
         syncBtn.textContent = 'Sync failed';
@@ -231,6 +257,8 @@ export class VillageScene extends Phaser.Scene {
     });
     const escKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
     escKey.on('down', () => this.dialogue.close());
+    const f5 = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.F5);
+    f5.on('down', () => this.saveGame());
 
     // Spawn villagers whose home is the village.
     const states = buildNpcStates();
@@ -282,6 +310,26 @@ export class VillageScene extends Phaser.Scene {
       solids.add(r);
       this.physics.add.collider(this.player, solids);
     }
+  }
+
+  private async saveGame(): Promise<void> {
+    const game: any = {
+      version: 1,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      player: { name: 'Player', appearance: { body: 'a', hair: 'crop', outfit: 'field', accessory: 'none' }, location: 'village', x: this.player.x, y: this.player.y, direction: this.player.getFacing() },
+      clock: this.clock_.getClock(),
+      inventory: { slots: [], hotbar: 0, capacity: 24 },
+      crops: [],
+      landmarks: [],
+      journal: [],
+      npcs: {},
+      discovered: ['village'],
+      sync: { lastSyncAt: null, source: 'none', username: null, totalContributions: 0, activeDays: 0, longestStreak: 0, repositories: 0, stars: 0, importedDays: 0, earliestDay: null, latestDay: null, notes: [] },
+      appliedEvents: [...this.appliedEvents],
+      flags: {},
+    };
+    try { await this.saves.save(game); console.log('saved'); } catch (e) { console.error('save failed', e); }
   }
 
   update(_time: number, delta: number): void {
