@@ -12,6 +12,8 @@ import { CONFIG } from '@/core/Config';
 import { META, TEX } from '@/art/registry';
 import type { TerrainId } from '@/art/tiles/terrain';
 import { Player } from '@/entities/Player';
+import { NPCS } from '@/data/npcs';
+import { Npc, buildNpcStates } from '@/entities/NPC';
 
 const MAP_W = 40;
 const MAP_H = 30;
@@ -70,6 +72,7 @@ for (let y = 8; y < 16; y++) {
 
 export class VillageScene extends Phaser.Scene {
   private player!: Player;
+  private npcs: Npc[] = [];
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<string, Phaser.Input.Keyboard.Key>;
   private shiftKey!: Phaser.Input.Keyboard.Key;
@@ -150,6 +153,15 @@ export class VillageScene extends Phaser.Scene {
     this.placeFlora(8, 22, 'coconut');
     this.placeFlora(34, 20, 'bamboo');
     this.placeFlora(28, 26, 'mango');
+
+    // Spawn villagers whose home is the village.
+    const states = buildNpcStates();
+    for (const def of NPCS) {
+      if (def.home !== 'village') continue;
+      const npc = new Npc(this, def, states[def.id]!);
+      this.npcs.push(npc);
+      this.physics.add.collider(this.player, npc);
+    }
   }
 
   private placeProp(tx: number, ty: number, id: string): void {
@@ -199,5 +211,7 @@ export class VillageScene extends Phaser.Scene {
 
     this.player.updateControls(keys);
     this.player.update(delta);
+    const minutes = 8 * 60; // placeholder morning
+    for (const npc of this.npcs) npc.update(delta, minutes);
   }
 }
