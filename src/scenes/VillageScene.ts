@@ -199,6 +199,30 @@ export class VillageScene extends Phaser.Scene {
     const jKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.J);
     jKey.on('down', () => { if (journalModal.style.display === 'flex') closeJournal(); else openJournal(); });
 
+    // World map modal.
+    const mapModal = document.createElement('div');
+    mapModal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:20;pointer-events:auto;';
+    mapModal.innerHTML = '<div style="background:#241f2c;border:2px solid #5a4a44;padding:16px;max-width:480px;width:90%;color:#e8dcc0;font-family:Georgia,serif;"><h3 style="margin:0 0 8px;color:#c9a227;">World Map</h3><div id="map-list"></div><button id="map-close" style="margin-top:8px;background:#241f2c;color:#e8dcc0;border:1px solid #3a3240;padding:4px 8px;cursor:pointer;">Close</button></div>';
+    document.getElementById('ui-root')!.appendChild(mapModal);
+    const renderMap = () => {
+      const list = mapModal.querySelector('#map-list') as HTMLElement;
+      const locs = ['village','forest','riverside','farmland','shrine'];
+      list.innerHTML = locs.map((l) => `<button data-loc="${l}" style="display:block;margin:4px 0;background:#332c3c;color:#e8dcc0;border:1px solid #3a3240;padding:6px 10px;width:100%;cursor:pointer;text-align:left;">${l.charAt(0).toUpperCase()+l.slice(1)}</button>`).join('');
+      list.querySelectorAll('button').forEach((b) => {
+        b.addEventListener('click', () => {
+          const loc = b.getAttribute('data-loc')!;
+          const key = loc === 'village' ? 'VillageScene' : loc === 'forest' ? 'ForestScene' : loc === 'riverside' ? 'RiversideScene' : loc === 'farmland' ? 'FarmlandScene' : 'ShrineScene';
+          mapModal.style.display = 'none';
+          this.scene.start(key);
+        });
+      });
+    };
+    const openMap = () => { renderMap(); mapModal.style.display = 'flex'; };
+    const closeMap = () => { mapModal.style.display = 'none'; };
+    mapModal.querySelector('#map-close')!.addEventListener('click', closeMap);
+    const mKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.M);
+    mKey.on('down', () => { if (mapModal.style.display === 'flex') closeMap(); else openMap(); });
+
     const syncBtn = document.getElementById('sync-btn') as HTMLButtonElement;
     syncBtn.addEventListener('click', async () => {
       const username = window.prompt('GitHub username to sync (leave blank for sample mode):');
