@@ -17,6 +17,7 @@ export class Npc extends Phaser.Physics.Arcade.Sprite {
   private targetY = 0;
   private animFrame = 0;
   private animTimer = 0;
+  private shadow?: Phaser.GameObjects.Image;
 
   constructor(scene: Phaser.Scene, def: NpcDef, state: NpcState) {
     super(scene, state.tx * CONFIG.tileSize + 16, state.ty * CONFIG.tileSize + 24, TEX.npc(def.id), 0);
@@ -30,24 +31,36 @@ export class Npc extends Phaser.Physics.Arcade.Sprite {
     this.setDepth(10);
     this.targetX = this.x;
     this.targetY = this.y;
+    this.shadow = scene.add
+      .image(this.x, this.y + 20, TEX.shadow)
+      .setDisplaySize(18, 6)
+      .setAlpha(0.34)
+      .setDepth(this.y - 1);
   }
 
-  resolveSchedule(minutesSinceMidnight: number): void {
+  resolveSchedule(minutesSinceMidnight: number, clamp?: (tx: number, ty: number) => { tx: number; ty: number }): void {
     const block = scheduleAt(this.def, minutesSinceMidnight);
-    const targetTx = block.tx;
-    const targetTy = block.ty;
+    const anchor = clamp ? clamp(block.tx, block.ty) : { tx: block.tx, ty: block.ty };
+    const targetTx = anchor.tx;
+    const targetTy = anchor.ty;
     this.targetX = targetTx * CONFIG.tileSize + 16;
     this.targetY = targetTy * CONFIG.tileSize + 24;
     if (block.location !== this.npcState.location) {
-      // Villager moved to another map; for the village scene we keep them in place.
-      this.npcState.location = block.location;
+      // Villagers keep to their home map; schedules that point elsewhere are
+      // treated as "around the village" rather than teleporting them.
+      if (block.location === this.def.home) this.npcState.location = block.location;
     }
     this.npcState.tx = targetTx;
     this.npcState.ty = targetTy;
   }
 
-  update(delta: number, minutesSinceMidnight: number): void {
-    this.resolveSchedule(minutesSinceMidnight);
+  update(delta: number, minutesSinceMidnight: number, clamp?: (tx: number, ty: number) => { tx: number; ty: number }): void {
+    this.resolveSchedule(minutesSinceMidnight, clamp);
+    this.setDepth(this.y);
+    if (this.shadow) {
+      this.shadow.setPosition(this.x, this.y + 20);
+      this.shadow.setDepth(this.y - 1);
+    }
 
     const dx = this.targetX - this.x;
     const dy = this.targetY - this.y;

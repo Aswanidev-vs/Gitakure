@@ -112,13 +112,13 @@ export class PixelCanvas {
     return this;
   }
 
-  hline(x: number, y: number, w: number, color: string): this {
-    for (let i = 0; i < w; i++) this.px(x + i, y, color);
+  hline(x: number, y: number, w: number, color: string, alpha = 255): this {
+    for (let i = 0; i < w; i++) this.px(x + i, y, color, alpha);
     return this;
   }
 
-  vline(x: number, y: number, h: number, color: string): this {
-    for (let i = 0; i < h; i++) this.px(x, y + i, color);
+  vline(x: number, y: number, h: number, color: string, alpha = 255): this {
+    for (let i = 0; i < h; i++) this.px(x, y + i, color, alpha);
     return this;
   }
 
@@ -128,6 +128,20 @@ export class PixelCanvas {
     const rr = r * r;
     for (let y = -r; y <= r; y++) {
       const span = Math.floor(Math.sqrt(Math.max(0, rr - y * y)));
+      for (let x = -span; x <= span; x++) {
+        this.setPixel(cx + x, cy + y, cr, cg, cb, alpha);
+      }
+    }
+    return this;
+  }
+
+  /** Filled ellipse drawn with a scanline fill; no anti-aliasing. */
+  ellipse(cx: number, cy: number, rx: number, ry: number, color: string, alpha = 255): this {
+    const [cr, cg, cb] = parseHex(color);
+    for (let y = -ry; y <= ry; y++) {
+      const t = 1 - (y * y) / (ry * ry);
+      if (t <= 0) continue;
+      const span = Math.floor(rx * Math.sqrt(t));
       for (let x = -span; x <= span; x++) {
         this.setPixel(cx + x, cy + y, cr, cg, cb, alpha);
       }

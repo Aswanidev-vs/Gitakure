@@ -10,7 +10,7 @@ import type { CropStage, PlantedCrop, Season } from '@/shared/types';
 import { CROPS } from '@/art/crops';
 
 export const CROP_GROWTH_MINUTES: Record<string, number> = Object.fromEntries(
-  Object.entries(CROPS).map(([k, v]) => [k, v.growMinutes]),
+  Object.entries(CROPS).map(([k, v]) => [k, (v as { growMinutes: number }).growMinutes]),
 );
 
 export function stageFor(crop: PlantedCrop, nowMinutes: number): CropStage {

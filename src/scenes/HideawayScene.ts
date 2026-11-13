@@ -1,62 +1,96 @@
-import Phaser from 'phaser';
-import { META, TEX } from '@/art/registry';
-import { Player } from '@/entities/Player';
+/**
+ * The developer's hideaway: one room, a desk, a window on the fields, and the
+ * work that paid for the valley. The only interior in the game so far.
+ */
 
-export class HideawayScene extends Phaser.Scene {
-  constructor() { super({ key: 'HideawayScene' }); }
-  create(): void {
-    this.cameras.main.setBackgroundColor('#1a1612');
-    const W = 20, H = 16;
-    const G = 'grass', P = 'path', Wf = 'wood_floor', GT = 'grass_tall';
-    const grid: string[][] = [];
-    for (let y = 0; y < H; y++) {
-      const row: string[] = [];
-      for (let x = 0; x < W; x++) {
-        if (y < 2 || y > H - 2 || x < 2 || x > W - 2) row.push(GT);
-        else if (y >= 4 && y <= 12 && x >= 4 && x <= 16) row.push(Wf);
-        else row.push(G);
-      }
-      grid.push(row);
-    }
-    for (let x = 4; x <= 16; x++) grid[13]![x] = P;
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      this.add.image(x * 32 + 16, y * 32 + 16, TEX.terrain(grid[y]![x] as any)).setDepth(0);
-    }
-    this.physics.world.setBounds(0, 0, W * 32, H * 32);
-    const player = new Player(this, 10 * 32, 13 * 32);
-    this.cameras.main.startFollow(player, true, 0.12, 0.12);
-    this.cameras.main.setBounds(0, 0, W * 32, H * 32);
-    const solids = this.physics.add.staticGroup();
-    const blocked = new Set(['grass_tall']);
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      if (blocked.has(grid[y]![x]!)) { const r = this.add.rectangle(x * 32 + 16, y * 32 + 16, 32, 32); r.setVisible(false); solids.add(r); }
-    }
-    this.physics.add.collider(player, solids);
-    // Developer's hideaway interior props.
-    this.placeProp(6, 5, 'desk');
-    this.placeProp(8, 5, 'computer');
-    this.placeProp(10, 5, 'bookshelf');
-    this.placeProp(12, 5, 'bookshelf');
-    this.placeProp(14, 5, 'computer');
-    this.placeProp(6, 9, 'workbench');
-    this.placeProp(14, 9, 'crate');
-    this.placeProp(10, 9, 'lantern');
-    this.placeFlora(4, 3, 'cherry');
-    this.placeFlora(16, 3, 'bamboo');
-    const cursors = this.input.keyboard!.createCursorKeys();
-    const wasd = { up: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.W), down: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.S), left: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.A), right: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.D) };
-    const shift = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
-    this.events.on('update', (_t: number, delta: number) => {
-      const keys = { up: (cursors.up.isDown ? wasd.up : wasd.up) as Phaser.Input.Keyboard.Key, down: wasd.down as Phaser.Input.Keyboard.Key, left: wasd.left as Phaser.Input.Keyboard.Key, right: wasd.right as Phaser.Input.Keyboard.Key, run: shift };
-      player.updateControls(keys); player.update(delta);
-    });
+import type { TerrainId } from '@/art/tiles/terrain';
+import { WorldScene, type WorldOptions } from './WorldScene';
+import type { FloraPlacement, PropPlacement, WorldSpec } from '@/world/Scenery';
+
+const W = 20;
+const H = 16;
+
+function buildHideawayMap(): WorldSpec {
+  const g: TerrainId[][] = [];
+  for (let y = 0; y < H; y++) {
+    const row: TerrainId[] = [];
+    for (let x = 0; x < W; x++) row.push('grass_tall');
+    g.push(row);
   }
-  private placeProp(tx: number, ty: number, id: string) {
-    const spec = META.PROPS[id as keyof typeof META.PROPS]; if (!spec) return;
-    this.add.image(tx * 32 + spec.w / 2, ty * 32 + spec.h, `prop:${id}:lit`).setDepth(ty * 32 + spec.h);
+  const set = (x: number, y: number, id: TerrainId): void => {
+    if (x >= 0 && y >= 0 && x < W && y < H) g[y]![x] = id;
+  };
+  const rect = (x0: number, y0: number, x1: number, y1: number, id: TerrainId): void => {
+    for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) set(x, y, id);
+  };
+
+  rect(3, 3, 16, 12, 'wood_floor');
+  rect(3, 3, 16, 3, 'tatami');
+  rect(3, 12, 16, 12, 'tatami');
+  rect(9, 13, 10, 15, 'path');
+  rect(9, 12, 10, 12, 'wood_floor');
+  rect(3, 3, 3, 12, 'stone_floor');
+  rect(16, 3, 16, 12, 'stone_floor');
+
+  const props: PropPlacement[] = [
+    { tx: 5, ty: 4, id: 'desk', verb: 'Work', label: 'Writing desk', lines: ['A notebook open to a page of small drawings: a bridge, a roof, a river that goes on too long.'] },
+    { tx: 7, ty: 4, id: 'computer', verb: 'Use', label: 'Computer', lines: ['The screen is dark. A postcard from a repository is pinned to the wall beside it.'] },
+    { tx: 10, ty: 3, id: 'bookshelf', verb: 'Read', label: 'Bookshelf', lines: ['Field guides, a book on paddy, and three spines that have been read so often they open by themselves.'] },
+    { tx: 11, ty: 3, id: 'bookshelf', verb: 'Read', label: 'Bookshelf', lines: ['Notebooks, one for each year. The earliest is mostly weather.'] },
+    { tx: 13, ty: 4, id: 'computer', verb: 'Use', label: 'Workstation', lines: ['A second machine, older, still warm. It has been running something for a long time.'] },
+    { tx: 5, ty: 8, id: 'workbench', verb: 'Craft', label: 'Workbench', lines: ['A half-built lantern, a soldering iron, and a jar of screws sorted by size.'] },
+    { tx: 14, ty: 8, id: 'crate', verb: 'Search', label: 'Post crate', lines: ['Letters from the village, a seed catalogue, and a parcel that has not been opened.'] },
+    { tx: 14, ty: 9, id: 'barrel', verb: 'Search', label: 'Umbrella stand', lines: ['Two umbrellas, one walking stick, and a rolled map of the valley.'] },
+    { tx: 9, ty: 2, id: 'window', verb: 'Look out', label: 'Window', lines: ['The fields go on until the hills take over. Someone is walking the paddy bund, very slowly.'] },
+    { tx: 4, ty: 11, id: 'lantern', solid: false },
+    { tx: 15, ty: 11, id: 'lantern', solid: false },
+    { tx: 4, ty: 4, id: 'flower_pot', solid: false, noShadow: true },
+    { tx: 15, ty: 4, id: 'flower_pot', solid: false, noShadow: true },
+  ];
+
+  const flora: FloraPlacement[] = [
+    { tx: 2, ty: 6, id: 'bamboo' },
+    { tx: 17, ty: 6, id: 'banana' },
+    { tx: 2, ty: 14, id: 'fern' },
+    { tx: 17, ty: 14, id: 'fern' },
+  ];
+
+  return {
+    key: 'HideawayScene',
+    width: W,
+    height: H,
+    tiles: g,
+    spawn: { tx: 10, ty: 13 },
+    props,
+    flora,
+    ambience: 'indoor',
+    dayNight: true,
+    weather: false,
+    startMinutes: 9 * 60,
+  };
+}
+
+export class HideawayScene extends WorldScene {
+  constructor() {
+    const options: WorldOptions = {
+      ...buildHideawayMap(),
+      location: 'hideaway',
+      npcs: false,
+      sync: true,
+      save: true,
+      music: 'village',
+    };
+    super(options);
   }
-  private placeFlora(tx: number, ty: number, id: string) {
-    const spec = META.FLORA[id as keyof typeof META.FLORA]; if (!spec) return;
-    this.add.image(tx * 32 + spec.w / 2, ty * 32 + spec.h, `flora:${id}`).setDepth(ty * 32 + spec.h);
+
+  protected build(): void {
+    if (!this.journal.has("Developer's Hideaway")) {
+      this.journal.add({
+        day: this.clock_.getClock().day,
+        kind: 'discovery',
+        title: "Developer's Hideaway",
+        body: 'One room at the edge of the fields. The desk faces the window; the window faces everything you made.',
+      });
+    }
   }
 }

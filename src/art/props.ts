@@ -43,7 +43,8 @@ export type PropId =
   | 'project_stone'
   | 'observatory'
   | 'ruin_pillar'
-  | 'market_stall';
+  | 'market_stall'
+  | 'window';
 
 export interface PropSpec {
   w: number;
@@ -89,6 +90,7 @@ export const PROPS: Record<PropId, PropSpec> = {
   observatory: { w: 96, h: 104, solidW: 84, solidH: 24, verb: 'Enter', seed: 467 },
   ruin_pillar: { w: 24, h: 56, solidW: 18, solidH: 10, seed: 471 },
   market_stall: { w: 48, h: 44, solidW: 40, solidH: 12, verb: 'Browse', seed: 479 },
+  window: { w: 32, h: 36, solidW: 0, solidH: 0, seed: 487 },
 };
 
 /* ---------- shared sub-painters ---------- */
@@ -645,6 +647,27 @@ export function paintProp(id: PropId, opts: { lit?: boolean } = {}): PixelCanvas
         const py = y + 16 - Math.floor(i / 4) * 3;
         c.disc(px, py, 3, produce[i % produce.length]!);
       }
+      c.outline(PAL.outline);
+      break;
+    }
+    case 'window': {
+      // A timber-framed window onto the fields. Used in the hideaway.
+      c.rect(0, 0, spec.w, spec.h, PAL.woodDark);
+      c.rect(3, 3, spec.w - 6, spec.h - 6, PAL.wood);
+      c.rect(5, 5, spec.w - 10, spec.h - 10, '#6f8fa0');
+      // Banded sky and a low green horizon.
+      for (let y = 5; y < 19; y++) {
+        const t = (y - 5) / 14;
+        c.hline(5, y, spec.w - 10, mix('#8fb8c4', '#e0c05a', t * 0.55));
+      }
+      c.rect(5, 20, spec.w - 10, 8, PAL.leaf);
+      c.hline(5, 20, spec.w - 10, PAL.leafLit);
+      c.rect(5, 27, spec.w - 10, 4, PAL.moss);
+      // Mullions.
+      c.vline(spec.w / 2, 5, spec.h - 10, PAL.woodDark);
+      c.hline(5, 20, spec.w - 10, PAL.woodDark);
+      c.frame(5, 5, spec.w - 10, spec.h - 10, PAL.woodDark);
+      c.hline(3, spec.h - 3, spec.w - 6, PAL.woodLit);
       c.outline(PAL.outline);
       break;
     }

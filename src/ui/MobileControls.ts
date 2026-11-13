@@ -1,90 +1,183 @@
 /**
- * Mobile controls: a virtual joystick and action buttons overlaid on the
- * screen. Only shown on touch devices or when forced via settings.
+ * Touch controls.
+ *
+ * A floating stick for movement (analog, not four buttons), a run toggle, and
+ * one context button whose label changes with what the player is standing next
+ * to. Mounted only when the device manager says the player is on a touch
+ * screen; the desktop path never creates this DOM.
  */
 
-export interface MobileControls {
-  destroy: () => void;
-  isDown: (key: 'up' | 'down' | 'left' | 'right' | 'run' | 'interact') => boolean;
+import { touchVerb } from '@/core/Device';
+
+export interface MobileControlsOptions {
+  onInteract: () => void;
+  onRunChange?: (running: boolean) => void;
 }
 
-export function createMobileControls(container: HTMLElement): MobileControls {
-  const state = { up: false, down: false, left: false, right: false, run: false, interact: false };
+export interface MobileControls {
+  destroy(): void;
+  /** Analog movement vector, each axis in [-1, 1]. */
+  getVector(): { x: number; y: number };
+  isRunning(): boolean;
+  setRunning(running: boolean): void;
+  /** `null` hides the action button; a string sets its label. */
+  setInteractLabel(label: string | null): void;
+  setVisible(visible: boolean): void;
+}
 
+const STICK_RADIUS = 42;
+const DEAD_ZONE = 0.16;
+
+export function createMobileControls(
+  container: HTMLElement,
+  opts: MobileControlsOptions,
+): MobileControls {
   const wrap = document.createElement('div');
-  wrap.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:10;';
+  wrap.className = 'mc';
+  wrap.setAttribute('aria-label', 'Touch controls');
 
-  // Joystick
-  const joy = document.createElement('div');
-  joy.style.cssText = 'position:absolute;left:16px;bottom:16px;width:96px;height:96px;border-radius:50%;background:rgba(36,31,44,0.6);border:2px solid #3a3240;pointer-events:auto;touch-action:none;';
-  wrap.appendChild(joy);
+  const stick = document.createElement('div');
+  stick.className = 'mc-stick';
+  stick.innerHTML = '<span class="mc-stick__ring"></span><span class="mc-stick__knob"></span>';
+  const knob = stick.querySelector<HTMLElement>('.mc-stick__knob')!;
 
-  const knob = document.createElement('div');
-  knob.style.cssText = 'position:absolute;left:32px;top:32px;width:32px;height:32px;border-radius:50%;background:#c9a227;';
-  joy.appendChild(knob);
+  const actions = document.createElement('div');
+  actions.className = 'mc-actions';
 
-  let activeTouch: number | null = null;
-  let originX = 0, originY = 0;
+  const runBtn = document.createElement('button');
+  runBtn.type = 'button';
+  runBtn.className = 'mc-btn mc-btn--run';
+  runBtn.textContent = 'Run';
+  runBtn.setAttribute('aria-pressed', 'false');
 
-  const updateKnob = (dx: number, dy: number) => {
-    const dist = Math.hypot(dx, dy);
-    const max = 32;
-    const clamped = Math.min(dist, max);
-    const scale = dist > 0 ? clamped / dist : 0;
-    knob.style.left = `${32 + dx * scale}px`;
-    knob.style.top = `${32 + dy * scale}px`;
-    const threshold = 8;
-    state.up = dy < -threshold;
-    state.down = dy > threshold;
-    state.left = dx < -threshold;
-    state.right = dx > threshold;
-  };
+  const interactBtn = document.createElement('button');
+  interactBtn.type = 'button';
+  interactBtn.className = 'mc-btn mc-btn--interact';
+  interactBtn.innerHTML = '<span class="mc-btn__label">Use</span>';
+  interactBtn.disabled = true;
 
-  joy.addEventListener('touchstart', (e) => {
-    const t = e.changedTouches[0]!;
-    activeTouch = t.identifier;
-    const rect = joy.getBoundingClientRect();
-    originX = t.clientX - rect.left - 48;
-    originY = t.clientY - rect.top - 48;
-    updateKnob(originX, originY);
-    e.preventDefault();
-  });
-  joy.addEventListener('touchmove', (e) => {
-    for (const t of Array.from(e.changedTouches)) {
-      if (t.identifier === activeTouch) {
-        const rect = joy.getBoundingClientRect();
-        const dx = t.clientX - rect.left - 48;
-        const dy = t.clientY - rect.top - 48;
-        updateKnob(dx, dy);
-      }
-    }
-    e.preventDefault();
-  });
-  const endTouch = () => {
-    activeTouch = null;
-    knob.style.left = '32px';
-    knob.style.top = '32px';
-    state.up = state.down = state.left = state.right = false;
-  };
-  joy.addEventListener('touchend', endTouch);
-  joy.addEventListener('touchcancel', endTouch);
-
-  // Action buttons
-  const makeBtn = (label: string, key: 'interact' | 'run', bottom: string, right: string) => {
-    const b = document.createElement('button');
-    b.textContent = label;
-    b.style.cssText = `position:absolute;right:${right};bottom:${bottom};width:56px;height:56px;border-radius:50%;background:rgba(36,31,44,0.7);color:#e8dcc0;border:2px solid #3a3240;font-size:12px;pointer-events:auto;`;
-    b.addEventListener('touchstart', (e) => { state[key] = true; e.preventDefault(); });
-    b.addEventListener('touchend', () => { state[key] = false; });
-    wrap.appendChild(b);
-  };
-  makeBtn('E', 'interact', '80px', '16px');
-  makeBtn('Run', 'run', '16px', '16px');
-
+  actions.append(runBtn, interactBtn);
+  wrap.append(stick, actions);
   container.appendChild(wrap);
 
+  let pointerId: number | null = null;
+  let centerX = 0;
+  let centerY = 0;
+  let vecX = 0;
+  let vecY = 0;
+  let running = false;
+  let visible = true;
+
+  const setKnob = (dx: number, dy: number): void => {
+    const dist = Math.hypot(dx, dy);
+    const scale = dist > STICK_RADIUS ? STICK_RADIUS / dist : 1;
+    const x = dx * scale;
+    const y = dy * scale;
+    knob.style.transform = `translate(${x}px, ${y}px)`;
+    const nx = x / STICK_RADIUS;
+    const ny = y / STICK_RADIUS;
+    const mag = Math.hypot(nx, ny);
+    if (mag < DEAD_ZONE) {
+      vecX = 0;
+      vecY = 0;
+    } else {
+      // Rescale so the first usable pixel is not a jump.
+      const norm = (mag - DEAD_ZONE) / (1 - DEAD_ZONE) / mag;
+      vecX = nx * norm;
+      vecY = ny * norm;
+    }
+    wrap.classList.toggle('is-walking', mag >= DEAD_ZONE);
+  };
+
+  const resetStick = (): void => {
+    pointerId = null;
+    vecX = 0;
+    vecY = 0;
+    knob.style.transform = 'translate(0px, 0px)';
+    wrap.classList.remove('is-walking');
+  };
+
+  const onStickDown = (e: PointerEvent): void => {
+    if (pointerId !== null) return;
+    pointerId = e.pointerId;
+    const rect = stick.getBoundingClientRect();
+    centerX = rect.left + rect.width / 2;
+    centerY = rect.top + rect.height / 2;
+    stick.setPointerCapture(e.pointerId);
+    setKnob(e.clientX - centerX, e.clientY - centerY);
+    e.preventDefault();
+  };
+
+  const onStickMove = (e: PointerEvent): void => {
+    if (e.pointerId !== pointerId) return;
+    setKnob(e.clientX - centerX, e.clientY - centerY);
+    e.preventDefault();
+  };
+
+  const onStickUp = (e: PointerEvent): void => {
+    if (e.pointerId !== pointerId) return;
+    resetStick();
+    e.preventDefault();
+  };
+
+  stick.addEventListener('pointerdown', onStickDown);
+  stick.addEventListener('pointermove', onStickMove);
+  stick.addEventListener('pointerup', onStickUp);
+  stick.addEventListener('pointercancel', onStickUp);
+  stick.addEventListener('lostpointercapture', resetStick);
+
+  const setRunning = (next: boolean): void => {
+    if (running === next) return;
+    running = next;
+    runBtn.classList.toggle('is-on', running);
+    runBtn.setAttribute('aria-pressed', String(running));
+    opts.onRunChange?.(running);
+  };
+
+  runBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    setRunning(!running);
+  });
+
+  const fireInteract = (e: PointerEvent): void => {
+    e.preventDefault();
+    if (interactBtn.disabled) return;
+    interactBtn.classList.add('is-pressed');
+    window.setTimeout(() => interactBtn.classList.remove('is-pressed'), 140);
+    opts.onInteract();
+  };
+  interactBtn.addEventListener('pointerdown', fireInteract);
+
+  // Keep the page from scrolling or zooming while the stick is in use.
+  const prevent = (e: TouchEvent): void => {
+    if (e.cancelable) e.preventDefault();
+  };
+  wrap.addEventListener('touchmove', prevent, { passive: false });
+
+  const setVisible = (next: boolean): void => {
+    visible = next;
+    wrap.classList.toggle('is-hidden', !visible);
+    wrap.setAttribute('aria-hidden', String(!visible));
+    if (!visible) resetStick();
+  };
+
   return {
-    destroy: () => wrap.remove(),
-    isDown: (k) => state[k],
+    destroy: () => {
+      wrap.removeEventListener('touchmove', prevent);
+      wrap.remove();
+    },
+    getVector: () => (visible ? { x: vecX, y: vecY } : { x: 0, y: 0 }),
+    isRunning: () => running,
+    setRunning,
+    setInteractLabel: (label) => {
+      if (!label) {
+        interactBtn.disabled = true;
+        interactBtn.querySelector('.mc-btn__label')!.textContent = 'Use';
+        return;
+      }
+      interactBtn.disabled = false;
+      interactBtn.querySelector('.mc-btn__label')!.textContent = touchVerb(label);
+    },
+    setVisible,
   };
 }

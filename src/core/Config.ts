@@ -25,8 +25,7 @@ export const CONFIG = {
   /** Scene keys. */
   scenes: {
     boot: 'BootScene',
-    loading: 'LoadingScene',
-    menu: 'MainMenuScene',
+    attract: 'AttractScene',
     village: 'VillageScene',
     forest: 'ForestScene',
     farm: 'FarmScene',

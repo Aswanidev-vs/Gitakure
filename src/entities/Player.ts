@@ -56,22 +56,32 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     right: Phaser.Input.Keyboard.Key;
     run: Phaser.Input.Keyboard.Key;
   }): void {
-    const vx =
-      (keys.right.isDown ? 1 : 0) - (keys.left.isDown ? 1 : 0);
-    const vy =
-      (keys.down.isDown ? 1 : 0) - (keys.up.isDown ? 1 : 0);
+    const x = (keys.right.isDown ? 1 : 0) - (keys.left.isDown ? 1 : 0);
+    const y = (keys.down.isDown ? 1 : 0) - (keys.up.isDown ? 1 : 0);
+    this.updateVector(x, y, keys.run.isDown);
+  }
 
-    this.running = keys.run.isDown && (vx !== 0 || vy !== 0);
+  /**
+   * Analog movement. Touch sticks and keyboard both land here, so acceleration,
+   * facing and animation behave the same on every device.
+   */
+  updateVector(x: number, y: number, run: boolean): void {
+    const mag = Math.hypot(x, y);
+    if (mag > 1) {
+      x /= mag;
+      y /= mag;
+    }
+    const moving = mag > 0.08;
+    this.running = run && moving;
     const speed = this.running ? CONFIG.runSpeed : CONFIG.walkSpeed;
 
-    if (vx !== 0 || vy !== 0) {
-      const len = Math.hypot(vx, vy);
-      this.setVelocity((vx / len) * speed, (vy / len) * speed);
+    if (moving) {
+      this.setVelocity(x * speed, y * speed);
       this.moving = true;
-      if (Math.abs(vx) > Math.abs(vy)) {
-        this.facing = vx > 0 ? 'right' : 'left';
-      } else {
-        this.facing = vy > 0 ? 'down' : 'up';
+      if (Math.abs(x) > Math.abs(y) + 0.01) {
+        this.facing = x > 0 ? 'right' : 'left';
+      } else if (Math.abs(y) > 0.01) {
+        this.facing = y > 0 ? 'down' : 'up';
       }
     } else {
       this.setVelocity(0, 0);
@@ -80,6 +90,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   update(delta: number): void {
+    this.setDepth(this.y);
     this.animTimer += delta;
     const frameInterval = this.moving ? (this.running ? 90 : 130) : 400;
     if (this.animTimer >= frameInterval) {

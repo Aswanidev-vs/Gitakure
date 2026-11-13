@@ -1,61 +1,119 @@
-import Phaser from 'phaser';
-import { META, TEX } from '@/art/registry';
-import { Player } from '@/entities/Player';
+/**
+ * Shrine and ruins: a stone stair, a gate older than the village, and a hillside
+ * that keeps the milestones the village has forgotten.
+ */
 
-export class ShrineScene extends Phaser.Scene {
-  constructor() { super({ key: 'ShrineScene' }); }
-  create(): void {
-    this.cameras.main.setBackgroundColor('#12101a');
-    const W = 24, H = 20;
-    const G = 'grass', P = 'path', C = 'cobble', GT = 'grass_tall', SF = 'stone_floor';
-    const grid: string[][] = [];
-    for (let y = 0; y < H; y++) {
-      const row: string[] = [];
-      for (let x = 0; x < W; x++) {
-        if (y < 2 || y > H - 2 || x < 2 || x > W - 2) row.push(GT);
-        else if (x >= 9 && x <= 14 && y >= 3 && y <= 8) row.push(SF);
-        else if (x >= 10 && x <= 13 && y >= 9 && y <= 12) row.push(C);
-        else row.push(Math.random() < 0.3 ? GT : G);
-      }
-      grid.push(row);
-    }
-    // Stone path from entrance to shrine.
-    for (let y = 10; y < H - 2; y++) { grid[y]![11] = P; grid[y]![12] = P; }
-    for (let x = 6; x < 18; x++) grid[10]![x] = P;
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      this.add.image(x * 32 + 16, y * 32 + 16, TEX.terrain(grid[y]![x] as any)).setDepth(0);
-    }
-    this.physics.world.setBounds(0, 0, W * 32, H * 32);
-    const player = new Player(this, 11 * 32, (H - 3) * 32);
-    this.cameras.main.startFollow(player, true, 0.12, 0.12);
-    this.cameras.main.setBounds(0, 0, W * 32, H * 32);
-    const solids = this.physics.add.staticGroup();
-    const blocked = new Set(['water', 'water_deep', 'cliff', 'void', 'grass_tall']);
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      if (blocked.has(grid[y]![x]!)) { const r = this.add.rectangle(x * 32 + 16, y * 32 + 16, 32, 32); r.setVisible(false); solids.add(r); }
-    }
-    this.physics.add.collider(player, solids);
-    this.placeProp(11, 4, 'torii');
-    this.placeProp(11, 6, 'shrine');
-    this.placeProp(6, 10, 'stone_lantern');
-    this.placeProp(16, 10, 'stone_lantern');
-    this.placeFlora(4, 4, 'cherry');
-    this.placeFlora(19, 4, 'cherry');
-    this.placeProp(11, 14, 'ruin_pillar');
-    const cursors = this.input.keyboard!.createCursorKeys();
-    const wasd = { up: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.W), down: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.S), left: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.A), right: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.D) };
-    const shift = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
-    this.events.on('update', (_t: number, delta: number) => {
-      const keys = { up: (cursors.up.isDown ? wasd.up : wasd.up) as Phaser.Input.Keyboard.Key, down: wasd.down as Phaser.Input.Keyboard.Key, left: wasd.left as Phaser.Input.Keyboard.Key, right: wasd.right as Phaser.Input.Keyboard.Key, run: shift };
-      player.updateControls(keys); player.update(delta);
-    });
+import type { TerrainId } from '@/art/tiles/terrain';
+import { WorldScene, type WorldOptions } from './WorldScene';
+import { scatter, type AnimalPlacement, type FloraPlacement, type PropPlacement, type WorldSpec } from '@/world/Scenery';
+
+const W = 24;
+const H = 20;
+
+function buildShrineMap(): WorldSpec {
+  const g: TerrainId[][] = [];
+  for (let y = 0; y < H; y++) {
+    const row: TerrainId[] = [];
+    for (let x = 0; x < W; x++) row.push('grass');
+    g.push(row);
   }
-  private placeProp(tx: number, ty: number, id: string) {
-    const spec = META.PROPS[id as keyof typeof META.PROPS]; if (!spec) return;
-    this.add.image(tx * 32 + spec.w / 2, ty * 32 + spec.h, `prop:${id}:lit`).setDepth(ty * 32 + spec.h);
+  const set = (x: number, y: number, id: TerrainId): void => {
+    if (x >= 0 && y >= 0 && x < W && y < H) g[y]![x] = id;
+  };
+  const rect = (x0: number, y0: number, x1: number, y1: number, id: TerrainId): void => {
+    for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) set(x, y, id);
+  };
+
+  rect(0, 0, W - 1, 1, 'grass_tall');
+  rect(0, H - 2, W - 1, H - 1, 'grass_tall');
+  rect(0, 0, 1, H - 1, 'grass_tall');
+  rect(W - 2, 0, W - 1, H - 1, 'grass_tall');
+
+  rect(8, 2, 15, 9, 'cobble');
+  rect(9, 3, 14, 8, 'stone_floor');
+  rect(11, 9, 12, 17, 'stone');
+  rect(6, 10, 17, 10, 'stone');
+  rect(11, 17, 12, 18, 'path');
+
+  // Worn patches in the moss.
+  for (let y = 11; y < H - 2; y++) {
+    for (let x = 2; x < W - 2; x++) {
+      if (g[y]![x] === 'grass' && (x * 7 + y * 13) % 11 === 0) set(x, y, 'grass_flowers');
+    }
   }
-  private placeFlora(tx: number, ty: number, id: string) {
-    const spec = META.FLORA[id as keyof typeof META.FLORA]; if (!spec) return;
-    this.add.image(tx * 32 + spec.w / 2, ty * 32 + spec.h, `flora:${id}`).setDepth(ty * 32 + spec.h);
+
+  const props: PropPlacement[] = [
+    { tx: 10, ty: 2, id: 'shrine', verb: 'Pray', label: 'Hillside shrine', lines: ['The offering box is full of small coins and smaller stones. You add a quiet minute instead.'] },
+    { tx: 11, ty: 6, id: 'torii', verb: 'Bow', label: 'Torii gate', lines: ['The gate leans a little east. It has been leaning for a long time, and it is still standing.'] },
+    { tx: 8, ty: 9, id: 'stone_lantern', verb: 'Examine', label: 'Stone lantern', lines: ['The light inside is a stub of candle, sheltered from the wind by the stone.'] },
+    { tx: 15, ty: 9, id: 'stone_lantern', verb: 'Examine', label: 'Stone lantern', lines: ['Someone has left a fresh wick and a dry matchbox. The village looks after this place.'] },
+    { tx: 7, ty: 12, id: 'ruin_pillar', verb: 'Examine', label: 'Fallen pillar', lines: ['A pillar, a capital, and a piece of roof tile. Whatever stood here was grander than the shrine.'] },
+    { tx: 16, ty: 12, id: 'ruin_pillar', verb: 'Examine', label: 'Standing pillar', lines: ['The carving is a knot of roots, or a river delta, or a family tree. It is hard to say.'] },
+    { tx: 7, ty: 15, id: 'ruin_pillar', verb: 'Examine', label: 'Broken pillar', lines: ['Moss has taken the top third. The stone underneath is warm.'] },
+    { tx: 14, ty: 14, id: 'stone_marker', verb: 'Examine', label: 'Milestone stone', lines: ['A date, a number of commits, and a line worn down to a suggestion. The world remembers in its own way.'] },
+    { tx: 9, ty: 13, id: 'campfire', verb: 'Rest', label: 'Pilgrim’s fire', lines: ['A small fire, carefully banked. Whoever lit it meant to come back.'] },
+    { tx: 17, ty: 6, id: 'lantern', solid: false },
+    { tx: 6, ty: 6, id: 'lantern', solid: false },
+  ];
+
+  const flora: FloraPlacement[] = [
+    { tx: 4, ty: 4, id: 'cherry' },
+    { tx: 19, ty: 4, id: 'cherry' },
+    { tx: 4, ty: 15, id: 'cherry' },
+    { tx: 19, ty: 15, id: 'maple' },
+    { tx: 3, ty: 9, id: 'bamboo' },
+    { tx: 20, ty: 9, id: 'bamboo' },
+    { tx: 6, ty: 17, id: 'pine' },
+    { tx: 17, ty: 17, id: 'pine' },
+  ];
+  const ground: FloraPlacement[] = [
+    ...scatter(6102, 12, W, H, (x, y) => g[y]![x] === 'grass' || g[y]![x] === 'grass_flowers').map((p) => ({ tx: p.tx, ty: p.ty, id: 'fern' as const })),
+    ...scatter(6103, 8, W, H, (x, y) => g[y]![x] === 'grass' || g[y]![x] === 'grass_flowers').map((p) => ({ tx: p.tx, ty: p.ty, id: 'flowers' as const })),
+    ...scatter(6104, 10, W, H, (x, y) => g[y]![x] === 'grass' || g[y]![x] === 'grass_flowers').map((p) => ({ tx: p.tx, ty: p.ty, id: 'grass_tuft' as const })),
+  ];
+
+  const animals: AnimalPlacement[] = [
+    { tx: 12, ty: 14, id: 'cat', radius: 3 },
+    { tx: 9, ty: 16, id: 'firefly', radius: 3, ambient: true },
+    { tx: 15, ty: 16, id: 'firefly', radius: 3, ambient: true },
+    { tx: 6, ty: 12, id: 'butterfly', radius: 2, ambient: true },
+    { tx: 17, ty: 12, id: 'butterfly', radius: 2, ambient: true },
+  ];
+
+  return {
+    key: 'ShrineScene',
+    width: W,
+    height: H,
+    tiles: g,
+    spawn: { tx: 11, ty: 17 },
+    props,
+    flora: [...flora, ...ground],
+    animals,
+    lights: [
+      { tx: 11, ty: 5, radius: 80, color: '#f2c078', intensity: 0.6 },
+      { tx: 8, ty: 9, radius: 36, color: '#f2c078', intensity: 0.4 },
+      { tx: 15, ty: 9, radius: 36, color: '#f2c078', intensity: 0.4 },
+      { tx: 17, ty: 6, radius: 46, color: '#f2c078', intensity: 0.4 },
+      { tx: 6, ty: 6, radius: 46, color: '#f2c078', intensity: 0.4 },
+      { tx: 9, ty: 13, radius: 70, color: '#f2c078', intensity: 0.55 },
+    ],
+    ambience: 'shrine',
+    dayNight: true,
+    weather: true,
+    startMinutes: 8 * 60,
+  };
+}
+
+export class ShrineScene extends WorldScene {
+  constructor() {
+    const options: WorldOptions = {
+      ...buildShrineMap(),
+      location: 'shrine',
+      npcs: true,
+      sync: false,
+      save: true,
+      music: 'shrine',
+    };
+    super(options);
   }
 }
