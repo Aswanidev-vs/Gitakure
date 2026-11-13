@@ -1,0 +1,36 @@
+:root {
+  --ink: #141019;
+  --parchment: #e8dcc0;
+  --parchment-dim: #c9bc9f;
+  --accent: #c9a227;
+  --panel: #241f2c;
+  --panel-lit: #332c3c;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; background: #141019; overflow: hidden; }
+#game-root { position: relative; width: 100vw; height: 100vh; }
+#game-canvas { display: none; }
+canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
+
+#ui-root { position: absolute; inset: 0; pointer-events: none; font-family: Georgia, 'Times New Roman', serif; }
+#ui-root .hud {
+  position: absolute; top: 8px; left: 8px; right: 8px;
+  display: flex; justify-content: space-between; align-items: center;
+  color: var(--parchment); font-size: 12px; text-shadow: 0 1px 0 #000;
+}
+#ui-root .hud .chip { background: rgba(36,31,44,0.85); padding: 4px 8px; border: 1px solid #3a3240; border-radius: 2px; }
+#ui-root .prompt {
+  position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%);
+  background: rgba(36,31,44,0.9); color: var(--parchment); padding: 6px 12px;
+  border: 1px solid #3a3240; font-size: 12px; pointer-events: none;
+}
+#ui-root .dialogue {
+  position: absolute; left: 12px; right: 12px; bottom: 12px;
+  background: rgba(36,31,44,0.96); border: 2px solid #5a4a44; border-radius: 2px;
+  padding: 10px 14px; color: var(--parchment); font-size: 13px; line-height: 1.4;
+  pointer-events: auto; display: none;
+}
+#ui-root .dialogue .speaker { color: var(--accent); font-weight: bold; margin-bottom: 4px; }
+#ui-root .dialogue .advance { color: var(--parchment-dim); font-size: 11px; margin-top: 6px; text-align: right; }
+#ui-root .dialogue.open { display: block; }

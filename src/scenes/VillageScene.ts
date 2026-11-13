@@ -12,8 +12,14 @@ import { CONFIG } from '@/core/Config';
 import { META, TEX } from '@/art/registry';
 import type { TerrainId } from '@/art/tiles/terrain';
 import { Player } from '@/entities/Player';
-import { NPCS } from '@/data/npcs';
+import { NPCS, formatClock } from '@/data/npcs';
 import { Npc, buildNpcStates } from '@/entities/NPC';
+import { InteractionSystem } from '@/systems/InteractionSystem';
+import { DialogueSystem } from '@/systems/DialogueSystem';
+import { createMobileControls } from '@/ui/MobileControls';
+import { TimeSystem } from '@/systems/TimeSystem';
+import { Authentication } from '@/github/Authentication';
+import { SyncService } from '@/github/SyncService';
 
 const MAP_W = 40;
 const MAP_H = 30;
@@ -73,6 +79,14 @@ for (let y = 8; y < 16; y++) {
 export class VillageScene extends Phaser.Scene {
   private player!: Player;
   private npcs: Npc[] = [];
+  private interactions = new InteractionSystem();
+  private dialogue = new DialogueSystem();
+  private clock_ = new TimeSystem({ minutes: 8*60, day: 0, season: 'spring', weather: 'sunny', phase: 'morning' });
+  private auth = new Authentication();
+  private syncService = new SyncService(this.auth);
+  private appliedEvents = new Set<string>();
+  private landmarks: { uid: string; tx: number; ty: number; name: string }[] = [];
+  private mobile = createMobileControls(document.getElementById('ui-root')!);
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<string, Phaser.Input.Keyboard.Key>;
   private shiftKey!: Phaser.Input.Keyboard.Key;
@@ -154,6 +168,70 @@ export class VillageScene extends Phaser.Scene {
     this.placeFlora(34, 20, 'bamboo');
     this.placeFlora(28, 26, 'mango');
 
+    // HUD
+    const ui2 = document.getElementById('ui-root')!;
+    const hud = document.createElement('div');
+    void ui2;
+    hud.className = 'hud';
+    hud.innerHTML = '<div class="chip" id="hud-time">8:00 am</div><div class="chip" id="hud-weather">Sunny · Spring</div><button id="sync-btn" style="pointer-events:auto;background:#241f2c;color:#e8dcc0;border:1px solid #3a3240;padding:4px 8px;font-family:inherit;cursor:pointer;">Sync GitHub</button>';
+    document.getElementById('ui-root')!.appendChild(hud);
+    const syncBtn = document.getElementById('sync-btn') as HTMLButtonElement;
+    syncBtn.addEventListener('click', async () => {
+      const username = window.prompt('GitHub username to sync (leave blank for sample mode):');
+      if (username === null) return;
+      const pat = window.prompt('Optional: personal access token (stored in memory only this session). Leave blank for public data.');
+      if (pat) this.auth.setPat(pat, username);
+      syncBtn.disabled = true;
+      syncBtn.textContent = 'Syncing…';
+      try {
+        const res = await this.syncService.sync(username || 'octocat', this.appliedEvents, []);
+        for (const id of res.appliedIds) this.appliedEvents.add(id);
+        for (const lm of res.landmarks) {
+          this.landmarks.push({ uid: lm.uid, tx: lm.tx, ty: lm.ty, name: lm.name });
+          this.placeProp(lm.tx, lm.ty, 'project_stone');
+        }
+        syncBtn.textContent = `Synced: ${res.summary.totalContributions} contribs`;
+      } catch (e) {
+        syncBtn.textContent = 'Sync failed';
+        console.error(e);
+      }
+      setTimeout(() => { syncBtn.disabled = false; syncBtn.textContent = 'Sync GitHub'; }, 2500);
+    });
+
+    // Dialogue + interaction prompt UI.
+    const ui = document.getElementById('ui-root')!;
+    const prompt = document.createElement('div');
+    prompt.className = 'prompt';
+    prompt.id = 'interact-prompt';
+    prompt.style.display = 'none';
+    ui.appendChild(prompt);
+    const dlg = document.createElement('div');
+    dlg.className = 'dialogue';
+    dlg.id = 'dialogue-box';
+    dlg.innerHTML = '<div class="speaker"></div><div class="text"></div><div class="advance">Space / Enter to continue · Esc to close</div>';
+    ui.appendChild(dlg);
+    const speakerEl = dlg.querySelector('.speaker') as HTMLElement;
+    const textEl = dlg.querySelector('.text') as HTMLElement;
+    this.dialogue.onLine((line) => {
+      if (!line) { dlg.classList.remove('open'); return; }
+      speakerEl.textContent = line.speaker;
+      textEl.textContent = line.text;
+      dlg.classList.add('open');
+    });
+
+    // Interaction key.
+    const eKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+    eKey.on('down', () => {
+      if (this.dialogue.isOpen()) return;
+      this.interactions.trigger();
+    });
+    const spaceKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    spaceKey.on('down', () => {
+      if (this.dialogue.isOpen()) this.dialogue.advance();
+    });
+    const escKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+    escKey.on('down', () => this.dialogue.close());
+
     // Spawn villagers whose home is the village.
     const states = buildNpcStates();
     for (const def of NPCS) {
@@ -161,6 +239,17 @@ export class VillageScene extends Phaser.Scene {
       const npc = new Npc(this, def, states[def.id]!);
       this.npcs.push(npc);
       this.physics.add.collider(this.player, npc);
+      this.interactions.register({
+        uid: 'npc:' + def.id,
+        tx: def.schedule[0]?.tx ?? 20,
+        ty: def.schedule[0]?.ty ?? 20,
+        verb: 'Talk',
+        label: def.name,
+        onInteract: () => {
+          const lines = npc.talk();
+          this.dialogue.open(def.name, lines);
+        },
+      });
     }
   }
 
@@ -208,10 +297,37 @@ export class VillageScene extends Phaser.Scene {
     if (this.cursors.down.isDown) keys.down = this.cursors.down as Phaser.Input.Keyboard.Key;
     if (this.cursors.left.isDown) keys.left = this.cursors.left as Phaser.Input.Keyboard.Key;
     if (this.cursors.right.isDown) keys.right = this.cursors.right as Phaser.Input.Keyboard.Key;
+    // Mobile overrides
+    if (this.mobile.isDown('up')) keys.up = this.wasd.up as Phaser.Input.Keyboard.Key;
+    if (this.mobile.isDown('down')) keys.down = this.wasd.down as Phaser.Input.Keyboard.Key;
+    if (this.mobile.isDown('left')) keys.left = this.wasd.left as Phaser.Input.Keyboard.Key;
+    if (this.mobile.isDown('right')) keys.right = this.wasd.right as Phaser.Input.Keyboard.Key;
+    if (this.mobile.isDown('run')) keys.run = this.shiftKey;
 
     this.player.updateControls(keys);
     this.player.update(delta);
-    const minutes = 8 * 60; // placeholder morning
+    const clock = this.clock_.tick(delta, 6); // 6 in-game minutes per real second
+    const minutes = clock.minutes % 1440;
     for (const npc of this.npcs) npc.update(delta, minutes);
+    const timeEl = document.getElementById('hud-time');
+    const weatherEl = document.getElementById('hud-weather');
+    if (timeEl) timeEl.textContent = formatClock(minutes);
+    if (weatherEl) weatherEl.textContent = clock.weather.charAt(0).toUpperCase()+clock.weather.slice(1) + ' · ' + clock.season.charAt(0).toUpperCase()+clock.season.slice(1);
+    // Keep interactable anchors in sync with NPC positions.
+    for (const npc of this.npcs) {
+      this.interactions.setPosition('npc:' + npc.def.id, Math.round(npc.x / CONFIG.tileSize), Math.round(npc.y / CONFIG.tileSize));
+    }
+    const ptx = Math.round(this.player.x / CONFIG.tileSize);
+    const pty = Math.round(this.player.y / CONFIG.tileSize);
+    const active = this.interactions.resolve(ptx, pty);
+    const promptEl = document.getElementById('interact-prompt');
+    if (promptEl) {
+      if (active && !this.dialogue.isOpen()) {
+        promptEl.textContent = 'E · ' + active.verb + ' ' + active.label;
+        promptEl.style.display = 'block';
+      } else {
+        promptEl.style.display = 'none';
+      }
+    }
   }
 }
