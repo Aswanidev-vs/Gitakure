@@ -100,3 +100,13 @@ Status legend: `[x]` done and verified · `[~]` in progress · `[ ]` not started
 - `[x]` **Living Wildlife Simulation**: Sinuous swimming fish in backwater canal, fluttering swallowtail butterflies over gardens, calm white heron fishing.
 - `[x]` **Time-of-Day Contextual NPC Dialogue**: Dialogue text for Master Ren, Devaki Amma, and Appu dynamically adapts to Dawn, Morning, Noon, Dusk, and Night.
 - `[x]` **Dynamic Interaction Prompts & Tranquility Dock**: Floating visual prompt pills (`[E] Collect Jasmine`, `[E] Talk with Devaki Amma`, `[F] Cast Line`) and bottom dock for Sit, Fish, Journal, and Shrine.
+
+---
+
+## 9. Phase 4: GitHub Integration Enhancement `[x]`
+
+- `[x]` **IndexedDB GameState Persistence**: Persistent retention of connected GitHub account across browser sessions in Dexie `gameState`.
+- `[x]` **Incremental Discovery Logic**: Re-connecting only unlocks and notifies genuinely new discoveries, preserving existing ones with quiet harmony.
+- `[x]` **Graceful Rate-Limit & Network Resilience**: Friendly fallback if GitHub API rate limit is reached, gracefully switching to peaceful offline honors.
+- `[x]` **Poetic Language Artifacts**: Custom poetic artifacts for Rust (Iron Lantern), Python (Bamboo Inkwell), TypeScript (Stone Path), JavaScript (Firefly), Go (Courier Boat), C/C++ (Granite Pillar), HTML/CSS (Shoji Screen).
+- `[x]` **Effortless Unlink / Solitude Option**: One-click "Return to Solitude" action in the Shrine to disconnect cleanly.

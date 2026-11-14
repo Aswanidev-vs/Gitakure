@@ -24,7 +24,56 @@ export interface InterpretedDevelopmentHistory {
   }[];
   generatedDiscoveries: WorldDiscovery[];
   openingJournalEntry: JournalEntry;
+  rateLimited?: boolean;
 }
+
+const LANGUAGE_POETICS: Record<string, { title: string; desc: string; icon: string }> = {
+  Rust: {
+    title: 'The Iron-Forged Temple Lantern',
+    desc: 'Forged with exactness and endurance, cast from iron that never yields to corrosion.',
+    icon: '🏮',
+  },
+  Python: {
+    title: 'The Carved Green Bamboo Inkwell',
+    desc: 'Gentle, expressive, and flowing like clean mountain water through bamboo chutes.',
+    icon: '🎋',
+  },
+  TypeScript: {
+    title: 'The Interlocking Stone Garden Path',
+    desc: 'Every stone measured and laid with deliberate symmetry to guide feet through the mist.',
+    icon: '🪨',
+  },
+  JavaScript: {
+    title: 'The Wandering Canal Firefly',
+    desc: 'Quick, adaptable, and lighting up unexpected corners of the evening.',
+    icon: '✨',
+  },
+  Go: {
+    title: 'The Swift Canal Courier Vallam',
+    desc: 'Trim, purposeful, and cutting cleanly through backwater tides with zero unnecessary baggage.',
+    icon: '🛶',
+  },
+  'C++': {
+    title: 'The Ancient Chiseled Foundation Pillar',
+    desc: 'Solid granite quarried from deep mountain bedrock, holding the whole ceiling without complaint.',
+    icon: '🏛️',
+  },
+  C: {
+    title: 'The Deep Mountain Spring',
+    desc: 'The original pure source from which all the valley rivers eventually flowed.',
+    icon: '💧',
+  },
+  HTML: {
+    title: 'The Washi Paper Sliding Screen',
+    desc: 'Diffusing sunlight into warm softness, framing the world with clean structure.',
+    icon: '📜',
+  },
+  CSS: {
+    title: 'The Indigo Silk Tapestry',
+    desc: 'Dyed with backwater indigo and madder root, draping the timber frames in quiet elegance.',
+    icon: '🧵',
+  },
+};
 
 export class GitHubHistoryInterpreter {
   /**
@@ -39,6 +88,11 @@ export class GitHubHistoryInterpreter {
     try {
       // 1. Fetch user profile
       const userRes = await fetch(`https://api.github.com/users/${encodeURIComponent(cleanUser)}`);
+      if (userRes.status === 403 || userRes.status === 429) {
+        const fallback = this.generateDefaultTranquilHistory(cleanUser);
+        fallback.rateLimited = true;
+        return fallback;
+      }
       if (!userRes.ok) {
         return this.generateDefaultTranquilHistory(cleanUser);
       }
@@ -129,15 +183,22 @@ export class GitHubHistoryInterpreter {
     ];
 
     if (sortedLangs.length > 0) {
+      const topLang = sortedLangs[0];
+      const poetic = LANGUAGE_POETICS[topLang] || {
+        title: `The Scroll of ${topLang}`,
+        desc: `Bound with bamboo cord in the village archive, these notes record thoughts written in the syntax of ${topLang}.`,
+        icon: '📜',
+      };
+
       discoveries.push({
-        id: `gh_craft_tome_${username}`,
-        title: `The Scroll of ${sortedLangs.join(' & ')}`,
-        subtitle: 'Dialects of the Creative Mind',
+        id: `gh_craft_tome_${username}_${topLang}`,
+        title: poetic.title,
+        subtitle: `Language of Craft · ${topLang}`,
         category: 'folklore',
         discoveredAt: new Date().toISOString(),
-        description: `Bound with bamboo cord in the village archive, these notes record thoughts written in the syntax of ${sortedLangs.join(', ')}.`,
+        description: poetic.desc,
         quote: 'Every language is a different window looking out at the same mountain.',
-        icon: '📜',
+        icon: poetic.icon,
       });
     }
 
@@ -222,11 +283,15 @@ export class GitHubHistoryInterpreter {
 
   /**
    * Persists discoveries & journal entries to IndexedDB smoothly.
+   * Returns count of truly new discoveries unlocked.
    */
-  public static async applyToLocalWorld(history: InterpretedDevelopmentHistory): Promise<void> {
+  public static async applyToLocalWorld(history: InterpretedDevelopmentHistory): Promise<{ newCount: number; isRepeat: boolean }> {
+    let newCount = 0;
     for (const disc of history.generatedDiscoveries) {
-      await addDiscovery(disc);
+      const isNew = await addDiscovery(disc);
+      if (isNew) newCount++;
     }
     await addJournalEntry(history.openingJournalEntry);
+    return { newCount, isRepeat: newCount === 0 };
   }
 }

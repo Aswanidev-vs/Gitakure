@@ -22,6 +22,15 @@
         </p>
       </div>
 
+      <!-- Currently Connected State -->
+      <div v-if="store.connectedGithubUser" class="connected-banner">
+        <div class="cb-left">
+          <span class="cb-icon">🌿</span>
+          <span class="cb-text">Connected to: <strong>@{{ store.connectedGithubUser }}</strong></span>
+        </div>
+        <button class="unlink-btn" @click="handleDisconnect">Return to Solitude</button>
+      </div>
+
       <!-- Username Input Section -->
       <div class="input-section">
         <label class="input-label" for="gh-user">Connect your GitHub journey (Public Read-Only):</label>
@@ -95,15 +104,28 @@ async function submitUsername() {
 
   loading.value = true;
   const history = await GitHubHistoryInterpreter.fetchAndInterpret(username);
-  await GitHubHistoryInterpreter.applyToLocalWorld(history);
+  const result = await GitHubHistoryInterpreter.applyToLocalWorld(history);
 
-  store.connectedGithubUser = username;
+  await store.setConnectedGithubUser(username);
   historyPreview.value = history;
   await store.refreshDiscoveries();
   await store.refreshJournal();
 
-  store.showToast(`Memories of ${username} have been weaved into the valley.`, '🌱');
+  if (history.rateLimited) {
+    store.showToast(`GitHub rate limit is resting; honored @${username} peacefully.`, '🍵');
+  } else if (result.isRepeat) {
+    store.showToast(`Welcome back, @${username}. Your valley remains in peaceful harmony.`, '✨');
+  } else {
+    store.showToast(`Weaved ${result.newCount} new memories of @${username} into the valley.`, '🌱');
+  }
+
   loading.value = false;
+}
+
+async function handleDisconnect() {
+  await store.disconnectGithub();
+  inputUsername.value = '';
+  historyPreview.value = null;
 }
 
 async function applyPreset(type: 'wanderer' | 'first_spark' | 'deep_roots') {
@@ -118,12 +140,18 @@ async function applyPreset(type: 'wanderer' | 'first_spark' | 'deep_roots') {
     history.favoriteLanguages = ['TypeScript', 'Rust', 'Silence'];
   }
 
-  await GitHubHistoryInterpreter.applyToLocalWorld(history);
+  const result = await GitHubHistoryInterpreter.applyToLocalWorld(history);
+  await store.setConnectedGithubUser(name);
   historyPreview.value = history;
   await store.refreshDiscoveries();
   await store.refreshJournal();
 
-  store.showToast(`Tranquil memories of ${name} recorded.`, '🍃');
+  if (result.isRepeat) {
+    store.showToast(`Tranquil state of ${name} confirmed.`, '🍃');
+  } else {
+    store.showToast(`Recorded ${result.newCount} peaceful keepsakes of ${name}.`, '🍃');
+  }
+
   loading.value = false;
 }
 </script>
@@ -203,6 +231,47 @@ async function applyPreset(type: 'wanderer' | 'first_spark' | 'deep_roots') {
   font-size: 12px;
   line-height: 1.55;
   color: var(--text-dark);
+}
+
+.connected-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(91, 138, 85, 0.15);
+  border: 1px solid rgba(91, 138, 85, 0.35);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 14px;
+}
+
+.cb-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cb-icon {
+  font-size: 14px;
+}
+
+.cb-text {
+  font-size: 12px;
+  color: var(--text-dark);
+}
+
+.unlink-btn {
+  background: transparent;
+  border: 1px solid rgba(211, 78, 54, 0.3);
+  color: var(--accent-vermilion);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.unlink-btn:hover {
+  background: rgba(211, 78, 54, 0.1);
 }
 
 .input-section {

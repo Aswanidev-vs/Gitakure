@@ -4,6 +4,8 @@ import {
   saveSettings,
   getDiscoveries,
   getJournalEntries,
+  getGameState,
+  saveGameState,
   type GameSettings,
   type WorldDiscovery,
   type JournalEntry,
@@ -63,6 +65,11 @@ export const useGitakureStore = defineStore('gitakure', {
         this.settings = loadedSettings;
         this.discoveries = await getDiscoveries();
         this.journalEntries = await getJournalEntries();
+
+        const gameState = await getGameState();
+        if (gameState?.connectedGithubUser) {
+          this.connectedGithubUser = gameState.connectedGithubUser;
+        }
 
         // Check real world time if sync enabled
         if (this.settings.realWorldTimeSync) {
@@ -196,6 +203,17 @@ export const useGitakureStore = defineStore('gitakure', {
       this.settings = { ...this.settings, ...partial };
       await saveSettings(partial);
       gameBridge.emit('settings_updated', this.settings);
+    },
+
+    async setConnectedGithubUser(username: string | null) {
+      this.connectedGithubUser = username;
+      await saveGameState({ connectedGithubUser: username || undefined });
+    },
+
+    async disconnectGithub() {
+      this.connectedGithubUser = null;
+      await saveGameState({ connectedGithubUser: undefined });
+      this.showToast('Returned to pure offline tranquility.', '🍃');
     },
 
     async refreshDiscoveries() {

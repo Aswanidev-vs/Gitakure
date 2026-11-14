@@ -106,6 +106,28 @@ export async function getJournalEntries(): Promise<JournalEntry[]> {
   return db.journal.orderBy('createdAt').reverse().toArray();
 }
 
+export async function getGameState(): Promise<LocalGameState> {
+  const current = await db.gameState.get('default');
+  if (current) return current;
+
+  const defaults: LocalGameState = {
+    id: 'default',
+    playerX: 10,
+    playerY: 10,
+    isSitting: false,
+    campfireLit: true,
+    activeSeason: 'spring',
+    lastPlayed: new Date().toISOString(),
+  };
+  await db.gameState.put(defaults);
+  return defaults;
+}
+
+export async function saveGameState(state: Partial<LocalGameState>): Promise<void> {
+  const current = await getGameState();
+  await db.gameState.put({ ...current, ...state, lastPlayed: new Date().toISOString() });
+}
+
 export async function clearLocalData(): Promise<void> {
   await db.discoveries.clear();
   await db.journal.clear();
