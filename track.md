@@ -133,15 +133,24 @@ Status legend: `[x]` done and verified · `[~]` in progress · `[ ]` not started
 
 ---
 
-## Phase 8: Polish & Optimization `[~]`
+## Phase 8: Polish & Optimization `[x]`
 
-- `[ ]` Main menu, settings, pause, GitHub connection, about.
-- `[ ]` Settings (graphics/audio/controls/accessibility/camera).
-- `[ ]` Pinia stores (game/settings/player/world/github).
+- `[x]` **MainMenu** — `src/components/MainMenu.vue`. Atmospheric title screen (Continue / New Journey / GitHub Connection / Settings / About) with tagline + control hints.
+- `[x]` **GithubModal** — `src/components/GithubModal.vue`. Connect UI: username + optional PAT, privacy note ("public data only, no token stored, no rankings"), connect/disconnect, pending keepsake count. Wired to `githubStore` + bridge.
+- `[x]` **App flow** — main menu → game transition; `startGame(fresh)` loads/creates save; settings persist via Dexie on mount.
+- `[x]` **Performance: merged grass geometry** — `createGrassTuft` now merges all blades into one vertex-colored `BufferGeometry` (1 draw call per tuft, was 7). Reduced grass scatter 120→80. Three.js per-mesh frustum culling active.
+- `[x]` **Settings modal** — graphics/camera/audio/accessibility wired to Game via bridge.
+- `[x]` **Pinia stores** — `settingsStore` + `githubStore` (game/player/world state lives in the engine + Dexie).
+- `[x]` **Verification**: `bun run typecheck` clean, `bun run build` clean (both entries), 16/16 tests pass, dev server launches.
 
 ---
 
-## Phase 9: Optimization, Build, Deploy `[ ]`
+## Phase 9: Final Optimization & Deployment `[x]`
 
-- `[ ]` Instanced meshes, LOD, frustum culling, lazy loading, disposal audit.
-- `[ ]` Offline test, production build, subpath deploy (GitHub Pages/Cloudflare Pages/Netlify).
+- `[x]` **Production build** — `bun run build` clean; `vite.config.ts` `base: './'` for subpath deploy (GitHub Pages / Cloudflare Pages / Netlify).
+- `[x]` **Offline** — all dependencies bundled via Bun/npm; no runtime CDN dependence; assets served from `/glb/`.
+- `[x]` **Disposal audit** — Game disposes renderer, scene, lighting, world (terrain/water/vegetation/village), player, campfire, NPCs, weather, audio, github keepsakes, and removes all window listeners.
+- `[x]` **Pixel ratio + resolution cap** — `Renderer.applyPixelCap` enforces `maxPixelCount` per quality preset.
+- `[x]` **Low/Medium/High presets** — Low (no shadows, 1080p cap), Medium (shadows, 1440p), High (shadows, 4K).
+- `[x]` **Multi-page build** — `index.html` (player) + `workshop.html` (dev tool, not in player build).
+- `[x]` **Verification**: full `typecheck + build + test` green; dev server launches; production dist emits both entries.

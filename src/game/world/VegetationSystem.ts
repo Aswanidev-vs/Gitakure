@@ -30,7 +30,7 @@ export class VegetationSystem {
     const rng = new Rng(this.terrain.opts.seed + 999);
 
     // Scatter ground-cover (grass + flowers) across the whole map, denser near center.
-    const grassPts = this.terrain.scatter(rng, 120, 2, 45);
+    const grassPts = this.terrain.scatter(rng, 80, 2, 45);
     for (const p of grassPts) {
       const t = createGrassTuft({ seed: (p.x * 100) | 0 });
       t.position.set(p.x, p.y, p.z);

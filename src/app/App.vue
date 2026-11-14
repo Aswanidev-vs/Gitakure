@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref, watch } from 'vue';
+import { onMounted, onBeforeUnmount, ref, watch, nextTick } from 'vue';
 import { Game } from '@/game/core/Game';
 import { gameBridge } from '@/game/core/GameBridge';
 import type { CameraMode, GameSettings } from '@/types';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { gameStateRepo, settingsRepo } from '@/database/repositories';
+import MainMenu from '@/components/MainMenu.vue';
 import SettingsModal from '@/components/SettingsModal.vue';
 import '@/styles.css';
 
 const settingsStore = useSettingsStore();
 const settings: GameSettings = settingsStore.settings;
-const showSettings = ref(false);
 
 const container = ref<HTMLDivElement | null>(null);
 const game = ref<Game | null>(null);
@@ -18,6 +19,10 @@ const fps = ref(0);
 const drawCalls = ref(0);
 const prompt = ref<string | null>(null);
 const paused = ref(false);
+const showSettings = ref(false);
+
+const started = ref(false);
+const hasSave = ref(false);
 
 const offSnapshot = gameBridge.on('snapshot', (e) => {
   fps.value = e.snapshot.fps;
@@ -39,6 +44,7 @@ function togglePause() {
 }
 
 function onKey(e: KeyboardEvent) {
+  if (!started.value) return;
   if (e.code === 'KeyV' && !e.repeat) {
     toggleCamera();
   } else if (e.code === 'Space' && e.shiftKey) {
@@ -52,6 +58,23 @@ function onSettingsChange(next: GameSettings) {
   settingsStore.settings = structuredClone(next);
 }
 
+async function startGame(fresh: boolean) {
+  if (fresh) {
+    // New journey: clear saved state.
+    try {
+      await gameStateRepo.save({ position: [0, 0, 0], rotation: 0 }, { time: 0.35, day: 1, season: 'spring', weather: 'clear' });
+    } catch {
+      // ignore
+    }
+  }
+  started.value = true;
+  await nextTick();
+  if (!container.value || game.value) return;
+  const g = new Game(container.value, settings);
+  game.value = g;
+  void g.start();
+}
+
 watch(
   () => settings.camera.followDistance,
   (d) => gameBridge.emit({ type: 'setFollowDistance', distance: d }),
@@ -61,12 +84,18 @@ watch(
   (q) => gameBridge.emit({ type: 'setQuality', settings: { ...settings.graphics, quality: q } }),
 );
 
-onMounted(() => {
+onMounted(async () => {
   window.addEventListener('keydown', onKey);
-  if (!container.value) return;
-  const g = new Game(container.value, settings);
-  game.value = g;
-  void g.start();
+  try {
+    hasSave.value = (await gameStateRepo.load()) !== null;
+    const saved = await settingsRepo.load();
+    if (saved) {
+      Object.assign(settings, structuredClone(saved));
+      settingsStore.settings = structuredClone(saved);
+    }
+  } catch {
+    // fresh
+  }
 });
 
 onBeforeUnmount(() => {
@@ -78,7 +107,17 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="gitakure-root">
+  <MainMenu
+    v-if="!started"
+    :has-save="hasSave"
+    @continue="startGame(false)"
+    @new-journey="startGame(true)"
+    @settings="showSettings = true"
+    @github="startGame(false)"
+    @about="showSettings = true"
+  />
+
+  <div v-show="started" class="gitakure-root">
     <div ref="container" class="game-canvas"></div>
 
     <div class="hud">

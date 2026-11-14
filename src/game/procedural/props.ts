@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Rng } from '@/utils/rng';
 import { MAT } from './materials';
-import { icoRock, blob, transform, cone } from './geometry';
+import { icoRock, blob, transform, cone, mergeColored, vertexColorMaterial } from './geometry';
 
 export interface RockParams {
   radius: number;
@@ -37,14 +37,20 @@ export function createGrassTuft(p: Partial<GrassTuftParams> = {}): THREE.Group {
   const params: GrassTuftParams = { blades: 7, height: 0.5, color: 'leafMid', seed: 6, ...p };
   const rng = new Rng(params.seed);
   const g = new THREE.Group();
+  const color = MAT[params.color]().color;
+  const parts: Array<{ geometry: THREE.BufferGeometry; color: THREE.Color }> = [];
   for (let i = 0; i < params.blades; i++) {
     const a = rng.range(0, Math.PI * 2);
     const r = rng.range(0, 0.15);
     const h = params.height * rng.range(0.6, 1.2);
     const blade = cone(0.04, h, 3);
     transform(blade, { rotZ: rng.range(-0.3, 0.3), x: Math.cos(a) * r, z: Math.sin(a) * r });
-    g.add(new THREE.Mesh(blade, MAT[params.color]()));
+    parts.push({ geometry: blade, color });
   }
+  // Merge all blades into a single vertex-colored mesh (1 draw call).
+  const merged = mergeColored(parts);
+  const mesh = new THREE.Mesh(merged, vertexColorMaterial());
+  g.add(mesh);
   return g;
 }
 
