@@ -98,6 +98,7 @@ export class IsoValleyScene extends Phaser.Scene {
   private currentSeason: Season = 'spring';
   private currentTimeOfDay: TimeOfDay = 'dusk';
   private lastPromptText = '';
+  private virtualMovement = { dx: 0, dy: 0 };
 
   constructor() {
     super({ key: 'IsoValleyScene' });
@@ -777,6 +778,26 @@ export class IsoValleyScene extends Phaser.Scene {
       if (payload?.season) this.currentSeason = payload.season;
       if (payload?.timeOfDay) this.currentTimeOfDay = payload.timeOfDay;
     });
+
+    gameBridge.on('camera_zoom', (p: { zoom: number }) => {
+      if (p?.zoom) {
+        this.cameras.main.setZoom(p.zoom);
+      }
+    });
+
+    gameBridge.on('reduced_motion', (p: { enabled: boolean }) => {
+      if (this.weatherParticles) {
+        if (p?.enabled) {
+          this.weatherParticles.pause();
+        } else {
+          this.weatherParticles.resume();
+        }
+      }
+    });
+
+    gameBridge.on('virtual_joystick', (p: { dx: number; dy: number }) => {
+      this.virtualMovement = { dx: p?.dx || 0, dy: p?.dy || 0 };
+    });
   }
 
   private startFishing(): void {
@@ -1067,6 +1088,18 @@ export class IsoValleyScene extends Phaser.Scene {
       vx += speed * 1.1;
       vy += speed * 0.55;
       this.playerSprite.setFrame('pixel_character_sheets_p02_r00_c00');
+    }
+
+    // Touch / Mobile virtual joystick input
+    if (this.virtualMovement.dx !== 0 || this.virtualMovement.dy !== 0) {
+      vx = this.virtualMovement.dx * speed;
+      vy = this.virtualMovement.dy * speed;
+      if (Math.abs(vx) > Math.abs(vy)) {
+        this.playerSprite.setFlipX(vx < 0);
+        this.playerSprite.setFrame('pixel_character_sheets_p02_r00_c01');
+      } else {
+        this.playerSprite.setFrame(vy < 0 ? 'pixel_character_sheets_p02_r00_c02' : 'pixel_character_sheets_p02_r00_c00');
+      }
     }
 
     this.playerSprite.setVelocity(vx, vy);

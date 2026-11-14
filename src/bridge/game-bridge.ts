@@ -13,6 +13,8 @@ export type BridgeEventType =
   | 'request_shrine'
   | 'request_settings'
   | 'camera_zoom'
+  | 'reduced_motion'
+  | 'virtual_joystick'
   | 'settings_updated'
   | 'fishing_start'
   | 'fishing_catch'

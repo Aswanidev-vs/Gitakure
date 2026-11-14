@@ -51,11 +51,39 @@
         <span class="dock-label">Shrine</span>
       </button>
     </div>
+
+    <!-- Mobile Soft D-Pad -->
+    <div v-if="isTouchDevice && !store.isSitting && !store.isFishing" class="mobile-dpad interactive">
+      <button class="dpad-btn up" @touchstart.prevent="startMove(0, -1)" @touchend.prevent="stopMove">▲</button>
+      <div class="dpad-mid">
+        <button class="dpad-btn left" @touchstart.prevent="startMove(-1, 0)" @touchend.prevent="stopMove">◀</button>
+        <div class="dpad-center">●</div>
+        <button class="dpad-btn right" @touchstart.prevent="startMove(1, 0)" @touchend.prevent="stopMove">▶</button>
+      </div>
+      <button class="dpad-btn down" @touchstart.prevent="startMove(0, 1)" @touchend.prevent="stopMove">▼</button>
+    </div>
+
+    <!-- Peaceful Title / Welcome Screen -->
+    <div v-if="showWelcomeOverlay" class="welcome-overlay interactive" @click="enterValley">
+      <div class="welcome-card washi-panel" @click.stop>
+        <div class="welcome-glyph">🍃</div>
+        <h1 class="welcome-title">GITAKURE</h1>
+        <p class="welcome-kanji">ギタクレ · ഗീതാകുരെ</p>
+        <p class="welcome-desc">
+          A quiet countryside sanctuary blending Japanese rural villages and Kerala backwaters.
+          Your development journey quietly becomes part of the earth, while you are free to enjoy the world at your own pace.
+        </p>
+        <div class="welcome-action">
+          <button class="enter-btn" @click="enterValley">Step into the Valley · 谷へ入る</button>
+          <span class="enter-sub">Click anywhere to begin soundscapes and exploration</span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import TopBar from './components/TopBar.vue';
 import DialogueBox from './components/DialogueBox.vue';
 import JournalModal from './components/JournalModal.vue';
@@ -63,8 +91,25 @@ import GithubShrineModal from './components/GithubShrineModal.vue';
 import SettingsModal from './components/SettingsModal.vue';
 import NotificationToast from './components/NotificationToast.vue';
 import { useGitakureStore } from '@/state/pinia-store';
+import { soundscapes } from '@/game/audio/soundscapes';
+import { gameBridge } from '@/bridge/game-bridge';
 
 const store = useGitakureStore();
+const showWelcomeOverlay = ref(true);
+const isTouchDevice = ref(false);
+
+function enterValley() {
+  showWelcomeOverlay.value = false;
+  soundscapes.init();
+}
+
+function startMove(dx: number, dy: number) {
+  gameBridge.emit('virtual_joystick', { dx, dy });
+}
+
+function stopMove() {
+  gameBridge.emit('virtual_joystick', { dx: 0, dy: 0 });
+}
 
 function handleGlobalKey(e: KeyboardEvent) {
   if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) return;
@@ -86,7 +131,7 @@ function handleGlobalKey(e: KeyboardEvent) {
 
 onMounted(async () => {
   await store.initialize();
-  store.showToast('Breathe in the mountain and backwater air.', '🍃');
+  isTouchDevice.value = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   window.addEventListener('keydown', handleGlobalKey);
 });
 
@@ -215,5 +260,137 @@ onUnmounted(() => {
 
 .sitting-icon {
   font-size: 15px;
+}
+
+/* Mobile D-Pad */
+.mobile-dpad {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  user-select: none;
+  z-index: 50;
+}
+
+.dpad-mid {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dpad-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(26, 35, 31, 0.88);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.dpad-btn:active {
+  background: rgba(91, 138, 85, 0.4);
+}
+
+.dpad-center {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+/* Welcome Overlay */
+.welcome-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(14, 20, 17, 0.82);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  cursor: pointer;
+}
+
+.welcome-card {
+  width: 90%;
+  max-width: 540px;
+  padding: 36px 30px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.welcome-glyph {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.welcome-title {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  letter-spacing: 4px;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+}
+
+.welcome-kanji {
+  font-family: var(--font-serif);
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--accent-vermilion);
+  margin-bottom: 16px;
+}
+
+.welcome-desc {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: #3f5247;
+  margin-bottom: 24px;
+}
+
+.welcome-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.enter-btn {
+  padding: 12px 28px;
+  border-radius: 24px;
+  background: var(--accent-vermilion);
+  color: #fff;
+  font-family: var(--font-serif);
+  font-size: 15px;
+  letter-spacing: 1px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 16px var(--accent-vermilion-glow);
+  transition: all 0.25s ease;
+}
+
+.enter-btn:hover {
+  background: #bf3e26;
+  transform: translateY(-1px);
+}
+
+.enter-sub {
+  font-size: 11px;
+  color: var(--text-dark-muted);
 }
 </style>

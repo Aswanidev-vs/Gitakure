@@ -110,3 +110,14 @@ Status legend: `[x]` done and verified · `[~]` in progress · `[ ]` not started
 - `[x]` **Graceful Rate-Limit & Network Resilience**: Friendly fallback if GitHub API rate limit is reached, gracefully switching to peaceful offline honors.
 - `[x]` **Poetic Language Artifacts**: Custom poetic artifacts for Rust (Iron Lantern), Python (Bamboo Inkwell), TypeScript (Stone Path), JavaScript (Firefly), Go (Courier Boat), C/C++ (Granite Pillar), HTML/CSS (Shoji Screen).
 - `[x]` **Effortless Unlink / Solitude Option**: One-click "Return to Solitude" action in the Shrine to disconnect cleanly.
+
+---
+
+## 10. Phase 5: Polish & Deployment Readiness `[x]`
+
+- `[x]` **Atmospheric Title / Welcome Screen**: Opening modal with Barakamon philosophy and Japanese/Malayalam typography, guaranteeing seamless user-gesture unlock for Web Audio API.
+- `[x]` **Mobile Touch D-Pad**: Automatic touch detection with responsive on-screen directional controls emitting bridge events.
+- `[x]` **Camera Perspective Zoom Slider**: Smooth real-time isometric camera zoom control (1.0x to 1.8x) wired from Settings modal to Phaser scene.
+- `[x]` **Reduced Motion Accessibility**: Particle emitter pause/resume honoring `prefers-reduced-motion` and user settings.
+- `[x]` **Universal Static Deployment**: Configured `base: './'` in `vite.config.ts` for instant GitHub Pages / static host readiness.
+- `[x]` **Full Verification**: 0 TypeScript errors on `vue-tsc`, clean production Vite build in 5.26s.

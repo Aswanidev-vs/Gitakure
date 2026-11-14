@@ -91,6 +91,20 @@
               @change="saveSettingsChange"
             />
           </div>
+
+          <div class="slider-row" style="margin-top: 14px;">
+            <label class="slider-label">Camera Perspective Zoom</label>
+            <input
+              v-model.number="localSettings.zoomLevel"
+              type="range"
+              min="1.0"
+              max="1.8"
+              step="0.05"
+              class="slider"
+              @input="onZoomChange"
+            />
+            <span class="val-num">{{ localSettings.zoomLevel.toFixed(2) }}x</span>
+          </div>
         </section>
 
         <!-- Privacy & Local Data -->
@@ -114,6 +128,7 @@ import { computed, ref, watch } from 'vue';
 import { useGitakureStore } from '@/state/pinia-store';
 import { soundscapes } from '@/game/audio/soundscapes';
 import { clearLocalData } from '@/storage/db';
+import { gameBridge } from '@/bridge/game-bridge';
 
 const store = useGitakureStore();
 const isOpen = computed(() => store.activeModal === 'settings');
@@ -140,6 +155,12 @@ function onVolumeChange() {
 
 function saveSettingsChange() {
   store.updateSettings(localSettings.value);
+  gameBridge.emit('reduced_motion', { enabled: localSettings.value.reducedMotion });
+}
+
+function onZoomChange() {
+  store.updateSettings(localSettings.value);
+  gameBridge.emit('camera_zoom', { zoom: localSettings.value.zoomLevel });
 }
 
 async function handleClearData() {
