@@ -10,115 +10,119 @@ Status legend: `[x]` done and verified · `[~]` in progress · `[ ]` not started
 
 | Requirement | Implementation | Evidence |
 |---|---|---|
-| **Frontend Framework** | Vue 3 | `src/ui/App.vue`, `src/main.ts` |
-| **State Management** | Pinia | `src/state/pinia-store.ts` |
-| **Game Engine** | Phaser 4 (v4.2.1) | `src/game/phaser-game.ts`, `src/game/scenes/IsoValleyScene.ts` |
-| **Language & Bundler** | TypeScript + Vite + Bun | `tsconfig.json`, `vite.config.ts`, `bun.lock` |
-| **Local Persistence** | IndexedDB via Dexie.js | `src/storage/db.ts` |
-| **Decoupled Bridge** | `gameBridge` | `src/bridge/game-bridge.ts` |
-| **Pixel Art Generator** | Procedural Bespoke Art Engine | `src/game/art/pixel-art-factory.ts` |
+| **Runtime** | Bun | `bun.lock`, `bun install` |
+| **Language** | TypeScript (strict) | `tsconfig.json` |
+| **Build tool** | Vite | `vite.config.ts` |
+| **UI** | Vue 3 Composition API | `src/app/App.vue`, `src/app/main.ts` |
+| **State management** | Pinia | `src/stores/settingsStore.ts` |
+| **Primary 3D engine** | Three.js (r0.187) | `src/game/core/Game.ts`, `src/game/rendering/*` |
+| **Local database** | Dexie.js (IndexedDB) | Phase 6 (pending) |
+| **Asset format** | GLB / glTF | `glb/` (80 Quaternius assets) |
+| **Rendering** | WebGL | `src/game/rendering/Renderer.ts` |
+| **Testing** | Vitest | `vitest.config.ts` |
+| **Typed Bridge** | `gameBridge` (no Three.js objects in Pinia) | `src/game/core/GameBridge.ts` |
 
 ---
 
-## 1. Core Philosophy & Barakamon Emotional Resonance `[x]`
+## Phase 0: Cleanup & Foundation Reset `[x]`
 
-- `[x]` **Zero Pressure Oath**: No energy meters, no forced farming, no crop death, no streaks.
-- `[x]` **Peaceful Sitting Experience**: Player can sit on river logs, veranda benches, or grass (`C` key or button) with idle breathing and sound.
-- `[x]` **Atmospheric Campfire**: Riverside campfire with animated flame flicker, warm light aura, and procedural crackle audio.
-- `[x]` **Barakamon Rural Warmth**: NPCs with unhurried routines (Master Ren the calligrapher, Devaki Amma on the porch, Appu watching kingfishers).
-
----
-
-## 2. World Concept — Cohesive Japanese & Kerala Countryside `[x]`
-
-- `[x]` **Japanese Architecture & Flora**:
-  - Traditional wooden tea house with tiled roof
-  - Sacred Shinto Torii shrine gate
-  - Bamboo forest grove & pink Sakura cherry blossom trees
-  - Stepping stone garden pathways
-- `[x]` **Kerala Countryside & Backwaters**:
-  - Traditional clay-tiled *Tharavadu / Nalukettu* house
-  - Coconut palm trees & broadleaf banana plants
-  - Flowing backwater canal with stepped ghats
-  - Moored wooden country boat (*Kettuvallam / Vallam*) with rocking water animation
-  - Paddy field terraces along the canal
+- `[x]` Removed old Phaser 4 / 2D isometric pixel-art iteration (all Phaser scenes, pixel-art factory, isometric camera, procedural-audio, Phaser-coupled Vue components, old GitHub/storage/state modules, old `src/main.ts`).
+- `[x]` Removed old pixel-art sprite assets (`public/sprites/`, `sprites/`, `summary.json`) and the two asset-pack zip bundles.
+- `[x]` Preserved `track.md`, `README.md`, `docs/`, `.gitignore`, `tsconfig.json`, `vite.config.ts`, `vitest.config.ts`, `glb/`.
+- `[x]` Added Quaternius GLB packs to `public/glb/` (Vite serves `/glb/*`) as the environmental foundation.
+- `[x]` Rewrote `package.json` for the new stack (three, vue, pinia, dexie; dropped phaser).
+- `[x]` Rewrote `index.html` for the `src/app/main.ts` entry.
+- `[x]` Dropped phaser `manualChunks` from `vite.config.ts`.
+- `[x]` `bun install` clean, lockfile regenerated. Committed `cc2cecc`.
 
 ---
 
-## 3. Isometric Pixel Art Projection `[x]`
+## Phase 1: Core Architecture, GameBridge, Dual Camera, First 3D Scene `[x]`
 
-- `[x]` **Fixed 2:1 Isometric Projection**: `src/game/camera/isometric.ts` (64×32 diamond grid).
-- `[x]` **Isometric Depth Sorting**: Objects sorted by `(gridX + gridY) * 10 + layer` so nearer elements occlude further ones.
-- `[x]` **Smooth Isometric Movement**: WASD / Arrow keys 4-way diagonal traversal, Shift for calm run.
-- `[x]` **Crisp Nearest-Neighbour Scaling**: `pixelArt: true`, `roundPixels: true`.
-
----
-
-## 4. Seasonal System & Local Real-Time Synchronization `[x]`
-
-- `[x]` **Hybrid Seasons**: Spring, Monsoon (Kerala rainy season), Autumn, Cool Winter.
-- `[x]` **Local Real-Time Sync**: Sunlight, golden dusk, and night starry ambient overlays track player's local clock automatically.
-- `[x]` **Atmospheric Weather**: Falling cherry blossoms, monsoon rain drifts, and evening canal fireflies.
-
----
-
-## 5. GitHub History Interpreter — Gradual & Pressure-Free `[x]`
-
-- `[x]` **Interpreter System**: `src/github/interpreter/github-interpreter.ts`.
-- `[x]` **Gradual Discovery**: Normalizes history into 2-3 meaningful keepsakes (First Seed, River Lantern, Language Scrolls) rather than dumping 100 buildings.
-- `[x]` **Zero-Commit Celebration**: 0 commits / resting periods rewarded with "Quiet Solitude" journal entry.
-- `[x]` **Offline Tranquility Presets**: Full offline mode with instant peaceful presets.
-- `[x]` **Privacy Guarantee**: 100% client-side, read-only public data, no tokens stored, disconnect & clear button in Settings.
+- `[x]` **Typed GameBridge** — `src/game/core/GameBridge.ts`. Serializable events (Vue→Game) and commands (Game→Vue) only; **no Three.js objects in Pinia**.
+- `[x]` **GameLoop** — `src/game/core/GameLoop.ts`. Fixed-timestep (1/60) accumulator with 0.25s frame clamp (no spiral of death); `onTick` + `onRender` handlers.
+- `[x]` **GameConfig** — `src/game/core/GameConfig.ts`. Low/Medium/High presets per spec §18 (pixelRatio cap 1.5, shadows off on Low, antialias on, maxPixelCount scaling).
+- `[x]` **Renderer** — `src/game/rendering/Renderer.ts`. WebGLRenderer, ACESFilmic tone mapping, pixel-ratio cap + internal resolution cap, resize handling, dispose.
+- `[x]` **SceneManager** — `src/game/rendering/SceneManager.ts`. Scene lifecycle, background, FogExp2, deep dispose.
+- `[x]` **CameraController** — `src/game/rendering/CameraController.ts`. **Dual-mode**: first-person (eye-level, look-ahead) + third-person (elevated fixed-orientation follow, smooth damping, adjustable distance, camera collision raycast). `V` key / UI button toggles. Mode persisted in settings.
+- `[x]` **Lighting** — `src/game/rendering/Lighting.ts`. One directional sun + hemisphere ambient; time-of-day sun arc/color/intensity; optional shadows.
+- `[x]` **AssetManager** — `src/game/assets/AssetManager.ts`. Cached GLTFLoader, bounds/poly-count measurement, instantiate clone, dispose.
+- `[x]` **AssetRegistry** — `src/game/assets/AssetRegistry.ts`. Central catalog of all 80 Quaternius GLBs with name, source pack, path, format, license (CC0), intended usage, biome (japanese/kerala/both), category; runtime `measureRegistry()` fills dimensions, triangle count, embedded-texture/animations status.
+- `[x]` **Game** — `src/game/core/Game.ts`. Top-level orchestrator wiring renderer/scene/camera/lighting/loop/bridge; command handler; snapshot emission (player, time, day, season, weather, cameraMode, fps, drawCalls).
+- `[x]` **Vue app** — `src/app/App.vue`. Mounts game canvas, HUD (camera toggle, pause, fps/draw-call stats, interaction pill), keyboard `V` toggle, `Shift+Space` pause.
+- `[x]` **Placeholder scene** — ground disc + procedural player capsule + Pine Trees GLB + Palm Trees GLB; proves GLB pipeline + camera toggle.
+- `[x]` **Utils** — `src/utils/rng.ts` (mulberry32 seeded RNG + hashSeed), `src/utils/math.ts` (clamp/lerp/damp/valueNoise2/fbm2).
+- `[x]` **Verification**: `bun run typecheck` clean, `bun run build` clean (38 modules, three chunk 144KB gzip), dev server launches on :5173, GLB served at `/glb/`.
 
 ---
 
-## 6. Procedural Web Audio Soundscapes `[x]`
+## Phase 2: Asset Pipeline & Registry `[~]`
 
-- `[x]` **Layered Soundscapes**: `src/game/audio/soundscapes.ts`.
-- `[x]` **Channel 1 (Ambience)**: Flowing canal water, wind through palms, rain, night crickets.
-- `[x]` **Channel 2 (Campfire)**: Crackling timber pops and embers.
-- `[x]` **Channel 3 (Peaceful Chimes)**: Procedural Japanese Koto (Hirajoshi) & Kerala temple (Mohanam) pentatonic bells.
-- `[x]` **Channel 4 (SFX)**: Footsteps varied by terrain (grass, stone, wood, water), sitting rustle.
-- `[x]` **Volume Sliders**: Independent controls for Master, Ambience, and SFX in Settings.
-
----
-
-## 7. Phase 2: World Polish `[x]`
-
-- `[x]` **True Isometric NPC Wandering**: Master Ren, Devaki Amma, Appu, Kuro the Cat, and White Heron stroll within wander radius and pause.
-- `[x]` **Seasonal & Dynamic Weather Particle System**: Reacts to weather/season with cherry blossoms, rain, winter snow, and night fireflies.
-- `[x]` **Terrain-Aware Footsteps**: Differentiated acoustic response for wood bridge, veranda, stone shrine path, water splash, and grass.
-- `[x]` **Campfire Embers & Sitting Glow**: Rising spark particles, warm ambient tint on player when resting by the fire.
-- `[x]` **Gentle Wind Through Trees**: Organic swaying sinusoidal tweens across all coconut palms, sakura, bamboo, and banana plants.
-- `[x]` **Canal Water Shimmer & Expanding Ripples**: Shimmering water tiles and gentle expanding water ring animations.
+- `[x]` Asset registry catalog (all 80 GLBs) — done in Phase 1.
+- `[x]` GLTFLoader pipeline + caching — done in Phase 1.
+- `[~]` Runtime `measureRegistry()` smoke verification across all assets.
+- `[ ]` Procedural geometry utilities (`src/game/procedural/`).
+- `[ ]` Initial procedural trees, rocks, grass, paths.
+- `[ ]` Developer asset workshop.
 
 ---
 
-## 8. Phase 3: Life & Interaction `[x]`
+## Phase 3: First Environment `[ ]`
 
-- `[x]` **Peaceful Canal Fishing Mechanic**: Cast line near backwater canal (`F` key or dock button), bobber water ripples, catch tranquil keepsakes (Silver Mussel, Canal Jade, Golden Carp, Blue Lotus) stored to Dexie.
-- `[x]` **Forageable Valley Keepsakes**: Floating collectible nodes across the valley (Wild Bamboo Shoot, Sacred Torii Ribbon, Golden Nendran Banana, Fragrant Jasmine) with proximity prompts and journal recording.
-- `[x]` **Living Wildlife Simulation**: Sinuous swimming fish in backwater canal, fluttering swallowtail butterflies over gardens, calm white heron fishing.
-- `[x]` **Time-of-Day Contextual NPC Dialogue**: Dialogue text for Master Ren, Devaki Amma, and Appu dynamically adapts to Dawn, Morning, Noon, Dusk, and Night.
-- `[x]` **Dynamic Interaction Prompts & Tranquility Dock**: Floating visual prompt pills (`[E] Collect Jasmine`, `[E] Talk with Devaki Amma`, `[F] Cast Line`) and bottom dock for Sit, Fish, Journal, and Shrine.
-
----
-
-## 9. Phase 4: GitHub Integration Enhancement `[x]`
-
-- `[x]` **IndexedDB GameState Persistence**: Persistent retention of connected GitHub account across browser sessions in Dexie `gameState`.
-- `[x]` **Incremental Discovery Logic**: Re-connecting only unlocks and notifies genuinely new discoveries, preserving existing ones with quiet harmony.
-- `[x]` **Graceful Rate-Limit & Network Resilience**: Friendly fallback if GitHub API rate limit is reached, gracefully switching to peaceful offline honors.
-- `[x]` **Poetic Language Artifacts**: Custom poetic artifacts for Rust (Iron Lantern), Python (Bamboo Inkwell), TypeScript (Stone Path), JavaScript (Firefly), Go (Courier Boat), C/C++ (Granite Pillar), HTML/CSS (Shoji Screen).
-- `[x]` **Effortless Unlink / Solitude Option**: One-click "Return to Solitude" action in the Shrine to disconnect cleanly.
+- `[ ]` Terrain (procedural heightfield, hills, riverbank carve).
+- `[ ]` Water (river/canal, custom shader).
+- `[ ]` Vegetation (instanced GLB placement by biome).
+- `[ ]` Village (procedural buildings + GLB props).
+- `[ ]` Paths, campfire spot, scenic viewpoints.
+- `[ ]` Lighting/camera established for the scene.
 
 ---
 
-## 10. Phase 5: Polish & Deployment Readiness `[x]`
+## Phase 4: Player & Interaction `[ ]`
 
-- `[x]` **Atmospheric Title / Welcome Screen**: Opening modal with Barakamon philosophy and Japanese/Malayalam typography, guaranteeing seamless user-gesture unlock for Web Audio API.
-- `[x]` **Mobile Touch D-Pad**: Automatic touch detection with responsive on-screen directional controls emitting bridge events.
-- `[x]` **Camera Perspective Zoom Slider**: Smooth real-time isometric camera zoom control (1.0x to 1.8x) wired from Settings modal to Phaser scene.
-- `[x]` **Reduced Motion Accessibility**: Particle emitter pause/resume honoring `prefers-reduced-motion` and user settings.
-- `[x]` **Universal Static Deployment**: Configured `base: './'` in `vite.config.ts` for instant GitHub Pages / static host readiness.
-- `[x]` **Full Verification**: 0 TypeScript errors on `vue-tsc`, clean production Vite build in 5.26s.
+- `[ ]` Stylized 3D player (procedural low-poly humanoid; no rigged GLB in pack).
+- `[ ]` Movement (WASD/arrows, accel/decel, terrain-aware, collision).
+- `[ ]` Camera polish (1P↔3P toggle, follow distance, sit camera).
+- `[ ]` Interactions (sit on bench, sit by campfire).
+- `[ ]` Campfire experience (flames, smoke, warm light, crackle, sit anim).
+
+---
+
+## Phase 5: Living World `[ ]`
+
+- `[ ]` Time system (sunrise→night, sun/ambient shifts).
+- `[ ]` Weather (clear/cloudy/rain/mist; rain particles, fog, wet look).
+- `[ ]` Seasons (spring/summer/monsoon/autumn/winter; palette + particles).
+- `[ ]` NPCs (3-4 peaceful villagers with routines + idle/walk).
+- `[ ]` Audio (procedural Web Audio: birds, water, wind, rain, campfire, crickets; volume sliders).
+
+---
+
+## Phase 6: Persistence & GitHub `[ ]`
+
+- `[ ]` Dexie schema + repositories.
+- `[ ]` Player/world/settings persistence.
+- `[ ]` GitHub interpreter (gradual discovery, milestones → keepsakes).
+- `[ ]` Offline mode.
+
+---
+
+## Phase 7: Asset Workshop (dev-only) `[ ]`
+
+- `[ ]` Live Three.js preview (category, params, seed, lighting).
+- `[ ]` GLB export via GLTFExporter (fallback JSON).
+
+---
+
+## Phase 8: UI (Vue 3) & HUD `[ ]`
+
+- `[ ]` Main menu, settings, pause, GitHub connection, about.
+- `[ ]` Settings (graphics/audio/controls/accessibility/camera).
+- `[ ]` Pinia stores (game/settings/player/world/github).
+
+---
+
+## Phase 9: Optimization, Build, Deploy `[ ]`
+
+- `[ ]` Instanced meshes, LOD, frustum culling, lazy loading, disposal audit.
+- `[ ]` Offline test, production build, subpath deploy (GitHub Pages/Cloudflare Pages/Netlify).
