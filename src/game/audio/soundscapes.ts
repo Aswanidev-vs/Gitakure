@@ -14,6 +14,7 @@ export class SoundscapeEngine {
   private campfireGain: GainNode | null = null;
   private musicGain: GainNode | null = null;
   private sfxGain: GainNode | null = null;
+  private rainGain: GainNode | null = null;
 
   // Active generators
   private timerHandles: number[] = [];
@@ -55,6 +56,11 @@ export class SoundscapeEngine {
       this.sfxGain = this.ctx.createGain();
       this.sfxGain.gain.setValueAtTime(0.7, this.ctx.currentTime);
       this.sfxGain.connect(this.masterGain);
+
+      // Rain / Monsoon channel
+      this.rainGain = this.ctx.createGain();
+      this.rainGain.gain.setValueAtTime(0.0, this.ctx.currentTime);
+      this.rainGain.connect(this.masterGain);
 
       this.startContinuousAmbience();
     } catch {
@@ -131,6 +137,20 @@ export class SoundscapeEngine {
     whiteNoiseSource.connect(waterFilter);
     waterFilter.connect(this.ambientGain);
     whiteNoiseSource.start(0);
+
+    // Dedicated Rain / Monsoon noise loop
+    if (this.rainGain) {
+      const rainSource = this.ctx.createBufferSource();
+      rainSource.buffer = noiseBuffer;
+      rainSource.loop = true;
+      const rainFilter = this.ctx.createBiquadFilter();
+      rainFilter.type = 'bandpass';
+      rainFilter.frequency.setValueAtTime(1100, this.ctx.currentTime);
+      rainFilter.Q.setValueAtTime(1.2, this.ctx.currentTime);
+      rainSource.connect(rainFilter);
+      rainFilter.connect(this.rainGain);
+      rainSource.start(0);
+    }
 
     // Periodic calm folk chimes (every 8 to 15s)
     this.timerHandles.push(
@@ -238,25 +258,71 @@ export class SoundscapeEngine {
   }
 
   /**
-   * Footstep rustle on grass/stone
+   * Set ambient weather soundscape
    */
-  public playFootstep(): void {
+  public setWeather(weather: 'sunny' | 'sakura_breeze' | 'gentle_rain' | 'starlight_mist' | 'monsoon' | 'clear'): void {
+    if (!this.ctx || !this.rainGain) return;
+    const t = this.ctx.currentTime;
+    let targetRain = 0;
+    if (weather === 'gentle_rain') {
+      targetRain = 0.28;
+    } else if (weather === 'monsoon') {
+      targetRain = 0.55;
+    } else if (weather === 'sakura_breeze') {
+      targetRain = 0.05;
+    }
+    this.rainGain.gain.setTargetAtTime(this.isMuted ? 0 : targetRain, t, 0.5);
+  }
+
+  /**
+   * Footstep rustle on grass, stone, wood, or water
+   */
+  public playFootstep(terrain: 'grass' | 'stone' | 'wood' | 'water' = 'grass'): void {
     if (this.isMuted || !this.ensureRunning() || !this.ctx || !this.sfxGain) return;
     const t = this.ctx.currentTime;
 
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
 
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(65 + Math.random() * 18, t);
-    gain.gain.setValueAtTime(0.035, t);
-    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
-
-    osc.connect(gain);
-    gain.connect(this.sfxGain);
-
-    osc.start(t);
-    osc.stop(t + 0.07);
+    if (terrain === 'wood') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(220 + Math.random() * 30, t);
+      gain.gain.setValueAtTime(0.06, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+      osc.connect(gain);
+      gain.connect(this.sfxGain);
+      osc.start(t);
+      osc.stop(t + 0.09);
+    } else if (terrain === 'stone') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(360 + Math.random() * 50, t);
+      gain.gain.setValueAtTime(0.04, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+      osc.connect(gain);
+      gain.connect(this.sfxGain);
+      osc.start(t);
+      osc.stop(t + 0.05);
+    } else if (terrain === 'water') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(480, t);
+      osc.frequency.exponentialRampToValueAtTime(180, t + 0.09);
+      gain.gain.setValueAtTime(0.08, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.11);
+      osc.connect(gain);
+      gain.connect(this.sfxGain);
+      osc.start(t);
+      osc.stop(t + 0.12);
+    } else {
+      // Grass / soil
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(70 + Math.random() * 20, t);
+      gain.gain.setValueAtTime(0.04, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+      osc.connect(gain);
+      gain.connect(this.sfxGain);
+      osc.start(t);
+      osc.stop(t + 0.07);
+    }
   }
 
   /**

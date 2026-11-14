@@ -77,5 +77,16 @@ Status legend: `[x]` done and verified · `[~]` in progress · `[ ]` not started
 - `[x]` **Channel 1 (Ambience)**: Flowing canal water, wind through palms, rain, night crickets.
 - `[x]` **Channel 2 (Campfire)**: Crackling timber pops and embers.
 - `[x]` **Channel 3 (Peaceful Chimes)**: Procedural Japanese Koto (Hirajoshi) & Kerala temple (Mohanam) pentatonic bells.
-- `[x]` **Channel 4 (SFX)**: Footsteps on earth/stone, sitting rustle.
+- `[x]` **Channel 4 (SFX)**: Footsteps varied by terrain (grass, stone, wood, water), sitting rustle.
 - `[x]` **Volume Sliders**: Independent controls for Master, Ambience, and SFX in Settings.
+
+---
+
+## 7. Phase 2: World Polish `[x]`
+
+- `[x]` **True Isometric NPC Wandering**: Master Ren, Devaki Amma, Appu, Kuro the Cat, and White Heron stroll within wander radius and pause.
+- `[x]` **Seasonal & Dynamic Weather Particle System**: Reacts to weather/season with cherry blossoms, rain, winter snow, and night fireflies.
+- `[x]` **Terrain-Aware Footsteps**: Differentiated acoustic response for wood bridge, veranda, stone shrine path, water splash, and grass.
+- `[x]` **Campfire Embers & Sitting Glow**: Rising spark particles, warm ambient tint on player when resting by the fire.
+- `[x]` **Gentle Wind Through Trees**: Organic swaying sinusoidal tweens across all coconut palms, sakura, bamboo, and banana plants.
+- `[x]` **Canal Water Shimmer & Expanding Ripples**: Shimmering water tiles and gentle expanding water ring animations.
