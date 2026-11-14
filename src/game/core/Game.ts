@@ -7,6 +7,15 @@ import { SceneManager } from '@/game/rendering/SceneManager';
 import { CameraController } from '@/game/rendering/CameraController';
 import { Lighting } from '@/game/rendering/Lighting';
 import { loadModel } from '@/game/assets/AssetManager';
+import { createCoconutPalm } from '@/game/procedural/vegetation/palm';
+import { createBamboo } from '@/game/procedural/vegetation/bamboo';
+import { createSakura } from '@/game/procedural/vegetation/sakura';
+import { createPine } from '@/game/procedural/vegetation/pine';
+import { createRock, createGrassTuft, createFlowerCluster, createBush } from '@/game/procedural/props';
+import { createHouse } from '@/game/procedural/buildings/house';
+import { createTorii } from '@/game/procedural/buildings/torii';
+import { createBridge } from '@/game/procedural/buildings/bridge';
+import { Rng } from '@/utils/rng';
 import { DEFAULT_SETTINGS, type GameSettings, type PlayerState, type WorldState } from '@/types';
 
 /**
@@ -115,6 +124,73 @@ export class Game {
       // Non-fatal in Phase 1; logged so the missing file is visible.
       console.warn('Phase 1: placeholder GLB failed to load; ground-only scene.');
     }
+
+    // Phase 2: scatter procedural vegetation to prove the generators.
+    const rng = new Rng(12345);
+    for (let i = 0; i < 6; i++) {
+      const a = rng.range(0, Math.PI * 2);
+      const d = rng.range(5, 18);
+      const palm = createCoconutPalm({ seed: 100 + i, curvature: rng.range(0.1, 0.5) });
+      palm.position.set(Math.cos(a) * d, 0, Math.sin(a) * d);
+      scene.add(palm);
+    }
+    for (let i = 0; i < 4; i++) {
+      const a = rng.range(0, Math.PI * 2);
+      const d = rng.range(6, 16);
+      const bamboo = createBamboo({ seed: 200 + i });
+      bamboo.position.set(Math.cos(a) * d, 0, Math.sin(a) * d);
+      scene.add(bamboo);
+    }
+    const sakura = createSakura({ seed: 300 });
+    sakura.position.set(4, 0, 6);
+    scene.add(sakura);
+    const pine = createPine({ seed: 400 });
+    pine.position.set(-5, 0, -6);
+    scene.add(pine);
+
+    for (let i = 0; i < 10; i++) {
+      const a = rng.range(0, Math.PI * 2);
+      const d = rng.range(3, 20);
+      const rock = createRock({ seed: 500 + i, radius: rng.range(0.3, 0.9) });
+      rock.position.set(Math.cos(a) * d, 0.1, Math.sin(a) * d);
+      scene.add(rock);
+    }
+    for (let i = 0; i < 30; i++) {
+      const a = rng.range(0, Math.PI * 2);
+      const d = rng.range(2, 22);
+      const tuft = createGrassTuft({ seed: 600 + i });
+      tuft.position.set(Math.cos(a) * d, 0, Math.sin(a) * d);
+      scene.add(tuft);
+    }
+    for (let i = 0; i < 8; i++) {
+      const a = rng.range(0, Math.PI * 2);
+      const d = rng.range(4, 18);
+      const flowers = createFlowerCluster({ seed: 700 + i, color: i % 2 === 0 ? 'flowerPink' : 'flowerYellow' });
+      flowers.position.set(Math.cos(a) * d, 0, Math.sin(a) * d);
+      scene.add(flowers);
+    }
+    for (let i = 0; i < 5; i++) {
+      const a = rng.range(0, Math.PI * 2);
+      const d = rng.range(5, 16);
+      const bush = createBush({ seed: 800 + i });
+      bush.position.set(Math.cos(a) * d, 0, Math.sin(a) * d);
+      scene.add(bush);
+    }
+
+    // A tiny village cluster: two houses, a torii, a bridge.
+    const houseA = createHouse({ style: 'japanese', seed: 901 });
+    houseA.position.set(9, 0, -2);
+    scene.add(houseA);
+    const houseB = createHouse({ style: 'kerala', seed: 902 });
+    houseB.position.set(-9, 0, -6);
+    scene.add(houseB);
+    const torii = createTorii({ seed: 903 });
+    torii.position.set(0, 0, -14);
+    scene.add(torii);
+    const bridge = createBridge({ seed: 904 });
+    bridge.position.set(-2, 0.1, 10);
+    bridge.rotation.y = Math.PI / 2;
+    scene.add(bridge);
 
     this.lighting.setTimeOfDay(this.world.time);
     const p = new THREE.Vector3(...this.player.position);

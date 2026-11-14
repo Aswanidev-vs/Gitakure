@@ -56,18 +56,23 @@ Status legend: `[x]` done and verified · `[~]` in progress · `[ ]` not started
 
 ---
 
-## Phase 2: Asset Pipeline & Registry `[~]`
+## Phase 2: Asset Pipeline & Registry `[x]`
 
 - `[x]` Asset registry catalog (all 80 GLBs) — done in Phase 1.
 - `[x]` GLTFLoader pipeline + caching — done in Phase 1.
-- `[~]` Runtime `measureRegistry()` smoke verification across all assets.
-- `[ ]` Procedural geometry utilities (`src/game/procedural/`).
-- `[ ]` Initial procedural trees, rocks, grass, paths.
-- `[ ]` Developer asset workshop.
+- `[x]` Runtime `measureRegistry()` (fills dimensions, poly count, embedded-texture/animations status on load).
+- `[x]` Registry + utils unit tests (16 tests passing).
+- `[x]` **Procedural materials palette** — `src/game/procedural/materials.ts` (shared low-poly `MeshStandardMaterial`s; cohesive palette).
+- `[x]` **Geometry helpers** — `src/game/procedural/geometry.ts` (taperedCylinder, box, icoRock, cone, blob, transform, mergeColored, shared vertex-color material).
+- `[x]` **Vegetation generators** — `src/game/procedural/vegetation/`: coconut palm (curved trunk, radial drooping fronds, coconuts), bamboo (segmented stalks + nodes), sakura (pink canopy blobs + branches), pine (stacked conical layers).
+- `[x]` **Props generators** — `src/game/procedural/props.ts`: rock (jittered icosahedron), grass tuft, flower cluster, bush.
+- `[x]` **Building generators** — `src/game/procedural/buildings/`: house (Japanese/Kerala gabled roof + veranda + posts), torii (Shinto gate), bridge (arched plank deck + rails).
+- `[x]` All generators wired into the placeholder scene (palms, bamboo, sakura, pine, rocks, grass, flowers, bushes, 2 houses, torii, bridge) to prove the pipeline.
+- `[x]` **Verification**: `bun run typecheck` clean, `bun run build` clean (49 modules), `bun run test` 16/16 pass, dev server launches, scene renders.
 
 ---
 
-## Phase 3: First Environment `[ ]`
+## Phase 3: First Environment `[~]`
 
 - `[ ]` Terrain (procedural heightfield, hills, riverbank carve).
 - `[ ]` Water (river/canal, custom shader).
