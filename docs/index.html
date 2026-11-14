@@ -3,56 +3,70 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#141c1f" />
-    <title>Gitakure — a valley that remembers</title>
+    <meta name="theme-color" content="#0d1618" />
+    <title>Gitakure — a little world, shaped by your journey</title>
+    <link rel="icon" href="favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
     <meta
       name="description"
-      content="Gitakure is a peaceful countryside RPG that runs in the browser. You live in a secluded valley, and it grows in step with your real GitHub history."
+      content="Gitakure is a peaceful low-poly countryside that runs in your browser. Explore a village, sit by a river, watch the monsoon, and spend time by a campfire. Built with Three.js and Vue."
     />
+    <meta property="og:title" content="Gitakure — a little world, shaped by your journey" />
+    <meta
+      property="og:description"
+      content="A peaceful low-poly countryside in the browser. Three.js, Vue, no backend."
+    />
+    <meta property="og:type" content="website" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..600&family=Karla:wght@300;400;500;600&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <a class="skip" href="#valley">Skip to the valley</a>
+    <a class="skip" href="#walk">Skip to the valley</a>
 
     <header class="bar">
       <a class="mark" href="#top">
-        <svg class="mark-glyph" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-          <path d="M8 15V8" stroke="currentColor" stroke-width="1.4" stroke-linecap="square" />
-          <path d="M8 9C8 6 5.6 4.4 3 4.4c0 2.9 2.2 4.6 5 4.6Z" fill="currentColor" />
-          <path d="M8 7.4c0-2.5 2-3.9 4.2-3.9 0 2.5-1.8 3.9-4.2 3.9Z" fill="currentColor" opacity=".62" />
-        </svg>
-        <span>gitakure</span>
+        <img class="mark-glyph" src="logo.png" width="28" height="28" alt="" aria-hidden="true" />
+        <span>Gitakure</span>
       </a>
       <nav class="bar-nav" aria-label="Sections">
-        <a href="#how">How it works</a>
-        <a class="bar-cta" href="https://github.com/Aswanidev-vs/Gitakure" target="_blank" rel="noopener noreferrer">
-          GitHub<span class="sr-only"> (opens in a new tab)</span>
-        </a>
+        <a href="#practice">Practice</a>
+        <a href="#valley-built">The valley</a>
+        <a href="#run">Run it</a>
+        <a
+          class="bar-cta"
+          href="https://github.com/Aswanidev-vs/Gitakure"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Source<span class="sr-only"> (opens in a new tab)</span></a
+        >
       </nav>
     </header>
 
     <main id="top">
-      <section class="hero" id="valley">
+      <section class="hero" id="walk">
         <canvas
-          id="valley-canvas"
+          id="valley"
           role="img"
-          aria-label="A pixel-art valley at dusk: a river runs below cedar and broadleaf trees, mist drifts across the water, and a villager walks the near bank."
+          aria-label="A river valley at dusk: layered ridgelines, a treeline of conifers, mist drifting over the water, and reeds on the near bank."
         >
-          A pixel-art valley at dusk, with a river, trees, drifting mist and a villager walking the bank.
+          A river valley at dusk, with ridgelines, conifers, drifting mist, a river, and reeds on the
+          near bank.
         </canvas>
-        <div class="hero-scrim" aria-hidden="true"></div>
 
         <div class="hero-body">
-          <h1>A valley that<br />remembers</h1>
+          <p class="hero-place"><span class="dot" aria-hidden="true"></span>River valley, evening</p>
+          <h1>A little world,<br /><em>shaped by your journey</em></h1>
           <p class="hero-sub">
-            Gitakure is a peaceful countryside RPG that runs in the browser. You live in a secluded
-            valley, and it quietly grows in step with your real GitHub history.
+            Gitakure is a peaceful low-poly countryside that runs in your browser. There is nothing to
+            complete. Explore a village, sit by the water, watch the monsoon come in, and stay by the
+            fire as long as you like.
           </p>
           <div class="hero-actions">
             <a
@@ -60,171 +74,257 @@
               href="https://github.com/Aswanidev-vs/Gitakure"
               target="_blank"
               rel="noopener noreferrer"
-              >Visit the repo<span class="sr-only"> (opens in a new tab)</span></a
+              >Get the source<span class="sr-only"> (opens in a new tab)</span></a
             >
-            <a class="btn btn-quiet" href="#how">How it works</a>
+            <a class="btn btn-quiet" href="#practice">Why it exists</a>
           </div>
-          <p class="hero-meta">2,581 sprites across 11 boards, and 18 villagers to meet.</p>
+          <p class="hero-meta">
+            Three.js and Vue. No backend, no account, no dedicated GPU.
+          </p>
         </div>
 
         <p class="hero-hint" aria-hidden="true">Scroll to walk north</p>
       </section>
 
-      <section class="band band-quiet" id="how">
+      <section class="band" id="practice">
         <div class="wrap">
-          <p class="num">01</p>
-          <div class="split">
-            <div class="split-text">
-              <h2>The valley is the game</h2>
+          <header class="band-head">
+            <p class="place"><span class="place-mark" aria-hidden="true">01</span>The near bank</p>
+            <h2>Most games ask for your attention.<br />This one gives it back.</h2>
+          </header>
+
+          <div class="creed">
+            <ol class="creed-list">
+              <li>
+                <span class="creed-term">Rest is the mechanic</span>
+                <span class="creed-def"
+                  >There are no energy meters, no streaks, no crops that die. Sitting down is a real
+                  activity with its own animation, camera and sound.</span
+                >
+              </li>
+              <li>
+                <span class="creed-term">Nothing is missable</span>
+                <span class="creed-def"
+                  >The valley does not decay while you are away and nothing expires. A quiet week is
+                  not a failure state.</span
+                >
+              </li>
+              <li>
+                <span class="creed-term">Atmosphere over objectives</span>
+                <span class="creed-def"
+                  >Weather, light and sound carry the experience. There is no quest log, no XP, no
+                  ranking.</span
+                >
+              </li>
+            </ol>
+
+            <aside class="creed-note">
               <p>
-                A village, a river, a forest, rice fields, a forgotten shrine, and a small hideaway.
-                Gitakure is a game first.
+                The valley is a real 3D scene, not a stack of sprites. Terrain is generated from a
+                seeded heightfield; the river is a shader; trees, houses and props are built from
+                geometry at runtime.
               </p>
               <p>
-                GitHub activity is not a dashboard. It is the reason the orchard behind the shrine
-                exists, why a particular villager moved here, and which paths are open.
+                It runs on integrated graphics: pixel ratio capped at 1.5, shadows off by default, one
+                directional light, instanced and merged geometry.
               </p>
-            </div>
-            <figure class="shoji">
-              <canvas id="vignette" width="360" height="300" role="img"
-                aria-label="A villager standing on a bank in front of two broadleaf trees.">
-                A villager on a bank in front of two broadleaf trees.
-              </canvas>
-              <figcaption>The valley, drawn from the sprites the game runs on.</figcaption>
-            </figure>
+            </aside>
           </div>
         </div>
       </section>
 
-      <section class="band band-deep" id="field">
+      <section class="band band-deep" id="keepsakes">
         <div class="wrap">
-          <p class="num">02</p>
-          <div class="stack">
-            <h2>Your year, planted</h2>
+          <header class="band-head">
+            <p class="place"><span class="place-mark" aria-hidden="true">02</span>The shrine path</p>
+            <h2>Your history becomes places,<br />not a dashboard</h2>
             <p class="lede">
-              Every contribution is a planting. A quiet week is bare soil; a heavy one is a full
-              paddy. The field only ever grows from real activity, so when the API is unreachable it
-              stays exactly as it was.
+              Connect a GitHub username and Gitakure reads your public history, picks a few moments
+              that actually mean something, and turns them into objects in the world. You still have to
+              go and find them.
             </p>
-          </div>
+          </header>
 
-          <figure class="paddy">
-            <div class="paddy-head">
-              <div class="paddy-readout" id="paddy-readout" aria-hidden="true">
-                <span class="paddy-week">Week 1</span>
-                <span class="paddy-count">No plantings</span>
-              </div>
-              <div class="paddy-key" aria-hidden="true">
-                <span class="key-soil"></span>bare
-                <span class="key-leaf k1"></span>
-                <span class="key-leaf k2"></span>
-                <span class="key-leaf k3"></span>
-                <span class="key-leaf k4"></span>full
-              </div>
+          <figure class="ledger">
+            <div class="ledger-bar">
+              <p class="ledger-title">Keepsake ledger</p>
+              <p class="ledger-key" aria-hidden="true">example account</p>
             </div>
-            <div class="paddy-scroll">
-              <svg
-                id="paddy-svg"
-                class="paddy-svg"
-                role="grid"
-                aria-label="A year of contributions as a planted paddy. Use the arrow keys to move between weeks."
-                tabindex="0"
-              ></svg>
-            </div>
+            <ul class="ledger-list">
+              <li class="ledger-row">
+                <span class="ledger-glyph glyph-seed" aria-hidden="true"></span>
+                <span class="ledger-name">The First Seed</span>
+                <span class="ledger-when">your earliest commit</span>
+                <span class="ledger-where">a sapling, south meadow</span>
+              </li>
+              <li class="ledger-row">
+                <span class="ledger-glyph glyph-lantern" aria-hidden="true"></span>
+                <span class="ledger-name">River Lantern</span>
+                <span class="ledger-when">five or more repositories</span>
+                <span class="ledger-where">stone lantern, river bend</span>
+              </li>
+              <li class="ledger-row">
+                <span class="ledger-glyph glyph-scroll" aria-hidden="true"></span>
+                <span class="ledger-name">TypeScript Scroll</span>
+                <span class="ledger-when">most-used language</span>
+                <span class="ledger-where">a marked stone, village edge</span>
+              </li>
+              <li class="ledger-row">
+                <span class="ledger-glyph glyph-star" aria-hidden="true"></span>
+                <span class="ledger-name">Constellation</span>
+                <span class="ledger-when">a five-day rhythm</span>
+                <span class="ledger-where">an obelisk on the ridge</span>
+              </li>
+              <li class="ledger-row ledger-row-quiet">
+                <span class="ledger-glyph glyph-stone" aria-hidden="true"></span>
+                <span class="ledger-name">Quiet Solitude</span>
+                <span class="ledger-when">a season with no commits</span>
+                <span class="ledger-where">a smooth pebble, riverbed</span>
+              </li>
+            </ul>
             <figcaption>
-              An example year. In the game this field is your own history, read once you connect it.
+              Three keepsakes are offered at a time. Each is discovered by walking to it, not by
+              reading a report. An empty history earns a keepsake too.
             </figcaption>
           </figure>
+
+          <div class="privacy">
+            <h3>What connecting actually does</h3>
+            <dl class="privacy-grid">
+              <div>
+                <dt>Reads</dt>
+                <dd>Public profile, public repositories, and a sample of commits from your five most
+                  recently pushed repos.</dd>
+              </div>
+              <div>
+                <dt>Requests</dt>
+                <dd>Public read scope only. Gitakure never asks for repository write access.</dd>
+              </div>
+              <div>
+                <dt>Stores</dt>
+                <dd>Keepsakes and player state in your own IndexedDB. A token, if you supply one, is
+                  used for that request and never written to storage.</dd>
+              </div>
+              <div>
+                <dt>Requires</dt>
+                <dd>Nothing. The valley is complete offline; GitHub only adds keepsakes.</dd>
+              </div>
+            </dl>
+          </div>
         </div>
       </section>
 
-      <section class="band band-quiet" id="villagers">
+      <section class="band" id="valley-built">
         <div class="wrap">
-          <p class="num">03</p>
-          <div class="stack">
-            <h2>Eighteen people live here</h2>
+          <header class="band-head">
+            <p class="place"><span class="place-mark" aria-hidden="true">03</span>The north field</p>
+            <h2>Built from geometry,<br />not from a modelling suite</h2>
             <p class="lede">
-              Villagers have names, routines and something to say. Each one is drawn from the same
-              measured sheets the valley runs on.
+              There is no Blender in this workflow and no dedicated GPU. Every tree, house and prop is
+              generated in TypeScript at runtime, so adding to the valley is a code change rather than
+              an art pipeline.
             </p>
-          </div>
-          <ul class="cast" id="cast"></ul>
-        </div>
-      </section>
+          </header>
 
-      <section class="band band-deep" id="built">
-        <div class="wrap">
-          <p class="num">04</p>
-          <div class="stack">
-            <h2>Built from what is already there</h2>
-            <p class="lede">
-              The valley is generated, not authored. That makes it cheap to grow and impossible to
-              fake.
-            </p>
-          </div>
-
-          <div class="notes">
-            <article class="note">
-              <h3>Determinism</h3>
+          <div class="specs">
+            <article class="spec">
+              <h3>Two kinds of asset</h3>
               <p>
-                World generation is a pure function of seed and world state. The seed is fixed for
-                the valley, so the same save always rebuilds the same village.
+                Eighty Quaternius nature models (CC0) ship with the project and are served locally as
+                GLB. Everything else is procedural: palms, bamboo, sakura, pine, Japanese and Kerala
+                houses, torii, bridges, rocks, grass, flowers.
               </p>
               <p>
-                A sync only ever adds, through an explicit and idempotent step. Replaying one cannot
-                double-apply it.
+                A coconut palm is a curved trunk tube with drooping frond cones and optional coconuts.
+                A bamboo cluster is segmented stalks with visible nodes. Both take a seed, so no two
+                instances match.
               </p>
             </article>
-            <article class="note">
-              <h3>Three ways to connect</h3>
-              <p>In increasing order of access.</p>
-              <ol class="methods">
-                <li>
-                  <span class="m-name">Public username</span>
-                  <span class="m-desc">No token, reads only public contribution data.</span>
-                </li>
-                <li>
-                  <span class="m-name">Personal access token</span>
-                  <span class="m-desc">
-                    Supplied by you, held in memory for the session only, never written to local
-                    storage, IndexedDB or logs.
-                  </span>
-                </li>
-                <li>
-                  <span class="m-name">GitHub App or OAuth</span>
-                  <span class="m-desc">
-                    Authorisation-code flow, handled by a backend you run yourself. No client secret
-                    is ever embedded in the bundle.
-                  </span>
-                </li>
-              </ol>
-              <p class="aside">Gitakure never requests repository write scope.</p>
+
+            <article class="spec">
+              <h3>The ground is real</h3>
+              <p>
+                Terrain is a seeded heightfield: rolling hills, a river channel carved along a sine
+                curve, and a flattened plateau where the village sits. It is vertex-coloured by height
+                and slope — sand at the waterline, grass on the flats, rock on the steep faces.
+              </p>
+              <p>
+                A single <code>heightAt(x, z)</code> sampler places every object and keeps the player
+                on the surface. The river is a custom shader with scrolling noise and a fresnel tint.
+              </p>
             </article>
+
+            <article class="spec">
+              <h3>Living, on a budget</h3>
+              <p>
+                A ten-minute day moves the sun through colour and intensity. Weather cycles clear,
+                cloudy, rain and mist, driving a particle column and the fog density. Five seasons
+                rotate on their own clock.
+              </p>
+              <p>
+                Audio is synthesised in the browser — filtered noise for wind and water, chirps for
+                birds and crickets. There are no audio files to download.
+              </p>
+            </article>
+
+            <article class="spec">
+              <h3>Two cameras, one key</h3>
+              <p>
+                The default is an elevated third-person follow with damping and obstruction handling.
+                Press <kbd>V</kbd> and it becomes first-person. Follow distance, field of view and
+                camera mode are all in settings and persist between sessions.
+              </p>
+              <p>
+                Movement is camera-relative with acceleration and deceleration, and the character is
+                procedural too — built from primitives, animated in code.
+              </p>
+            </article>
+          </div>
+
+          <div class="workshop-note">
+            <h3>There is a workshop, and it is not for players</h3>
+            <p>
+              A separate dev-only page renders any procedural asset with live sliders for height,
+              thickness, colour, counts and seed, then exports it as GLB. It is a separate build entry,
+              so it never ships in the player bundle.
+            </p>
           </div>
         </div>
       </section>
 
-      <section class="band band-quiet" id="run">
+      <section class="band band-deep" id="run">
         <div class="wrap">
-          <p class="num">05</p>
-          <div class="split">
-            <div class="split-text">
-              <h2>Run it locally</h2>
-              <p>Requires Bun 1.4 or newer. The asset build step measures the sprite boards first.</p>
-              <p class="aside">
-                Nothing is assumed about the sprites. Every frame is measured on the way in.
-              </p>
-            </div>
+          <header class="band-head">
+            <p class="place"><span class="place-mark" aria-hidden="true">04</span>The gate</p>
+            <h2>Run it locally</h2>
+            <p class="lede">Requires Bun 1.4 or newer. There is no asset build step and no setup beyond installing.</p>
+          </header>
+
+          <div class="run-grid">
             <div class="term">
               <div class="term-bar">
                 <span class="term-dots" aria-hidden="true"><i></i><i></i><i></i></span>
                 <button class="term-copy" id="copy" type="button">Copy</button>
               </div>
-              <pre class="term-body" id="commands"><code><span class="c"># install, measure sprites, run</span>
+              <pre class="term-body" id="commands"><code><span class="c"># install and run</span>
 bun install
-bun run assets
 bun run dev</code></pre>
               <p class="term-out">Serves on localhost:5173</p>
+            </div>
+
+            <div class="keys">
+              <h3>Controls</h3>
+              <dl class="key-list">
+                <div><dt><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></dt><dd>Walk</dd></div>
+                <div><dt><kbd>Shift</kbd></dt><dd>Run</dd></div>
+                <div><dt><kbd>E</kbd></dt><dd>Sit, rest, interact</dd></div>
+                <div><dt><kbd>V</kbd></dt><dd>Switch camera</dd></div>
+                <div><dt><kbd>Shift</kbd>+<kbd>Space</kbd></dt><dd>Pause</dd></div>
+              </dl>
+              <p class="keys-note">
+                Other commands: <code>bun run build</code>, <code>bun run preview</code>,
+                <code>bun run test</code>, <code>bun run typecheck</code>.
+              </p>
             </div>
           </div>
         </div>
@@ -234,17 +334,19 @@ bun run dev</code></pre>
     <footer class="foot">
       <div class="wrap foot-row">
         <p class="foot-mark">
-          <svg class="mark-glyph" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-            <path d="M8 15V8" stroke="currentColor" stroke-width="1.4" stroke-linecap="square" />
-            <path d="M8 9C8 6 5.6 4.4 3 4.4c0 2.9 2.2 4.6 5 4.6Z" fill="currentColor" />
-            <path d="M8 7.4c0-2.5 2-3.9 4.2-3.9 0 2.5-1.8 3.9-4.2 3.9Z" fill="currentColor" opacity=".62" />
-          </svg>
-          a valley that remembers
+          <img class="mark-glyph" src="logo.png" width="22" height="22" alt="" aria-hidden="true" />
+          Gitakure
         </p>
         <p class="foot-note">
-          Code in this repository is original. The sprite boards were supplied with the project.
+          Nature models by
+          <a href="https://quaternius.com/" target="_blank" rel="noopener noreferrer">Quaternius</a>
+          (CC0). Built with Three.js, Vue, Pinia and Dexie.
         </p>
-        <a class="foot-link" href="https://github.com/Aswanidev-vs/Gitakure" target="_blank" rel="noopener noreferrer"
+        <a
+          class="foot-link"
+          href="https://github.com/Aswanidev-vs/Gitakure"
+          target="_blank"
+          rel="noopener noreferrer"
           >Aswanidev-vs/Gitakure<span class="sr-only"> (opens in a new tab)</span></a
         >
       </div>

@@ -1,20 +1,18 @@
 {
   "name": "gitakure",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
-  "description": "Gitakure — a 3D countryside valley whose growth is shaped by your real GitHub history.",
+  "description": "Gitakure — a peaceful low-poly 3D countryside shaped by your journey.",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview --port 4173",
     "typecheck": "vue-tsc --noEmit",
-    "test": "vitest run",
-    "assets": "bun run scripts/build-assets.ts"
+    "test": "vitest run"
   },
   "dependencies": {
     "dexie": "^4.4.7",
-    "phaser": "^4.2.1",
     "pinia": "^4.1.0",
     "three": "0.187.0",
     "vue": "3.5.45"
@@ -22,6 +20,8 @@
   "devDependencies": {
     "@types/three": "0.187.0",
     "@vitejs/plugin-vue": "6.0.11",
+    "three-mesh-bvh": "^0.9.1",
+    "troika-three-text": "^0.52.4",
     "typescript": "5.9.3",
     "vite": "7.3.8",
     "vitest": "3.2.4",

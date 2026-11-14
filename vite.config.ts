@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 
 export default defineConfig({
   base: './',
@@ -16,9 +17,13 @@ export default defineConfig({
     target: 'es2022',
     chunkSizeWarningLimit: 2500,
     rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        workshop: resolve(__dirname, 'workshop.html'),
+      },
       output: {
         manualChunks: {
-          phaser: ['phaser'],
+          three: ['three'],
           vue: ['vue'],
         },
       },

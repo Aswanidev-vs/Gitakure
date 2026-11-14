@@ -1,297 +1,170 @@
-import { addDiscovery, addJournalEntry, type WorldDiscovery, type JournalEntry } from '@/storage/db';
+import { githubService, type GithubRepo, type Milestone, type NormalizedHistory } from '@/services/github/github-service';
 
-export interface GitHubRepoSummary {
-  name: string;
-  description: string | null;
-  createdAt: string;
-  updatedAt: string;
-  language: string | null;
-  stargazersCount: number;
-  fork: boolean;
+// GitHub history interpreter (spec §16). Normalizes a user's history into a
+// small set of meaningful milestones, prioritizes them, and converts selected
+// ones into environmental keepsakes. No productivity ranking — GitHub
+// provides memories; exploration gives the player time to discover them.
+
+export interface InterpretResult {
+  history: NormalizedHistory;
+  /** The subset of milestones to place in the world now (gradual discovery). */
+  discoveries: Milestone[];
 }
 
-export interface InterpretedDevelopmentHistory {
-  username: string;
-  totalRepos: number;
-  firstRepoYear: number;
-  yearsOfJourney: number;
-  favoriteLanguages: string[];
-  keyMilestones: {
-    year: number;
-    title: string;
-    narrative: string;
-    repoName?: string;
-  }[];
-  generatedDiscoveries: WorldDiscovery[];
-  openingJournalEntry: JournalEntry;
-  rateLimited?: boolean;
-}
+export class GithubInterpreter {
+  /** Fetch and normalize a user's public GitHub history. */
+  async interpret(username: string, token?: string): Promise<InterpretResult> {
+    const [user, repos] = await Promise.all([
+      githubService.fetchUser(username, token),
+      githubService.fetchRepos(username, token),
+    ]);
 
-const LANGUAGE_POETICS: Record<string, { title: string; desc: string; icon: string }> = {
-  Rust: {
-    title: 'The Iron-Forged Temple Lantern',
-    desc: 'Forged with exactness and endurance, cast from iron that never yields to corrosion.',
-    icon: '🏮',
-  },
-  Python: {
-    title: 'The Carved Green Bamboo Inkwell',
-    desc: 'Gentle, expressive, and flowing like clean mountain water through bamboo chutes.',
-    icon: '🎋',
-  },
-  TypeScript: {
-    title: 'The Interlocking Stone Garden Path',
-    desc: 'Every stone measured and laid with deliberate symmetry to guide feet through the mist.',
-    icon: '🪨',
-  },
-  JavaScript: {
-    title: 'The Wandering Canal Firefly',
-    desc: 'Quick, adaptable, and lighting up unexpected corners of the evening.',
-    icon: '✨',
-  },
-  Go: {
-    title: 'The Swift Canal Courier Vallam',
-    desc: 'Trim, purposeful, and cutting cleanly through backwater tides with zero unnecessary baggage.',
-    icon: '🛶',
-  },
-  'C++': {
-    title: 'The Ancient Chiseled Foundation Pillar',
-    desc: 'Solid granite quarried from deep mountain bedrock, holding the whole ceiling without complaint.',
-    icon: '🏛️',
-  },
-  C: {
-    title: 'The Deep Mountain Spring',
-    desc: 'The original pure source from which all the valley rivers eventually flowed.',
-    icon: '💧',
-  },
-  HTML: {
-    title: 'The Washi Paper Sliding Screen',
-    desc: 'Diffusing sunlight into warm softness, framing the world with clean structure.',
-    icon: '📜',
-  },
-  CSS: {
-    title: 'The Indigo Silk Tapestry',
-    desc: 'Dyed with backwater indigo and madder root, draping the timber frames in quiet elegance.',
-    icon: '🧵',
-  },
-};
-
-export class GitHubHistoryInterpreter {
-  /**
-   * Fetches public repositories & profile info safely with no backend.
-   */
-  public static async fetchAndInterpret(username: string): Promise<InterpretedDevelopmentHistory> {
-    const cleanUser = username.trim().replace(/^@/, '');
-    if (!cleanUser) {
-      return this.generateDefaultTranquilHistory('Valley Wanderer');
+    // Sample commits from a few representative repos to estimate activity
+    // without overwhelming the API (rate-limit friendly).
+    const sampleRepos = this.groupRepos(repos).slice(0, 5);
+    let totalCommits = 0;
+    const commitDates: string[] = [];
+    for (const repo of sampleRepos) {
+      try {
+        const commits = await githubService.fetchCommits(username, repo.name, token);
+        totalCommits += commits.length;
+        for (const c of commits) {
+          if (c.date) commitDates.push(c.date);
+        }
+      } catch {
+        // Skip repos that error (empty, rate-limited, etc.).
+      }
     }
 
-    try {
-      // 1. Fetch user profile
-      const userRes = await fetch(`https://api.github.com/users/${encodeURIComponent(cleanUser)}`);
-      if (userRes.status === 403 || userRes.status === 429) {
-        const fallback = this.generateDefaultTranquilHistory(cleanUser);
-        fallback.rateLimited = true;
-        return fallback;
-      }
-      if (!userRes.ok) {
-        return this.generateDefaultTranquilHistory(cleanUser);
-      }
-      const userData = await userRes.json();
+    commitDates.sort();
+    const firstCommitDate = commitDates[0] ?? null;
+    const languages = this.collectLanguages(repos);
+    const longestStreak = this.computeStreak(commitDates);
+    const displayName = user.name ?? user.login;
 
-      // 2. Fetch public repos (up to 100)
-      const reposRes = await fetch(
-        `https://api.github.com/users/${encodeURIComponent(cleanUser)}/repos?sort=created&direction=asc&per_page=100`
-      );
-      const repos: GitHubRepoSummary[] = reposRes.ok ? await reposRes.json() : [];
+    const history: NormalizedHistory = {
+      username: user.login,
+      displayName,
+      repoCount: repos.length,
+      totalCommits,
+      firstCommitDate,
+      longestStreak,
+      languages,
+      milestones: [],
+    };
 
-      return this.interpret(cleanUser, userData, repos);
-    } catch {
-      return this.generateDefaultTranquilHistory(cleanUser);
-    }
+    const milestones = this.buildMilestones(history);
+    history.milestones = milestones;
+
+    // Gradual discovery: pick the top 3 by weight, never more.
+    const discoveries = [...milestones].sort((a, b) => b.weight - a.weight).slice(0, 3);
+
+    return { history, discoveries };
   }
 
-  /**
-   * Transforms raw GitHub data into poetic, pressure-free countryside memories.
-   */
-  public static interpret(
-    username: string,
-    userData: { public_repos?: number; created_at?: string; name?: string },
-    repos: GitHubRepoSummary[]
-  ): InterpretedDevelopmentHistory {
-    const currentYear = new Date().getFullYear();
-    const accountCreatedYear = userData.created_at ? new Date(userData.created_at).getFullYear() : currentYear;
-    const yearsOfJourney = Math.max(1, currentYear - accountCreatedYear + 1);
+  /** Group repositories by language into meaningful clusters (spec §16.3). */
+  private groupRepos(repos: GithubRepo[]): GithubRepo[] {
+    // Sort by activity (recent push) and size to surface the most meaningful.
+    return [...repos].sort((a, b) => {
+      const pa = new Date(a.pushed_at).getTime();
+      const pb = new Date(b.pushed_at).getTime();
+      return pb - pa;
+    });
+  }
 
-    // Collect language counts
-    const langMap: Record<string, number> = {};
-    repos.forEach((r) => {
-      if (r.language) {
-        langMap[r.language] = (langMap[r.language] || 0) + 1;
+  private collectLanguages(repos: GithubRepo[]): string[] {
+    const set = new Set<string>();
+    for (const r of repos) {
+      if (r.language) set.add(r.language);
+    }
+    return [...set].slice(0, 8);
+  }
+
+  /** Longest run of consecutive days with commits (computed from sampled dates). */
+  private computeStreak(dates: string[]): number {
+    if (dates.length === 0) return 0;
+    const days = new Set(dates.map((d) => d.slice(0, 10)));
+    const sorted = [...days].sort();
+    let longest = 1;
+    let current = 1;
+    for (let i = 1; i < sorted.length; i++) {
+      const prev = new Date(sorted[i - 1]!);
+      const cur = new Date(sorted[i]!);
+      const diffDays = Math.round((cur.getTime() - prev.getTime()) / 86400000);
+      if (diffDays === 1) {
+        current++;
+        longest = Math.max(longest, current);
+      } else if (diffDays > 1) {
+        current = 1;
       }
-    });
-    const sortedLangs = Object.entries(langMap)
-      .sort((a, b) => b[1] - a[1])
-      .map(([lang]) => lang)
-      .slice(0, 3);
+    }
+    return longest;
+  }
 
-    // 1. First Repository: The "Old Seed"
-    const firstRepo = repos.length > 0 ? repos[0] : null;
-    const firstRepoYear = firstRepo ? new Date(firstRepo.createdAt).getFullYear() : accountCreatedYear;
+  /** Convert normalized history into environmental memory milestones. */
+  private buildMilestones(history: NormalizedHistory): Milestone[] {
+    const milestones: Milestone[] = [];
 
-    // 2. Identify 2-4 subtle milestones (never flood the player)
-    const milestones: InterpretedDevelopmentHistory['keyMilestones'] = [];
-
-    milestones.push({
-      year: firstRepoYear,
-      title: 'The First Spark of Curiosity',
-      narrative: firstRepo
-        ? `In ${firstRepoYear}, the first repository '${firstRepo.name}' was planted like a wild bamboo sprout. A journey had quietly begun.`
-        : `A path opened in ${firstRepoYear}. Every craft begins with a single curious step.`,
-      repoName: firstRepo?.name,
-    });
-
-    if (yearsOfJourney >= 3) {
+    // 0 commits → quiet solitude keepsake.
+    if (history.totalCommits === 0) {
       milestones.push({
-        year: firstRepoYear + Math.floor(yearsOfJourney / 2),
-        title: 'Deep Roots in the Soil',
-        narrative: `Across multiple seasons, patience grew. Solutions were contemplated, libraries explored, and quiet perseverance became habit.`,
+        id: 'quiet-solitude',
+        kind: 'quiet-solitude',
+        label: 'Quiet Solitude',
+        detail: 'A season of rest. The valley remembers your stillness.',
+        weight: 10,
+      });
+      return milestones;
+    }
+
+    // First commit → the first seed (always the most meaningful).
+    if (history.firstCommitDate) {
+      milestones.push({
+        id: 'first-seed',
+        kind: 'first-seed',
+        label: 'The First Seed',
+        detail: `Planted on ${history.firstCommitDate.slice(0, 10)}. Every journey begins with a single commit.`,
+        weight: 100,
       });
     }
 
-    // 3. Convert into 3 initial gradual discoveries (not 100!)
-    const discoveries: WorldDiscovery[] = [
-      {
-        id: `gh_first_seed_${username}`,
-        title: firstRepo ? `Keepsake of ${firstRepo.name}` : 'A Weathered Wooden Compass',
-        subtitle: `Memory of Year ${firstRepoYear}`,
-        category: 'github_memory',
-        discoveredAt: new Date().toISOString(),
-        description: `Resting under the eaves of the tea cottage lies a carved talisman inscribed with ${firstRepoYear}. It carries the quiet gratitude of learning something new for the first time.`,
-        quote: 'The seeds of yesterday cast long, comforting shadows today.',
-        icon: '🌱',
-      },
-      {
-        id: `gh_journey_lantern_${username}`,
-        title: 'The Traveler’s River Lantern',
-        subtitle: `${yearsOfJourney} Seasons of Craft`,
-        category: 'architecture',
-        discoveredAt: new Date().toISOString(),
-        description: `Floating beside the Kerala backwater canal, this oil lantern burns gently. Its flame signifies that no effort made in passion is ever forgotten.`,
-        quote: 'Like water carving a canal, patience builds a world without noise.',
-        icon: '🏮',
-      },
-    ];
-
-    if (sortedLangs.length > 0) {
-      const topLang = sortedLangs[0];
-      const poetic = LANGUAGE_POETICS[topLang] || {
-        title: `The Scroll of ${topLang}`,
-        desc: `Bound with bamboo cord in the village archive, these notes record thoughts written in the syntax of ${topLang}.`,
-        icon: '📜',
-      };
-
-      discoveries.push({
-        id: `gh_craft_tome_${username}_${topLang}`,
-        title: poetic.title,
-        subtitle: `Language of Craft · ${topLang}`,
-        category: 'folklore',
-        discoveredAt: new Date().toISOString(),
-        description: poetic.desc,
-        quote: 'Every language is a different window looking out at the same mountain.',
-        icon: poetic.icon,
+    // Language milestone → a scroll for the most-used language.
+    const primaryLang = history.languages[0];
+    if (primaryLang) {
+      milestones.push({
+        id: `language-${primaryLang.toLowerCase()}`,
+        kind: 'language-scroll',
+        label: `${primaryLang} Scroll`,
+        detail: `A keepsake for your work in ${primaryLang}.`,
+        weight: 60 + history.languages.length,
       });
     }
 
-    const openingJournalEntry: JournalEntry = {
-      id: `journal_welcome_${Date.now()}`,
-      title: `Arrival at Gitakure Valley — ${username}`,
-      createdAt: new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }),
-      season: 'Monsoon Spring',
-      weather: 'Gentle Rain',
-      timeOfDay: 'Dusk',
-      text: `Left the clatter of keyboards and notifications behind. The sound of rain dripping from the tharavadu clay tiles blends with the wind rustling through Japanese bamboo. Here, nobody asks what I shipped today. The river simply flows.`,
-      source: 'github_memory',
-    };
-
-    return {
-      username,
-      totalRepos: repos.length || userData.public_repos || 0,
-      firstRepoYear,
-      yearsOfJourney,
-      favoriteLanguages: sortedLangs,
-      keyMilestones: milestones,
-      generatedDiscoveries: discoveries,
-      openingJournalEntry,
-    };
-  }
-
-  /**
-   * Default serene memory for offline or disconnected players.
-   */
-  public static generateDefaultTranquilHistory(name = 'Valley Wanderer'): InterpretedDevelopmentHistory {
-    const openingJournalEntry: JournalEntry = {
-      id: `journal_solitude_${Date.now()}`,
-      title: 'A Letter from the Tea Porch',
-      createdAt: new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }),
-      season: 'Monsoon Spring',
-      weather: 'Sakura Breeze',
-      timeOfDay: 'Morning',
-      text: `Sat on the veranda with hot spiced tea. Watched an egret land on the bank of the backwater canal. No deadlines, no backlogs, no unread tickets. Just the slow drift of clouds over the Western Ghats and the smell of wet earth.`,
-      source: 'valley_chronicle',
-    };
-
-    const discoveries: WorldDiscovery[] = [
-      {
-        id: 'default_sanctuary_stone',
-        title: 'The Moss-Covered Stepping Stone',
-        subtitle: 'Foundations of Stillness',
-        category: 'nature',
-        discoveredAt: new Date().toISOString(),
-        description: 'Smooth river rock laid where the canal meets the bamboo grove. Cool beneath the feet, weathered by decades of rainfall.',
-        quote: 'Rest is the ground from which all genuine creations rise.',
-        icon: '🪨',
-      },
-      {
-        id: 'default_kettuvallam',
-        title: 'The Moored Wooden Country Boat',
-        subtitle: 'Resting on the Canal',
-        category: 'architecture',
-        discoveredAt: new Date().toISOString(),
-        description: 'A traditional wooden vallam tied gently to the coconut palm. It sways with the rhythm of the water, waiting for nowhere in particular.',
-        quote: 'There is no haste in a river that knows where it is going.',
-        icon: '🛶',
-      },
-    ];
-
-    return {
-      username: name,
-      totalRepos: 0,
-      firstRepoYear: new Date().getFullYear() - 2,
-      yearsOfJourney: 2,
-      favoriteLanguages: ['Silence', 'Curiosity'],
-      keyMilestones: [
-        {
-          year: new Date().getFullYear(),
-          title: 'The Choice to Rest',
-          narrative: 'Decided to step into Gitakure and let the mind wander freely.',
-        },
-      ],
-      generatedDiscoveries: discoveries,
-      openingJournalEntry,
-    };
-  }
-
-  /**
-   * Persists discoveries & journal entries to IndexedDB smoothly.
-   * Returns count of truly new discoveries unlocked.
-   */
-  public static async applyToLocalWorld(history: InterpretedDevelopmentHistory): Promise<{ newCount: number; isRepeat: boolean }> {
-    let newCount = 0;
-    for (const disc of history.generatedDiscoveries) {
-      const isNew = await addDiscovery(disc);
-      if (isNew) newCount++;
+    // Many repos → a river lantern.
+    if (history.repoCount >= 5) {
+      milestones.push({
+        id: 'river-lantern',
+        kind: 'river-lantern',
+        label: 'River Lantern',
+        detail: `${history.repoCount} repositories, each a lantern on the water.`,
+        weight: 50,
+      });
     }
-    await addJournalEntry(history.openingJournalEntry);
-    return { newCount, isRepeat: newCount === 0 };
+
+    // Long streak → a constellation.
+    if (history.longestStreak >= 5) {
+      milestones.push({
+        id: 'constellation',
+        kind: 'constellation',
+        label: `Constellation of ${history.longestStreak} Days`,
+        detail: `A ${history.longestStreak}-day rhythm of steady work, written in the stars.`,
+        weight: 40,
+      });
+    }
+
+    return milestones;
   }
 }
+
+export type { Milestone };
+export { githubService };
