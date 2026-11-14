@@ -125,4 +125,39 @@ dependency on external CDNs.
 
 ---
 
+## Credits
+
+**Environment models by [Quaternius](https://quaternius.com/)** — released under
+[CC0](https://creativecommons.org/publicdomain/zero/1.0/), so they are free to
+use, modify and redistribute with no attribution required. Credited here as a
+matter of course, not obligation.
+
+The eighty GLB files in `glb/` come from two Quaternius packs:
+
+| Pack | Used for |
+|---|---|
+| Ultimate Stylized Nature | Trees, bushes, rocks, plants, pebbles, stepping-stone paths, flowers, grass, mushrooms |
+| Stylized Nature MegaKit | Additional trees, plants and environmental variety |
+
+Files were used as downloaded; nothing was re-modelled. Per-asset source pack,
+path and intended use are recorded in `src/game/assets/AssetRegistry.ts`.
+
+Everything else — terrain, water shader, coconut palms, bamboo, sakura, pine,
+Japanese and Kerala houses, torii, bridges, props, the player character, and all
+audio — is generated at runtime from code in this repository. No other third-party
+art or audio assets are included.
+
+### Built with
+
+[Three.js](https://threejs.org/) · [Vue 3](https://vuejs.org/) ·
+[Pinia](https://pinia.vuejs.org/) · [Dexie.js](https://dexie.org/) ·
+[Vite](https://vite.dev/) · [Bun](https://bun.sh/) ·
+[Vitest](https://vitest.dev/)
+
+Typefaces: [Fraunces](https://fonts.google.com/specimen/Fraunces) and
+[Karla](https://fonts.google.com/specimen/Karla), both under the SIL Open Font
+License.
+
+---
+
 **Gitakure is not a game about getting more work done. It is a place where you can forget about work for a while.**
