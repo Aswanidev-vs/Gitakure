@@ -95,17 +95,20 @@ Status legend: `[x]` done and verified · `[~]` in progress · `[ ]` not started
 
 ---
 
-## Phase 5: Living World `[~]`
+## Phase 5: Living World `[x]`
 
-- `[ ]` Time system (sunrise→night, sun/ambient shifts).
-- `[ ]` Weather (clear/cloudy/rain/mist; rain particles, fog, wet look).
-- `[ ]` Seasons (spring/summer/monsoon/autumn/winter; palette + particles).
-- `[ ]` NPCs (3-4 peaceful villagers with routines + idle/walk).
-- `[ ]` Audio (procedural Web Audio: birds, water, wind, rain, campfire, crickets; volume sliders).
+- `[x]` **TimeSystem** — `src/game/systems/TimeSystem.ts`. Normalized day fraction advancing over a configurable cycle (default 10 min), derives named time-of-day phase (sunrise/morning/afternoon/sunset/evening/night), day counter, `setTime`.
+- `[x]` **WeatherSystem** — `src/game/systems/WeatherSystem.ts`. Cycles clear→cloudy→lightRain→mist→heavyRain; rain particle column (Points) that follows the camera; fog density per weather; reduced-motion support; `onWeatherChange` listener.
+- `[x]` **SeasonSystem** — `src/game/systems/SeasonSystem.ts`. Cycles spring/summer/monsoon/autumn/winter (4 min each); exposes foliage tint color + season-change listener.
+- `[x]` **NPC entity** — `src/game/entities/NPC.ts`. Peaceful low-poly villager that wanders within a radius of home, pauses, breathes when idle. 3 villagers spawned (Ren, Amma, Appu) near the village/river.
+- `[x]` **AudioSystem** — `src/game/systems/AudioSystem.ts`. Procedural Web Audio (no files): wind (filtered noise + gust LFO), water (bandpass noise), rain (highpass noise, weather-driven), birds (day chirps), crickets (night chirps). Separate master/ambience/sfx gains. Starts on first user gesture (autoplay policy).
+- `[x]` Game wired: TimeSystem drives lighting + snapshot; WeatherSystem drives rain + fog; SeasonSystem exposes season; NPCs update each tick; AudioSystem responds to time + weather.
+- `[x]` Command handlers updated: `setAudio` → AudioSystem, `setReducedMotion` → campfire + weather, `setTimeOfDay` → TimeSystem, `setSeason` → SeasonSystem.
+- `[x]` **Verification**: `bun run typecheck` clean, `bun run build` clean, 16/16 tests pass, dev server launches.
 
 ---
 
-## Phase 6: Persistence & GitHub `[ ]`
+## Phase 6: Persistence & GitHub `[~]`
 
 - `[ ]` Dexie schema + repositories.
 - `[ ]` Player/world/settings persistence.
