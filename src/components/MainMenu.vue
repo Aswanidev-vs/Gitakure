@@ -12,6 +12,14 @@ const showAbout = ref(false);
 <template>
   <div class="main-menu">
     <div class="menu-card">
+      <img
+        class="menu-logo"
+        src="/brand/logo-96.png"
+        width="96"
+        height="96"
+        alt=""
+        aria-hidden="true"
+      />
       <h1 class="title">Gitakure</h1>
       <p class="tagline">A little world, shaped by your journey.</p>
 
@@ -70,6 +78,15 @@ const showAbout = ref(false);
   padding: 2.5rem;
   max-width: 420px;
 }
+.menu-logo {
+  display: block;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 1.1rem;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
 .title {
   font-size: 3rem;
   margin: 0;

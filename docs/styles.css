@@ -179,10 +179,18 @@ kbd {
 }
 
 .mark-glyph {
-  width: 19px;
-  height: 19px;
+  width: 28px;
+  height: 28px;
   flex: none;
-  color: var(--paddy);
+  border-radius: 6px;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.foot-mark .mark-glyph {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
 }
 
 .bar-nav {

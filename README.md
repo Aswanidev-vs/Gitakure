@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="public/brand/logo-square.png" width="160" alt="Gitakure" />
+</p>
+
 # Gitakure
 
 A peaceful low-poly 3D countryside that runs in the browser. Explore a village,
@@ -146,6 +150,22 @@ Everything else — terrain, water shader, coconut palms, bamboo, sakura, pine,
 Japanese and Kerala houses, torii, bridges, props, the player character, and all
 audio — is generated at runtime from code in this repository. No other third-party
 art or audio assets are included.
+
+### Brand assets
+
+The Gitakure logo is supplied artwork, used unmodified apart from trimming,
+resizing and palette reduction. Sized variants live in `public/brand/`:
+
+| File | Use |
+|---|---|
+| `logo-square.png` | Source, trimmed to a 1024×1024 square |
+| `logo-512.png`, `logo-192.png` | PWA and manifest icons |
+| `apple-touch-icon.png` | iOS home screen |
+| `favicon.ico`, `favicon-32.png`, `favicon-16.png` | Browser tabs |
+| `site.webmanifest` | Install metadata |
+
+`docs/` carries its own smaller copies because it is published as a standalone
+static folder with no build step.
 
 ### Built with
 
