@@ -16,6 +16,7 @@ Status legend: `[x]` done and verified · `[~]` in progress · `[ ]` not started
 | **Language & Bundler** | TypeScript + Vite + Bun | `tsconfig.json`, `vite.config.ts`, `bun.lock` |
 | **Local Persistence** | IndexedDB via Dexie.js | `src/storage/db.ts` |
 | **Decoupled Bridge** | `gameBridge` | `src/bridge/game-bridge.ts` |
+| **Pixel Art Generator** | Procedural Bespoke Art Engine | `src/game/art/pixel-art-factory.ts` |
 
 ---
 

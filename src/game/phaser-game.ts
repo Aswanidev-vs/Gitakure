@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene';
 import { IsoValleyScene } from './scenes/IsoValleyScene';
-import { ValleyScene } from './scenes/ValleyScene';
 
 export function createPhaserGame(): Phaser.Game {
   const config: Phaser.Types.Core.GameConfig = {
@@ -23,7 +22,7 @@ export function createPhaserGame(): Phaser.Game {
         debug: false,
       },
     },
-    scene: [BootScene, IsoValleyScene, ValleyScene],
+    scene: [BootScene, IsoValleyScene],
   };
 
   return new Phaser.Game(config);
