@@ -122,14 +122,18 @@ Status legend: `[x]` done and verified · `[~]` in progress · `[ ]` not started
 
 ---
 
-## Phase 7: Asset Workshop (dev-only) `[~]`
+## Phase 7: Asset Workshop (dev-only) `[x]`
 
-- `[ ]` Live Three.js preview (category, params, seed, lighting).
-- `[ ]` GLB export via GLTFExporter (fallback JSON).
+- `[x]` **AssetWorkshop** — `src/game/tools/AssetWorkshop.ts`. Live Three.js preview with OrbitControls, param sliders, seed, lighting preview (hemisphere + sun + ground), GLB export via GLTFExporter (binary download). Categories: palm, bamboo, sakura, pine, house.
+- `[x]` **Workshop UI** — `src/components/Workshop.vue`. Control panel with category selector, per-asset param sliders, regenerate, export GLB.
+- `[x]` **Workshop entry** — `src/app/workshop.ts` + `workshop.html`. Separate multi-page build entry; NOT loaded in the player build. Access via `/workshop.html` in dev.
+- `[x]` **Settings modal** — `src/components/SettingsModal.vue`. Graphics (quality, shadows), camera (mode, follow distance), audio (master/ambience/sfx/music), accessibility (reduced motion, show time/weather). Wired to Game via bridge; wired into App.vue HUD.
+- `[x]` **Vite multi-page build** — `vite.config.ts` rollup input for `index.html` + `workshop.html`.
+- `[x]` **Verification**: `bun run typecheck` clean, `bun run build` clean (both entries emitted), 16/16 tests pass, dev server launches.
 
 ---
 
-## Phase 8: UI (Vue 3) & HUD `[ ]`
+## Phase 8: Polish & Optimization `[~]`
 
 - `[ ]` Main menu, settings, pause, GitHub connection, about.
 - `[ ]` Settings (graphics/audio/controls/accessibility/camera).

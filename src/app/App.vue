@@ -4,10 +4,12 @@ import { Game } from '@/game/core/Game';
 import { gameBridge } from '@/game/core/GameBridge';
 import type { CameraMode, GameSettings } from '@/types';
 import { useSettingsStore } from '@/stores/settingsStore';
+import SettingsModal from '@/components/SettingsModal.vue';
 import '@/styles.css';
 
 const settingsStore = useSettingsStore();
 const settings: GameSettings = settingsStore.settings;
+const showSettings = ref(false);
 
 const container = ref<HTMLDivElement | null>(null);
 const game = ref<Game | null>(null);
@@ -45,6 +47,11 @@ function onKey(e: KeyboardEvent) {
   }
 }
 
+function onSettingsChange(next: GameSettings) {
+  Object.assign(settings, structuredClone(next));
+  settingsStore.settings = structuredClone(next);
+}
+
 watch(
   () => settings.camera.followDistance,
   (d) => gameBridge.emit({ type: 'setFollowDistance', distance: d }),
@@ -80,6 +87,7 @@ onBeforeUnmount(() => {
           {{ cameraMode === 'thirdPerson' ? 'Third-person' : 'First-person' }} · V
         </button>
         <button class="hud-btn" @click="togglePause">Pause</button>
+        <button class="hud-btn" @click="showSettings = true">Settings</button>
       </div>
       <div class="hud-right">
         <span class="stat">{{ fps }} fps · {{ drawCalls }} calls</span>
@@ -87,6 +95,8 @@ onBeforeUnmount(() => {
     </div>
 
     <div v-if="prompt" class="interaction-pill">{{ prompt }}</div>
+
+    <SettingsModal :settings="settings" :open="showSettings" @close="showSettings = false" @change="onSettingsChange" />
   </div>
 </template>
 
