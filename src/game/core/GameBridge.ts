@@ -34,7 +34,10 @@ export type GameCommand =
   | { type: 'setSeason'; season: string }
   | { type: 'setWeather'; weather: string }
   | { type: 'saveState' }
-  | { type: 'teleport'; x: number; y: number; z: number };
+  | { type: 'teleport'; x: number; y: number; z: number }
+  | { type: 'connectGithub'; username: string; token?: string }
+  | { type: 'disconnectGithub' }
+  | { type: 'spawnGithubKeepsake' };
 
 type Handler<T> = (payload: T) => void;
 

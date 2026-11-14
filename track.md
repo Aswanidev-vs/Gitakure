@@ -108,16 +108,21 @@ Status legend: `[x]` done and verified · `[~]` in progress · `[ ]` not started
 
 ---
 
-## Phase 6: Persistence & GitHub `[~]`
+## Phase 6: Persistence & GitHub `[x]`
 
-- `[ ]` Dexie schema + repositories.
-- `[ ]` Player/world/settings persistence.
-- `[ ]` GitHub interpreter (gradual discovery, milestones → keepsakes).
-- `[ ]` Offline mode.
+- `[x]` **Dexie schema** — `src/database/db.ts`. Versioned IndexedDB (v1): `gameState`, `settings`, `memories` (discovered + undiscovered keepsakes), `githubMeta`.
+- `[x]` **Repositories** — `src/database/repositories/index.ts`. Typed accessors: `gameStateRepo` (load/save player+world), `settingsRepo` (load/save), `memoriesRepo` (list/undiscovered/put/markDiscovered/has/clear), `githubMetaRepo` (get/upsert/clear).
+- `[x]` **GitHub service** — `src/services/github/github-service.ts`. Browser-safe public-data fetch (no token stored); optional PAT for private repos with opt-in; rate-limit-friendly error handling.
+- `[x]` **GitHub interpreter** — `src/github/interpreter/github-interpreter.ts`. Normalizes history (user, repos, sampled commits), groups repos by activity, collects languages, computes longest streak, builds milestones (first-seed, river-lantern, language-scroll, constellation, quiet-solitude) with weights; **gradual discovery** picks top 3.
+- `[x]` **GitHubWorldSystem** — `src/game/systems/GitHubWorldSystem.ts`. Converts milestones into procedural keepsakes (sapling, stone lantern with glow, scroll slab, obelisk, pebble); spawns them near the village as the player explores; `spawnNext()` for gradual discovery.
+- `[x]` **Persistence wired into Game** — loads saved settings + player/world on `start()`; auto-saves every 15s + on `saveState` command; `connectGithub`/`disconnectGithub`/`spawnGithubKeepsake` commands.
+- `[x]` **GitHub store** — `src/stores/githubStore.ts`. Connects the interpreter + Dexie + Vue; tracks connected state, pending discoveries, discovered list; `markDiscovered`/`disconnect`.
+- `[x]` **Offline mode** — if Dexie/GitHub unavailable, the game starts fresh; GitHub is optional (spec §16).
+- `[x]` **Verification**: `bun run typecheck` clean, `bun run build` clean (Dexie code-split into its own chunk), 16/16 tests pass, dev server launches.
 
 ---
 
-## Phase 7: Asset Workshop (dev-only) `[ ]`
+## Phase 7: Asset Workshop (dev-only) `[~]`
 
 - `[ ]` Live Three.js preview (category, params, seed, lighting).
 - `[ ]` GLB export via GLTFExporter (fallback JSON).

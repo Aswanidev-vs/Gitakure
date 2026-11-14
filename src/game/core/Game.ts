@@ -16,7 +16,9 @@ import { TimeSystem } from '@/game/systems/TimeSystem';
 import { WeatherSystem } from '@/game/systems/WeatherSystem';
 import { SeasonSystem } from '@/game/systems/SeasonSystem';
 import { AudioSystem } from '@/game/systems/AudioSystem';
+import { GitHubWorldSystem } from '@/game/systems/GitHubWorldSystem';
 import { Rng } from '@/utils/rng';
+import { gameStateRepo, settingsRepo } from '@/database/repositories';
 import { DEFAULT_SETTINGS, type GameSettings, type PlayerState, type WorldState } from '@/types';
 
 /**
@@ -41,7 +43,9 @@ export class Game {
   private weatherSystem: WeatherSystem;
   private seasonSystem: SeasonSystem;
   private audioSystem: AudioSystem;
+  private githubWorld: GitHubWorldSystem;
   private npcs: NPC[] = [];
+  private lastSaveTime = 0;
 
   private settings: GameSettings;
   private playerState: PlayerState;
@@ -80,6 +84,8 @@ export class Game {
     this.weatherSystem = new WeatherSystem(this.sceneManager.scene);
     this.seasonSystem = new SeasonSystem();
     this.audioSystem = new AudioSystem(settings.audio);
+    this.githubWorld = new GitHubWorldSystem(this.worldManager.terrain);
+    this.sceneManager.scene.add(this.githubWorld.group);
     this.weatherSystem.onWeatherChange((w) => {
       this.world.weather = w;
       this.bridge.send({ type: 'snapshot', snapshot: this.buildSnapshot() });
@@ -100,6 +106,20 @@ export class Game {
   }
 
   async start(): Promise<void> {
+    // Load persisted settings + player/world state (spec §17).
+    try {
+      const savedSettings = await settingsRepo.load();
+      if (savedSettings) this.settings = savedSettings;
+      const savedState = await gameStateRepo.load();
+      if (savedState) {
+        this.playerState = savedState.player;
+        this.world = savedState.world;
+        this.timeSystem.setTime(savedState.world.time);
+      }
+    } catch {
+      // Dexie unavailable — start fresh.
+    }
+
     await this.buildWorld();
     this.running = true;
     this.loop.start();
@@ -264,6 +284,13 @@ export class Game {
 
     // Audio responds to time + weather.
     this.audioSystem.update(dt, this.timeSystem.phase, this.weatherSystem.current);
+
+    // Auto-save every 15s (spec §17).
+    this.lastSaveTime += dt;
+    if (this.lastSaveTime >= 15) {
+      this.lastSaveTime = 0;
+      void gameStateRepo.save(this.playerState, this.world).catch(() => {});
+    }
   }
 
   private lastTime = performance.now();
@@ -362,8 +389,38 @@ export class Game {
         this.playerState.position = [cmd.x, cmd.y, cmd.z];
         break;
       case 'saveState':
-        // Dexie persistence wired in Phase 6.
+        void gameStateRepo.save(this.playerState, this.world).catch(() => {});
+        void settingsRepo.save(this.settings).catch(() => {});
         break;
+      case 'connectGithub':
+        void this.connectGithub(cmd.username, cmd.token);
+        break;
+      case 'disconnectGithub':
+        this.githubWorld.dispose();
+        break;
+      case 'spawnGithubKeepsake':
+        this.spawnNextKeepsake();
+        break;
+    }
+  }
+
+  private async connectGithub(username: string, token?: string): Promise<void> {
+    try {
+      const { GithubInterpreter } = await import('@/github/interpreter/github-interpreter');
+      const interpreter = new GithubInterpreter();
+      const result = await interpreter.interpret(username, token);
+      this.githubWorld.setPending(result.discoveries);
+      this.spawnNextKeepsake();
+    } catch {
+      // Non-fatal: GitHub is optional (spec §16).
+    }
+  }
+
+  private spawnNextKeepsake(): void {
+    const villageCenter = this.worldManager.village.group.position;
+    const placement = this.githubWorld.spawnNext(villageCenter);
+    if (placement) {
+      this.lastInteraction = `[E] ${placement.milestone.label}`;
     }
   }
 
@@ -387,6 +444,7 @@ export class Game {
     this.npcs.length = 0;
     this.weatherSystem.dispose();
     this.audioSystem.dispose();
+    this.githubWorld.dispose();
     this.worldManager.dispose();
     this.renderer.dispose();
     this.sceneManager.dispose();
