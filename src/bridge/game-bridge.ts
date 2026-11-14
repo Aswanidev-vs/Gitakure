@@ -13,7 +13,11 @@ export type BridgeEventType =
   | 'request_shrine'
   | 'request_settings'
   | 'camera_zoom'
-  | 'settings_updated';
+  | 'settings_updated'
+  | 'fishing_start'
+  | 'fishing_catch'
+  | 'fishing_end'
+  | 'interaction_prompt';
 
 export type BridgeListener<T = unknown> = (payload: T) => void;
 

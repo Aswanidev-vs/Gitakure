@@ -2,7 +2,8 @@ import Phaser from 'phaser';
 import { IsometricHelper } from '@/game/camera/isometric';
 import { gameBridge } from '@/bridge/game-bridge';
 import { soundscapes } from '@/game/audio/soundscapes';
-import type { DialogueNode, WeatherType, Season } from '@/types';
+import { addDiscovery, addJournalEntry } from '@/storage/db';
+import type { DialogueNode, WeatherType, Season, TimeOfDay } from '@/types';
 
 interface InteractiveSeat {
   gx: number;
@@ -23,7 +24,30 @@ interface ValleyNPC {
   wanderRadius: number;
   isMoving: boolean;
   timer: number;
-  dialogue: DialogueNode;
+  getDialogue: (timeOfDay: TimeOfDay) => DialogueNode;
+}
+
+interface ForageSpot {
+  id: string;
+  title: string;
+  subtitle: string;
+  category: 'nature' | 'architecture' | 'github_memory' | 'folklore';
+  icon: string;
+  gx: number;
+  gy: number;
+  description: string;
+  atlas: string;
+  frame: string;
+  sprite?: Phaser.GameObjects.Sprite;
+  collected: boolean;
+}
+
+interface SwimmingFish {
+  sprite: Phaser.GameObjects.Sprite;
+  gx: number;
+  gy: number;
+  speed: number;
+  direction: number;
 }
 
 export class IsoValleyScene extends Phaser.Scene {
@@ -32,6 +56,9 @@ export class IsoValleyScene extends Phaser.Scene {
   private playerGx = 10;
   private playerGy = 10;
   private isSitting = false;
+  private isFishing = false;
+  private fishingTimer = 0;
+  private fishingBobber?: Phaser.GameObjects.Arc;
 
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasdKeys!: {
@@ -42,6 +69,7 @@ export class IsoValleyScene extends Phaser.Scene {
     SHIFT: Phaser.Input.Keyboard.Key;
     E: Phaser.Input.Keyboard.Key;
     C: Phaser.Input.Keyboard.Key;
+    F: Phaser.Input.Keyboard.Key;
   };
 
   private campfireSprite?: Phaser.GameObjects.Sprite;
@@ -55,6 +83,10 @@ export class IsoValleyScene extends Phaser.Scene {
   private treeSprites: Phaser.GameObjects.Sprite[] = [];
   private waterRipples: Phaser.GameObjects.Arc[] = [];
   private npcs: ValleyNPC[] = [];
+  private forageSpots: ForageSpot[] = [];
+  private swimmingFishes: SwimmingFish[] = [];
+  private butterflies: Phaser.GameObjects.Sprite[] = [];
+
   private interactiveSeats: InteractiveSeat[] = [
     { gx: 12, gy: 8, name: 'Riverside Campfire Log', type: 'campfire' },
     { gx: 6, gy: 4, name: 'Tea Porch Veranda', type: 'veranda' },
@@ -64,6 +96,8 @@ export class IsoValleyScene extends Phaser.Scene {
   private stepTimer = 0;
   private currentWeather: WeatherType = 'sakura_breeze';
   private currentSeason: Season = 'spring';
+  private currentTimeOfDay: TimeOfDay = 'dusk';
+  private lastPromptText = '';
 
   constructor() {
     super({ key: 'IsoValleyScene' });
@@ -79,24 +113,30 @@ export class IsoValleyScene extends Phaser.Scene {
     // 3. Campfire by the backwater canal with flame & embers
     this.setupCampfire();
 
-    // 4. Village NPCs with Barakamon Rural Spirit & wandering behaviors
+    // 4. Wildlife (Swimming Fish, Butterflies, Heron)
+    this.setupWildlife();
+
+    // 5. Forageable Valley Keepsakes
+    this.setupForageables();
+
+    // 6. Village NPCs with Barakamon Rural Spirit & wandering behaviors
     this.setupNPCs();
 
-    // 5. Player in Isometric Space
+    // 7. Player in Isometric Space
     this.setupPlayer();
 
-    // 6. Camera Follow
+    // 8. Camera Follow
     this.cameras.main.startFollow(this.playerSprite, true, 0.08, 0.08);
     this.cameras.main.setZoom(1.35);
     this.cameras.main.roundPixels = true;
 
-    // 7. Ambient Lighting & Weather Overlays
+    // 9. Ambient Lighting & Weather Overlays
     this.setupLightingAndWeather();
 
-    // 8. Bridge Event Listeners
+    // 10. Bridge Event Listeners
     this.setupBridgeListeners();
 
-    // 9. Input Setup
+    // 11. Input Setup
     if (this.input.keyboard) {
       this.cursors = this.input.keyboard.createCursorKeys();
       this.wasdKeys = this.input.keyboard.addKeys({
@@ -107,6 +147,7 @@ export class IsoValleyScene extends Phaser.Scene {
         SHIFT: Phaser.Input.Keyboard.KeyCodes.SHIFT,
         E: Phaser.Input.Keyboard.KeyCodes.E,
         C: Phaser.Input.Keyboard.KeyCodes.C,
+        F: Phaser.Input.Keyboard.KeyCodes.F,
       }) as typeof this.wasdKeys;
     }
 
@@ -223,18 +264,14 @@ export class IsoValleyScene extends Phaser.Scene {
 
     // 5. Coconut Palms & Banana Plants (Kerala) + Bamboo & Cherry Blossoms (Japanese)
     const flora = [
-      // Coconut Palms by the canal
       { gx: 15, gy: 5, frame: 'trees_and_vegetation_p01_r00_c04', scale: 1.2, tint: 0x98b870 },
       { gx: 15, gy: 9, frame: 'trees_and_vegetation_p01_r00_c04', scale: 1.3, tint: 0x98b870 },
       { gx: 15, gy: 15, frame: 'trees_and_vegetation_p01_r00_c04', scale: 1.2, tint: 0x98b870 },
-      // Sakura trees near shrine
       { gx: 7, gy: 1, frame: 'trees_and_vegetation_p01_r00_c00', scale: 1.1, tint: 0xffd9e6 },
       { gx: 9, gy: 1, frame: 'trees_and_vegetation_p01_r00_c00', scale: 1.1, tint: 0xffd9e6 },
-      // Bamboo grove in South
       { gx: 3, gy: 18, frame: 'trees_and_vegetation_p01_r02_c00', scale: 1.0 },
       { gx: 5, gy: 19, frame: 'trees_and_vegetation_p01_r02_c00', scale: 1.0 },
       { gx: 7, gy: 20, frame: 'trees_and_vegetation_p01_r02_c00', scale: 1.0 },
-      // Banana plants around homestead
       { gx: 4, gy: 7, frame: 'trees_and_vegetation_p01_r02_c01', scale: 0.9 },
       { gx: 11, gy: 6, frame: 'trees_and_vegetation_p01_r02_c01', scale: 0.9 },
     ];
@@ -247,7 +284,6 @@ export class IsoValleyScene extends Phaser.Scene {
       if (f.tint) sprite.setTint(f.tint);
       this.treeSprites.push(sprite);
 
-      // Phase 2 World Polish: Wind swaying through trees
       this.tweens.add({
         targets: sprite,
         angle: { from: -1.6, to: 1.6 },
@@ -282,7 +318,7 @@ export class IsoValleyScene extends Phaser.Scene {
       ease: 'Sine.easeInOut',
     });
 
-    // Phase 2 World Polish: Campfire rising spark particles
+    // Campfire rising spark particles
     this.campfireParticles = this.add.particles(pos.x, pos.y - 12, 'environmental_effects', {
       frame: 'environmental_effects_p01_r00_c02',
       speedY: { min: -35, max: -12 },
@@ -297,6 +333,145 @@ export class IsoValleyScene extends Phaser.Scene {
     this.campfireParticles.setDepth(IsometricHelper.getIsoDepth(12, 8, 9));
   }
 
+  private setupWildlife(): void {
+    // 1. Swimming Fish in the Backwater Canal
+    const fishConfigs = [
+      { gx: 18, gy: 8, speed: 18 },
+      { gx: 19, gy: 14, speed: 14 },
+      { gx: 17, gy: 17, speed: 22 },
+    ];
+
+    fishConfigs.forEach((fc) => {
+      const pos = IsometricHelper.gridToScreen(fc.gx, fc.gy);
+      const sprite = this.add.sprite(pos.x, pos.y, 'wildlife_sprite', 'wildlife_sprite_p00_r01_c00');
+      sprite.setDisplaySize(20, 12);
+      sprite.setDepth(IsometricHelper.getIsoDepth(fc.gx, fc.gy, 1));
+      sprite.setTint(0xd27850); // Warm orange river carp
+      sprite.setAlpha(0.75);
+
+      this.swimmingFishes.push({
+        sprite,
+        gx: fc.gx,
+        gy: fc.gy,
+        speed: fc.speed,
+        direction: Math.random() > 0.5 ? 1 : -1,
+      });
+
+      // Subtle water fish wobble
+      this.tweens.add({
+        targets: sprite,
+        y: pos.y + 3,
+        duration: 1200,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+    });
+
+    // 2. Fluttering Butterflies over tea gardens & banana plants
+    const butterflyPos = [
+      { gx: 5, gy: 8 },
+      { gx: 12, gy: 6 },
+    ];
+
+    butterflyPos.forEach((bp) => {
+      const pos = IsometricHelper.gridToScreen(bp.gx, bp.gy);
+      const butterfly = this.add.sprite(pos.x, pos.y - 12, 'environmental_effects', 'environmental_effects_p01_r00_c02');
+      butterfly.setDisplaySize(12, 12);
+      butterfly.setDepth(IsometricHelper.getIsoDepth(bp.gx, bp.gy, 18));
+      butterfly.setTint(0x7ad8c6); // Emerald swallowtail
+      this.butterflies.push(butterfly);
+
+      // Flutter path tween
+      this.tweens.add({
+        targets: butterfly,
+        x: pos.x + 24,
+        y: pos.y - 20,
+        duration: 2400,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+    });
+  }
+
+  private setupForageables(): void {
+    const spots: Omit<ForageSpot, 'collected'>[] = [
+      {
+        id: 'forage_bamboo',
+        title: 'Wild Bamboo Shoot (竹の子)',
+        subtitle: 'Harvested from the southern bamboo grove',
+        category: 'nature',
+        icon: '🎍',
+        gx: 4,
+        gy: 18,
+        description: 'Tender sweet bamboo shoot pushing through the rich loam. In Japanese countryside cooking, boiled gently with rice water.',
+        atlas: 'trees_and_vegetation',
+        frame: 'trees_and_vegetation_p01_r02_c00',
+      },
+      {
+        id: 'forage_ribbon',
+        title: 'Sacred Torii Ribbon (注連縄の紙垂)',
+        subtitle: 'Blessed at the Shinto-Kerala Grove',
+        category: 'folklore',
+        icon: '⛩️',
+        gx: 8,
+        gy: 2,
+        description: 'A folded white washi paper ribbon tied with mountain coconut coir string, offering peaceful protection to passing travellers.',
+        atlas: 'buildings_interiors',
+        frame: 'buildings_interiors_p00_r01_c01',
+      },
+      {
+        id: 'forage_banana',
+        title: 'Golden Nendran Banana (നേന്ത്രപ്പഴം)',
+        subtitle: 'Grown along the fertile homestead hedge',
+        category: 'nature',
+        icon: '🍌',
+        gx: 11,
+        gy: 7,
+        description: 'A ripe, naturally sweet highland banana from the family garden. Shared on banana leaf plates during rural festivals.',
+        atlas: 'trees_and_vegetation',
+        frame: 'trees_and_vegetation_p01_r02_c01',
+      },
+      {
+        id: 'forage_jasmine',
+        title: 'Fragrant Wild Jasmine (മുല്ലപ്പൂവ്)',
+        subtitle: 'Gathered near the canal stepping stone',
+        category: 'nature',
+        icon: '🌸',
+        gx: 14,
+        gy: 15,
+        description: 'Tiny white night-blooming jasmine flowers with an intoxicating sweet fragrance that drifts over the water after dusk.',
+        atlas: 'environmental_effects',
+        frame: 'environmental_effects_p01_r00_c00',
+      },
+    ];
+
+    spots.forEach((s) => {
+      const pos = IsometricHelper.gridToScreen(s.gx, s.gy);
+      const sprite = this.add.sprite(pos.x, pos.y - 6, s.atlas, s.frame);
+      sprite.setDisplaySize(20, 20);
+      sprite.setDepth(IsometricHelper.getIsoDepth(s.gx, s.gy, 6));
+
+      // Gentle floating sparkle tween
+      this.tweens.add({
+        targets: sprite,
+        y: pos.y - 12,
+        alpha: 0.85,
+        duration: 1600,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+
+      this.forageSpots.push({
+        ...s,
+        sprite,
+        collected: false,
+      });
+    });
+  }
+
   private setupNPCs(): void {
     const villagerConfigs: {
       id: string;
@@ -306,7 +481,7 @@ export class IsoValleyScene extends Phaser.Scene {
       atlas: string;
       frame: string;
       wanderRadius: number;
-      dialogue: DialogueNode;
+      getDialogue: (timeOfDay: TimeOfDay) => DialogueNode;
     }[] = [
       {
         id: 'ren',
@@ -316,18 +491,26 @@ export class IsoValleyScene extends Phaser.Scene {
         atlas: 'npc',
         frame: 'npc_p01_r00_c00',
         wanderRadius: 2,
-        dialogue: {
-          speaker: 'Master Ren (蓮先生)',
-          title: 'Former City Calligrapher',
-          portraitAtlas: 'npc',
-          portraitFrame: 'npc_p01_r00_c00',
-          text: 'In the city, I thought speed proved mastery. Here in the valley, watching the morning mist rise over the paddy, I discovered that clarity only comes when you put the brush down and listen.',
-          options: [
-            {
-              label: 'How do you spend your days here?',
-              nextText: 'Brewing green tea with fresh mountain rainwater, sweeping the veranda, and watching the clouds crawl across the hills.',
-            },
-          ],
+        getDialogue: (timeOfDay) => {
+          let text = 'In the city, I thought speed proved mastery. Here in the valley, watching the morning mist rise over the paddy, I discovered that clarity only comes when you put the brush down and listen.';
+          if (timeOfDay === 'dusk' || timeOfDay === 'night') {
+            text = 'The crickets are tuning their instruments for the night. Sit beside the lantern; the best thoughts always arrive when you stop chasing them.';
+          } else if (timeOfDay === 'dawn') {
+            text = 'Early dawn carries the sharp scent of mountain pine and wet earth. A single cup of green tea before speaking clears the mind completely.';
+          }
+          return {
+            speaker: 'Master Ren (蓮先生)',
+            title: 'Former City Calligrapher',
+            portraitAtlas: 'npc',
+            portraitFrame: 'npc_p01_r00_c00',
+            text,
+            options: [
+              {
+                label: 'How do you spend your days here?',
+                nextText: 'Brewing green tea with fresh mountain rainwater, sweeping the veranda, and watching the clouds crawl across the hills.',
+              },
+            ],
+          };
         },
       },
       {
@@ -338,18 +521,24 @@ export class IsoValleyScene extends Phaser.Scene {
         atlas: 'npc',
         frame: 'npc_p01_r00_c01',
         wanderRadius: 1,
-        dialogue: {
-          speaker: 'Devaki Amma (ദേവകി അമ്മ)',
-          title: 'Tharavadu Matriarch',
-          portraitAtlas: 'npc',
-          portraitFrame: 'npc_p01_r00_c01',
-          text: 'Have you drank warm spiced ginger tea today, child? The monsoon rain is coming over the canal. Sit on the porch; nobody has to hurry anywhere when the rain sings.',
-          options: [
-            {
-              label: 'The house is so peaceful.',
-              nextText: 'These clay tiles have kept generations dry through a hundred monsoons. Rest your tired mind here.',
-            },
-          ],
+        getDialogue: (timeOfDay) => {
+          let text = 'Have you drank warm spiced ginger tea today, child? The monsoon rain is coming over the canal. Sit on the porch; nobody has to hurry anywhere when the rain sings.';
+          if (timeOfDay === 'night' || timeOfDay === 'dusk') {
+            text = 'I just lit the brass Nilavilakku lamp inside the courtyard. Come sit on the wooden bench; the night jasmine is filling the whole breeze with sweetness.';
+          }
+          return {
+            speaker: 'Devaki Amma (ദേവകി അമ്മ)',
+            title: 'Tharavadu Matriarch',
+            portraitAtlas: 'npc',
+            portraitFrame: 'npc_p01_r00_c01',
+            text,
+            options: [
+              {
+                label: 'The house is so peaceful.',
+                nextText: 'These clay tiles have kept generations dry through a hundred monsoons. Rest your tired mind here.',
+              },
+            ],
+          };
         },
       },
       {
@@ -360,18 +549,24 @@ export class IsoValleyScene extends Phaser.Scene {
         atlas: 'npc',
         frame: 'npc_p01_r00_c02',
         wanderRadius: 2,
-        dialogue: {
-          speaker: 'Appu (അപ്പു)',
-          title: 'Canal Wanderer',
-          portraitAtlas: 'npc',
-          portraitFrame: 'npc_p01_r00_c02',
-          text: 'Look there! A blue-winged kingfisher just dived near the boat. If you sit very still by the campfire tonight, the golden fireflies will land right beside you!',
-          options: [
-            {
-              label: 'Can I sit by the campfire?',
-              nextText: 'Of course! Press C or click Sit. Listening to the sparks crackle while the river gurgles is the best feeling in the world.',
-            },
-          ],
+        getDialogue: (timeOfDay) => {
+          let text = 'Look there! A blue-winged kingfisher just dived near the boat. If you sit very still by the campfire tonight, the golden fireflies will land right beside you!';
+          if (timeOfDay === 'night') {
+            text = 'See the stars reflected in the water canal? The old boatmen say each reflection is a secret wish being rested in the deep.';
+          }
+          return {
+            speaker: 'Appu (അപ്പു)',
+            title: 'Canal Wanderer',
+            portraitAtlas: 'npc',
+            portraitFrame: 'npc_p01_r00_c02',
+            text,
+            options: [
+              {
+                label: 'Can I fish here?',
+                nextText: 'Press F near the canal bank! We never rush the fish; watching the float dance on the water is the whole joy.',
+              },
+            ],
+          };
         },
       },
       {
@@ -382,7 +577,7 @@ export class IsoValleyScene extends Phaser.Scene {
         atlas: 'npc',
         frame: 'npc_p01_r00_c03',
         wanderRadius: 2,
-        dialogue: {
+        getDialogue: () => ({
           speaker: 'Kuro (クロ)',
           title: 'Veranda Sleeping Cat',
           portraitAtlas: 'npc',
@@ -394,7 +589,7 @@ export class IsoValleyScene extends Phaser.Scene {
               nextText: 'Kuro closes eyes and rolls onto side, entirely untroubled by pull requests or deadlines.',
             },
           ],
-        },
+        }),
       },
       {
         id: 'crane',
@@ -404,13 +599,13 @@ export class IsoValleyScene extends Phaser.Scene {
         atlas: 'wildlife_sprite',
         frame: 'wildlife_sprite_p00_r00_c00',
         wanderRadius: 1,
-        dialogue: {
+        getDialogue: () => ({
           speaker: 'White Heron (വെള്ളക്കൊക്ക്)',
           title: 'Canal Fisher',
           portraitAtlas: 'wildlife_sprite',
           portraitFrame: 'wildlife_sprite_p00_r00_c00',
           text: 'The tall white heron stands motionless on one leg among the water lilies, waiting with infinite patience. Nothing in the river is in a hurry.',
-        },
+        }),
       },
     ];
 
@@ -435,7 +630,7 @@ export class IsoValleyScene extends Phaser.Scene {
         wanderRadius: cfg.wanderRadius,
         isMoving: false,
         timer: Math.random() * 3000 + 2000,
-        dialogue: cfg.dialogue,
+        getDialogue: cfg.getDialogue,
       });
     });
   }
@@ -541,11 +736,11 @@ export class IsoValleyScene extends Phaser.Scene {
   private setupBridgeListeners(): void {
     gameBridge.on('player_sit', (p: any) => {
       this.isSitting = true;
+      this.isFishing = false;
       this.playerSprite.setVelocity(0, 0);
       this.playerSprite.setFrame('pixel_character_sheets_p02_r00_c03'); // Rest pose
       soundscapes.playSitSound();
 
-      // If sitting near campfire, warm amber tint
       if (p?.locationName?.toLowerCase().includes('campfire')) {
         this.playerSprite.setTint(0xffd4aa);
       }
@@ -554,6 +749,14 @@ export class IsoValleyScene extends Phaser.Scene {
     gameBridge.on('player_stand', () => {
       this.isSitting = false;
       this.playerSprite.clearTint();
+    });
+
+    gameBridge.on('fishing_start', () => {
+      this.startFishing();
+    });
+
+    gameBridge.on('fishing_end', () => {
+      this.stopFishing();
     });
 
     gameBridge.on('campfire_toggle', (p: { isLit: boolean }) => {
@@ -571,9 +774,127 @@ export class IsoValleyScene extends Phaser.Scene {
     });
 
     gameBridge.on('time_tick', (payload: any) => {
-      if (payload?.season) {
-        this.currentSeason = payload.season;
-      }
+      if (payload?.season) this.currentSeason = payload.season;
+      if (payload?.timeOfDay) this.currentTimeOfDay = payload.timeOfDay;
+    });
+  }
+
+  private startFishing(): void {
+    if (this.isFishing) return;
+    const grid = IsometricHelper.screenToGrid(this.playerSprite.x, this.playerSprite.y);
+    const gx = Math.round(grid.gx);
+
+    // Can fish anywhere along the backwater canal border (gx: 13-17)
+    if (gx < 13 || gx > 17) {
+      gameBridge.emit('interaction_prompt', { text: 'Walk closer to the canal bank to fish peacefully', key: 'WASD' });
+      return;
+    }
+
+    this.isFishing = true;
+    this.isSitting = false;
+    this.playerSprite.setVelocity(0, 0);
+    this.playerSprite.setFrame('pixel_character_sheets_p02_r00_c01'); // Facing right toward canal
+    this.playerSprite.setFlipX(false);
+
+    // Create floating bobber on canal water
+    const bobberPos = IsometricHelper.gridToScreen(18, Math.round(grid.gy));
+    this.fishingBobber = this.add.circle(bobberPos.x, bobberPos.y, 4, 0xd34e36);
+    this.fishingBobber.setDepth(IsometricHelper.getIsoDepth(18, Math.round(grid.gy), 3));
+
+    soundscapes.playFootstep('water');
+
+    // Bobber gentle bobbing tween
+    this.tweens.add({
+      targets: this.fishingBobber,
+      y: bobberPos.y + 4,
+      duration: 1100,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    });
+
+    this.fishingTimer = 3500 + Math.random() * 2000; // 3.5 to 5.5s calm wait
+  }
+
+  private stopFishing(): void {
+    if (!this.isFishing) return;
+    this.isFishing = false;
+    if (this.fishingBobber) {
+      this.fishingBobber.destroy();
+      this.fishingBobber = undefined;
+    }
+  }
+
+  private async reelInCatch(): Promise<void> {
+    this.stopFishing();
+    soundscapes.playGentleChime(4);
+
+    const catches = [
+      {
+        id: `catch_${Date.now()}`,
+        title: 'Silver River Mussel (പുഴ മുത്തുച്ചിപ്പി)',
+        subtitle: 'Found resting peacefully in the canal silt',
+        category: 'nature' as const,
+        icon: '🐚',
+        description: 'An ancient freshwater bivalve shell with an iridescent mother-of-pearl sheen. Handed back to the clear water.',
+      },
+      {
+        id: `catch_${Date.now()}`,
+        title: 'Polished Canal Jade (കനാൽ കല്ല്)',
+        subtitle: 'Rolled smooth by decades of mountain tides',
+        category: 'nature' as const,
+        icon: '🪨',
+        description: 'A soothing sea-green river stone, perfectly rounded and cool to the touch.',
+      },
+      {
+        id: `catch_${Date.now()}`,
+        title: 'Golden River Carp (സുവർണ്ണ മത്സ്യം)',
+        subtitle: 'A gentle visitor from the backwater depths',
+        category: 'nature' as const,
+        icon: '🐟',
+        description: 'A peaceful golden carp that fluttered its fins curiously, received a blessing, and swam smoothly back home.',
+      },
+      {
+        id: `catch_${Date.now()}`,
+        title: 'Blooming Blue Lotus (നീലത്താമര)',
+        subtitle: 'Floating gently past the moored boat',
+        category: 'nature' as const,
+        icon: '🪷',
+        description: 'A radiant wild water lily petal carrying sweet river dew.',
+      },
+    ];
+
+    const item = catches[Math.floor(Math.random() * catches.length)];
+
+    await addDiscovery({
+      id: item.id,
+      title: item.title,
+      subtitle: item.subtitle,
+      category: item.category,
+      discoveredAt: new Date().toISOString(),
+      description: item.description,
+      icon: item.icon,
+    });
+
+    await addJournalEntry({
+      id: `journal_${Date.now()}`,
+      title: item.title,
+      createdAt: new Date().toISOString(),
+      season: this.currentSeason,
+      weather: this.currentWeather,
+      timeOfDay: this.currentTimeOfDay,
+      text: item.description,
+      source: 'valley_chronicle',
+    });
+
+    gameBridge.notifyDiscovery({
+      id: item.id,
+      title: item.title,
+      subtitle: item.subtitle,
+      category: item.category,
+      discoveredAt: new Date().toISOString(),
+      description: item.description,
+      icon: item.icon,
     });
   }
 
@@ -583,9 +904,8 @@ export class IsoValleyScene extends Phaser.Scene {
 
       npc.timer -= delta;
       if (npc.timer <= 0) {
-        npc.timer = Math.random() * 4500 + 3500; // Wander every 3.5 - 8s
+        npc.timer = Math.random() * 4500 + 3500;
 
-        // 50% chance to wander, 50% chance to just rest/look around
         if (Math.random() > 0.45) {
           const dx = Phaser.Math.Between(-npc.wanderRadius, npc.wanderRadius);
           const dy = Phaser.Math.Between(-npc.wanderRadius, npc.wanderRadius);
@@ -599,7 +919,7 @@ export class IsoValleyScene extends Phaser.Scene {
 
             this.tweens.add({
               targets: [npc.sprite, npc.shadow],
-              x: (target: any) => (target === npc.shadow ? dest.x : dest.x),
+              x: dest.x,
               y: (target: any) => (target === npc.shadow ? dest.y + 2 : dest.y - 16),
               duration: 1800,
               ease: 'Linear',
@@ -615,19 +935,101 @@ export class IsoValleyScene extends Phaser.Scene {
             });
           }
         } else {
-          // Idle flip or stretch
           npc.sprite.setFlipX(!npc.sprite.flipX);
         }
       }
     });
   }
 
+  private updateWildlife(delta: number): void {
+    // Fish swimming back and forth in canal
+    this.swimmingFishes.forEach((f) => {
+      f.gx += (f.direction * (f.speed * delta)) / 10000;
+      if (f.gx > 21) {
+        f.direction = -1;
+        f.sprite.setFlipX(true);
+      } else if (f.gx < 17) {
+        f.direction = 1;
+        f.sprite.setFlipX(false);
+      }
+      const pos = IsometricHelper.gridToScreen(f.gx, f.gy);
+      f.sprite.setPosition(pos.x, pos.y);
+    });
+  }
+
+  private updatePrompts(): void {
+    let prompt: { text: string; key: string } | null = null;
+
+    // 1. Check nearby forageables
+    for (const spot of this.forageSpots) {
+      if (spot.collected || !spot.sprite) continue;
+      const dist = Phaser.Math.Distance.Between(this.playerSprite.x, this.playerSprite.y, spot.sprite.x, spot.sprite.y);
+      if (dist < 42) {
+        prompt = { text: `Collect ${spot.title}`, key: 'E' };
+        break;
+      }
+    }
+
+    // 2. Check nearby NPCs
+    if (!prompt) {
+      for (const npc of this.npcs) {
+        const dist = Phaser.Math.Distance.Between(this.playerSprite.x, this.playerSprite.y, npc.sprite.x, npc.sprite.y);
+        if (dist < 50) {
+          prompt = { text: `Talk with ${npc.name}`, key: 'E' };
+          break;
+        }
+      }
+    }
+
+    // 3. Check nearby seats
+    if (!prompt) {
+      for (const seat of this.interactiveSeats) {
+        const seatPos = IsometricHelper.gridToScreen(seat.gx, seat.gy);
+        const dist = Phaser.Math.Distance.Between(this.playerSprite.x, this.playerSprite.y, seatPos.x, seatPos.y);
+        if (dist < 48) {
+          prompt = { text: `Sit at ${seat.name}`, key: 'E' };
+          break;
+        }
+      }
+    }
+
+    // 4. Check canal fishing readiness
+    if (!prompt && !this.isFishing) {
+      const grid = IsometricHelper.screenToGrid(this.playerSprite.x, this.playerSprite.y);
+      const gx = Math.round(grid.gx);
+      if (gx >= 13 && gx <= 17) {
+        prompt = { text: 'Cast Line into Canal', key: 'F' };
+      }
+    }
+
+    const currentPromptKey = prompt ? `${prompt.key}:${prompt.text}` : '';
+    if (currentPromptKey !== this.lastPromptText) {
+      this.lastPromptText = currentPromptKey;
+      gameBridge.emit('interaction_prompt', prompt);
+    }
+  }
+
   update(_time: number, delta: number): void {
-    // Update NPC wandering routines
+    // Wildlife & NPC behaviors
     this.updateNPCWandering(delta);
+    this.updateWildlife(delta);
+
+    // Fishing timer logic
+    if (this.isFishing) {
+      this.fishingTimer -= delta;
+      if (this.fishingTimer <= 0) {
+        this.reelInCatch();
+      }
+
+      const cancelKey = this.wasdKeys?.W?.isDown || this.wasdKeys?.A?.isDown || this.wasdKeys?.S?.isDown || this.wasdKeys?.D?.isDown;
+      if (cancelKey) {
+        this.stopFishing();
+        gameBridge.emit('fishing_end');
+      }
+      return;
+    }
 
     if (this.isSitting) {
-      // If sitting, pressing movement key stands up gently
       const standKey = this.wasdKeys?.W?.isDown || this.wasdKeys?.A?.isDown || this.wasdKeys?.S?.isDown || this.wasdKeys?.D?.isDown;
       if (standKey) {
         gameBridge.notifySitting(false);
@@ -640,7 +1042,6 @@ export class IsoValleyScene extends Phaser.Scene {
     const isRunning = this.wasdKeys?.SHIFT?.isDown || this.cursors?.shift?.isDown;
     const speed = isRunning ? 140 : 85;
 
-    // Isometric 4-way movement
     const left = this.wasdKeys?.A?.isDown || this.cursors?.left?.isDown;
     const right = this.wasdKeys?.D?.isDown || this.cursors?.right?.isDown;
     const up = this.wasdKeys?.W?.isDown || this.cursors?.up?.isDown;
@@ -670,11 +1071,9 @@ export class IsoValleyScene extends Phaser.Scene {
 
     this.playerSprite.setVelocity(vx, vy);
 
-    // Sync shadow position
     this.playerShadow.setPosition(this.playerSprite.x, this.playerSprite.y + 16);
     this.playerShadow.setDepth(this.playerSprite.y);
 
-    // Footsteps based on terrain
     const isMoving = vx !== 0 || vy !== 0;
     if (isMoving) {
       this.stepTimer += delta;
@@ -687,33 +1086,92 @@ export class IsoValleyScene extends Phaser.Scene {
 
         let terrain: 'grass' | 'wood' | 'stone' | 'water' = 'grass';
         if (gy === 10 && gx >= 15 && gx <= 18) {
-          terrain = 'wood'; // Wooden bridge
+          terrain = 'wood';
         } else if (gx <= 6 && gy <= 5) {
-          terrain = 'wood'; // Veranda porch
+          terrain = 'wood';
         } else if (gx >= 16) {
-          terrain = 'water'; // Canal stepping stone / water
+          terrain = 'water';
         } else if (gx === 10 || (gx >= 7 && gx <= 9 && gy <= 3)) {
-          terrain = 'stone'; // Shrine path
+          terrain = 'stone';
         }
 
         soundscapes.playFootstep(terrain);
       }
     }
 
-    // Dynamic depth sorting based on current screen Y
     this.playerSprite.setDepth(this.playerSprite.y + 16);
 
-    // Check interaction key (E or Space)
+    // Update dynamic interaction prompts
+    this.updatePrompts();
+
+    // Key inputs
     const interactPressed = Phaser.Input.Keyboard.JustDown(this.wasdKeys?.E) || Phaser.Input.Keyboard.JustDown(this.cursors?.space);
     const sitPressed = Phaser.Input.Keyboard.JustDown(this.wasdKeys?.C);
+    const fishPressed = Phaser.Input.Keyboard.JustDown(this.wasdKeys?.F);
 
     if (sitPressed) {
       gameBridge.notifySitting(true, 'Soft Grass Verge');
       return;
     }
 
+    if (fishPressed) {
+      this.startFishing();
+      return;
+    }
+
     if (interactPressed) {
-      // 1. Check nearby seats
+      // 1. Forage spot check
+      for (const spot of this.forageSpots) {
+        if (spot.collected || !spot.sprite) continue;
+        const dist = Phaser.Math.Distance.Between(this.playerSprite.x, this.playerSprite.y, spot.sprite.x, spot.sprite.y);
+        if (dist < 42) {
+          spot.collected = true;
+          this.tweens.add({
+            targets: spot.sprite,
+            scaleX: 0,
+            scaleY: 0,
+            alpha: 0,
+            duration: 350,
+            onComplete: () => spot.sprite?.destroy(),
+          });
+
+          soundscapes.playGentleChime(2);
+
+          addDiscovery({
+            id: spot.id,
+            title: spot.title,
+            subtitle: spot.subtitle,
+            category: spot.category,
+            discoveredAt: new Date().toISOString(),
+            description: spot.description,
+            icon: spot.icon,
+          });
+
+          addJournalEntry({
+            id: `journal_${Date.now()}`,
+            title: spot.title,
+            createdAt: new Date().toISOString(),
+            season: this.currentSeason,
+            weather: this.currentWeather,
+            timeOfDay: this.currentTimeOfDay,
+            text: spot.description,
+            source: 'personal',
+          });
+
+          gameBridge.notifyDiscovery({
+            id: spot.id,
+            title: spot.title,
+            subtitle: spot.subtitle,
+            category: spot.category,
+            discoveredAt: new Date().toISOString(),
+            description: spot.description,
+            icon: spot.icon,
+          });
+          return;
+        }
+      }
+
+      // 2. Check nearby seats
       for (const seat of this.interactiveSeats) {
         const seatPos = IsometricHelper.gridToScreen(seat.gx, seat.gy);
         const dist = Phaser.Math.Distance.Between(this.playerSprite.x, this.playerSprite.y, seatPos.x, seatPos.y);
@@ -723,11 +1181,11 @@ export class IsoValleyScene extends Phaser.Scene {
         }
       }
 
-      // 2. Check nearby NPCs
+      // 3. Check nearby NPCs
       for (const npc of this.npcs) {
         const dist = Phaser.Math.Distance.Between(this.playerSprite.x, this.playerSprite.y, npc.sprite.x, npc.sprite.y);
         if (dist < 50) {
-          gameBridge.emit('dialogue_open', npc.dialogue);
+          gameBridge.emit('dialogue_open', npc.getDialogue(this.currentTimeOfDay));
           return;
         }
       }

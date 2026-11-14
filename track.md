@@ -90,3 +90,13 @@ Status legend: `[x]` done and verified · `[~]` in progress · `[ ]` not started
 - `[x]` **Campfire Embers & Sitting Glow**: Rising spark particles, warm ambient tint on player when resting by the fire.
 - `[x]` **Gentle Wind Through Trees**: Organic swaying sinusoidal tweens across all coconut palms, sakura, bamboo, and banana plants.
 - `[x]` **Canal Water Shimmer & Expanding Ripples**: Shimmering water tiles and gentle expanding water ring animations.
+
+---
+
+## 8. Phase 3: Life & Interaction `[x]`
+
+- `[x]` **Peaceful Canal Fishing Mechanic**: Cast line near backwater canal (`F` key or dock button), bobber water ripples, catch tranquil keepsakes (Silver Mussel, Canal Jade, Golden Carp, Blue Lotus) stored to Dexie.
+- `[x]` **Forageable Valley Keepsakes**: Floating collectible nodes across the valley (Wild Bamboo Shoot, Sacred Torii Ribbon, Golden Nendran Banana, Fragrant Jasmine) with proximity prompts and journal recording.
+- `[x]` **Living Wildlife Simulation**: Sinuous swimming fish in backwater canal, fluttering swallowtail butterflies over gardens, calm white heron fishing.
+- `[x]` **Time-of-Day Contextual NPC Dialogue**: Dialogue text for Master Ren, Devaki Amma, and Appu dynamically adapts to Dawn, Morning, Noon, Dusk, and Night.
+- `[x]` **Dynamic Interaction Prompts & Tranquility Dock**: Floating visual prompt pills (`[E] Collect Jasmine`, `[E] Talk with Devaki Amma`, `[F] Cast Line`) and bottom dock for Sit, Fish, Journal, and Shrine.

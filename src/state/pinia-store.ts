@@ -20,6 +20,8 @@ export const useGitakureStore = defineStore('gitakure', {
     isLoaded: false,
     isSitting: false,
     sittingLocation: null as string | null,
+    isFishing: false,
+    activePrompt: null as { text: string; key: string } | null,
     campfireLit: true,
     activeModal: null as 'journal' | 'shrine' | 'settings' | null,
     currentDialogue: null as DialogueNode | null,
@@ -97,6 +99,19 @@ export const useGitakureStore = defineStore('gitakure', {
           this.currentDialogue = null;
         });
 
+        gameBridge.on('interaction_prompt', (p: any) => {
+          this.activePrompt = p ? { text: p.text, key: p.key || 'E' } : null;
+        });
+
+        gameBridge.on('fishing_start', () => {
+          this.isFishing = true;
+          this.showToast('Cast your line into the calm backwaters...', '🎣');
+        });
+
+        gameBridge.on('fishing_end', () => {
+          this.isFishing = false;
+        });
+
         this.isLoaded = true;
       } catch (err) {
         console.error('Failed to initialize Gitakure store:', err);
@@ -144,6 +159,15 @@ export const useGitakureStore = defineStore('gitakure', {
         gameBridge.notifySitting(true, 'Riverside Bank');
       } else {
         gameBridge.notifySitting(false);
+      }
+    },
+
+    toggleFishing() {
+      if (this.isFishing) {
+        gameBridge.emit('fishing_end');
+        this.isFishing = false;
+      } else {
+        gameBridge.emit('fishing_start');
       }
     },
 
