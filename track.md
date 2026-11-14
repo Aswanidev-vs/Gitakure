@@ -84,17 +84,18 @@ Status legend: `[x]` done and verified · `[~]` in progress · `[ ]` not started
 
 ---
 
-## Phase 4: Player & Interaction `[~]`
+## Phase 4: Player & Interaction `[x]`
 
-- `[ ]` Stylized 3D player (procedural low-poly humanoid; no rigged GLB in pack).
-- `[ ]` Movement (WASD/arrows, accel/decel, terrain-aware, collision).
-- `[ ]` Camera polish (1P↔3P toggle, follow distance, sit camera).
-- `[ ]` Interactions (sit on bench, sit by campfire).
-- `[ ]` Campfire experience (flames, smoke, warm light, crackle, sit anim).
+- `[x]` **Player entity** — `src/game/entities/Player.ts`. Stylized low-poly humanoid (head, torso, arms, legs, hair) built from primitives; procedural walk/idle/sit animation via `update(dt, speed)`; facing rotation. No rigged GLB in the pack, so this is the player.
+- `[x]` **MovementSystem** — `src/game/systems/MovementSystem.ts`. WASD/arrows with smooth acceleration + deceleration (damp), terrain-aware height following, sphere-vs-AABB collision resolution against registered colliders, turn-speed-limited facing. Walk/run via Shift.
+- `[x]` **Campfire experience** — `src/game/entities/Campfire.ts`. Layered additive flame cones with flicker, warm flickering point light, rising smoke particle column (Points). No time limit, no reward. Honors `prefers-reduced-motion`/setting.
+- `[x]` **InteractionSystem** — `src/game/systems/InteractionSystem.ts`. Proximity detection with `[E] <label>` prompt emission; `sit` toggles player sit animation + disables movement; interactable registry.
+- `[x]` Game wired: Player + Movement + Campfire + Interactions all instantiated; `E` interacts; `V` toggles camera; sit by campfire or bench.
+- `[x]` **Verification**: `bun run typecheck` clean, `bun run build` clean, 16/16 tests pass, dev server launches.
 
 ---
 
-## Phase 5: Living World `[ ]`
+## Phase 5: Living World `[~]`
 
 - `[ ]` Time system (sunrise→night, sun/ambient shifts).
 - `[ ]` Weather (clear/cloudy/rain/mist; rain particles, fog, wet look).

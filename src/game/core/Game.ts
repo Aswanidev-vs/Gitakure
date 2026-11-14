@@ -7,6 +7,10 @@ import { SceneManager } from '@/game/rendering/SceneManager';
 import { CameraController } from '@/game/rendering/CameraController';
 import { Lighting } from '@/game/rendering/Lighting';
 import { WorldManager } from '@/game/world/WorldManager';
+import { Player } from '@/game/entities/Player';
+import { Campfire } from '@/game/entities/Campfire';
+import { MovementSystem } from '@/game/systems/MovementSystem';
+import { InteractionSystem } from '@/game/systems/InteractionSystem';
 import { DEFAULT_SETTINGS, type GameSettings, type PlayerState, type WorldState } from '@/types';
 
 /**
@@ -23,10 +27,13 @@ export class Game {
   private readonly camera: CameraController;
   private readonly lighting: Lighting;
   private readonly worldManager: WorldManager;
-  private playerMesh: THREE.Mesh | null = null;
+  private player: Player | null = null;
+  private campfire: Campfire | null = null;
+  private movement: MovementSystem | null = null;
+  private interactions: InteractionSystem | null = null;
 
   private settings: GameSettings;
-  private player: PlayerState;
+  private playerState: PlayerState;
   private world: WorldState;
   private running = false;
   private lastInteraction: string | null = null;
@@ -56,7 +63,7 @@ export class Game {
     this.worldManager = new WorldManager(1);
     this.sceneManager.scene.add(this.worldManager.group);
 
-    this.player = { position: [0, 0, 0], rotation: 0 };
+    this.playerState = { position: [0, 0, 0], rotation: 0 };
     this.world = { time: 0.35, day: 1, season: 'spring', weather: 'clear' };
 
     this.loop.onRender(() => this.render(this.dtSeconds()));
@@ -86,31 +93,70 @@ export class Game {
   private async buildWorld(): Promise<void> {
     const scene = this.sceneManager.scene;
 
-    // Place the player capsule at the village center on the terrain.
-    const playerMesh = new THREE.Mesh(
-      new THREE.CapsuleGeometry(0.4, 1.1, 6, 12),
-      new THREE.MeshStandardMaterial({ color: 0xf0c8a0, roughness: 0.7 }),
-    );
-    playerMesh.castShadow = true;
-    playerMesh.name = 'player';
-    scene.add(playerMesh);
-    this.playerMesh = playerMesh;
-
     // Build the async vegetation layer (loads GLB prototypes).
     await this.worldManager.build();
 
-    // Place the player on the terrain near the campfire/village.
+    // Player entity (stylized low-poly humanoid).
+    this.player = new Player();
+    scene.add(this.player.group);
+
+    // Place the player on the terrain near the village bench.
     const start = this.worldManager.benchPosition;
-    this.player.position = [start.x + 2, this.worldManager.heightAt(start.x + 2, start.z + 2), start.z + 2];
-    playerMesh.position.set(...this.player.position);
+    this.playerState.position = [
+      start.x + 2,
+      this.worldManager.heightAt(start.x + 2, start.z + 2),
+      start.z + 2,
+    ];
+    this.player.group.position.set(...this.playerState.position);
+
+    // Movement system (WASD + collision + terrain-aware).
+    this.movement = new MovementSystem(this.worldManager.terrain);
+    this.movement.enable();
+
+    // Campfire experience at the village campfire spot.
+    this.campfire = new Campfire(this.worldManager.campfirePosition);
+    this.campfire.setReducedMotion(this.settings.reducedMotion);
+    scene.add(this.campfire.group);
+
+    // Interaction system: sit by the campfire / bench.
+    this.interactions = new InteractionSystem(this.player, this.movement);
+    this.interactions.setPromptListener((prompt) => {
+      this.lastInteraction = prompt;
+      this.bridge.send({ type: 'interaction', prompt });
+    });
+    this.interactions.add({
+      id: 'campfire',
+      label: 'Rest by the campfire',
+      position: this.worldManager.campfirePosition.clone().add(new THREE.Vector3(0, 0.5, 0)),
+      radius: 2.5,
+      sit: true,
+    });
+    this.interactions.add({
+      id: 'bench',
+      label: 'Sit on the bench',
+      position: this.worldManager.benchPosition.clone().add(new THREE.Vector3(0, 0.5, 0)),
+      radius: 2,
+      sit: true,
+    });
+
+    // E key interacts.
+    window.addEventListener('keydown', this.onInteractKey);
 
     this.lighting.setTimeOfDay(this.world.time);
-    const p = new THREE.Vector3(...this.player.position);
-    this.camera.snap(p, this.player.rotation);
+    const p = new THREE.Vector3(...this.playerState.position);
+    this.camera.snap(p, this.playerState.rotation);
   }
 
+  private onInteractKey = (e: KeyboardEvent): void => {
+    if (e.code === 'KeyE' && !e.repeat) {
+      this.interactions?.interact();
+    }
+  };
+
+  private elapsedTime = 0;
   private update(dt: number): void {
     if (!this.running) return;
+    this.elapsedTime += dt;
 
     // Time of day advances slowly (full cycle ~10 min).
     this.world.time = (this.world.time + dt / 600) % 1;
@@ -119,30 +165,35 @@ export class Game {
     // World ambience (water shader).
     this.worldManager.update(this.elapsedTime);
 
-    // Player movement (Phase 4 replaces the placeholder).
-    this.updateMovement(dt);
+    if (this.player && this.movement) {
+      // Movement + terrain-aware height.
+      this.movement.update(dt, this.player.group.position);
+      this.playerState.position = [this.player.group.position.x, this.player.group.position.y, this.player.group.position.z];
+      this.playerState.rotation = this.movement.facingYaw;
+      this.player.setFacing(this.playerState.rotation);
 
-    // Keep the player capsule glued to the terrain height.
-    if (this.playerMesh) {
-      const groundY = this.worldManager.heightAt(this.player.position[0], this.player.position[2]);
-      this.player.position[1] = groundY;
-      this.playerMesh.position.set(
-        this.player.position[0],
-        this.player.position[1] + 0.95,
-        this.player.position[2],
-      );
-      this.playerMesh.rotation.y = this.player.rotation;
+      // Animation state.
+      const speed = this.movement.speed;
+      if (this.movement.isSitting) {
+        this.player.setAnim('sit');
+      } else if (speed > 0.1) {
+        this.player.setAnim('walk');
+      } else {
+        this.player.setAnim('idle');
+      }
+      this.player.update(dt, speed);
+
+      // Interaction proximity.
+      this.interactions?.update(this.player.group.position);
+
+      // Camera follow.
+      const playerVec = this.player.group.position;
+      this.camera.update(playerVec, this.playerState.rotation, dt, [this.player.group]);
+      this.lighting.setFollowTarget(this.player.group);
     }
 
-    const playerVec = new THREE.Vector3(...this.player.position);
-    this.camera.update(playerVec, this.player.rotation, dt, this.playerMesh ? [this.playerMesh] : []);
-    if (this.playerMesh) this.lighting.setFollowTarget(this.playerMesh);
-  }
-
-  private elapsedTime = 0;
-  private updateMovement(dt: number): void {
-    // Phase 4: WASD movement, acceleration, collision, terrain-aware.
-    this.elapsedTime += dt;
+    // Campfire flame/smoke animation.
+    this.campfire?.update(dt, this.elapsedTime);
   }
 
   private lastTime = performance.now();
@@ -172,10 +223,10 @@ export class Game {
         type: 'snapshot',
         snapshot: {
           player: {
-            x: this.player.position[0],
-            y: this.player.position[1],
-            z: this.player.position[2],
-            rotation: this.player.rotation,
+            x: this.playerState.position[0],
+            y: this.playerState.position[1],
+            z: this.playerState.position[2],
+            rotation: this.playerState.rotation,
           },
           time: this.world.time,
           day: this.world.day,
@@ -220,6 +271,7 @@ export class Game {
         break;
       case 'setReducedMotion':
         this.settings.reducedMotion = cmd.value;
+        this.campfire?.setReducedMotion(cmd.value);
         break;
       case 'setTimeOfDay':
         this.world.time = cmd.time;
@@ -232,7 +284,7 @@ export class Game {
         this.world.weather = cmd.weather as WorldState['weather'];
         break;
       case 'teleport':
-        this.player.position = [cmd.x, cmd.y, cmd.z];
+        this.playerState.position = [cmd.x, cmd.y, cmd.z];
         break;
       case 'saveState':
         // Dexie persistence wired in Phase 6.
@@ -250,6 +302,10 @@ export class Game {
   dispose(): void {
     this.stop();
     window.removeEventListener('resize', this.onResize);
+    window.removeEventListener('keydown', this.onInteractKey);
+    this.movement?.dispose();
+    this.interactions?.dispose();
+    this.campfire?.dispose();
     this.worldManager.dispose();
     this.renderer.dispose();
     this.sceneManager.dispose();
