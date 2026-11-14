@@ -3,356 +3,517 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#0d1618" />
-    <title>Gitakure — a little world, shaped by your journey</title>
+    <meta name="theme-color" content="#141f23" />
+    <title>Gitakure — A little world, shaped by your journey.</title>
     <link rel="icon" href="favicon.ico" sizes="48x48" />
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
     <meta
       name="description"
-      content="Gitakure is a peaceful low-poly countryside that runs in your browser. Explore a village, sit by a river, watch the monsoon, and spend time by a campfire. Built with Three.js and Vue."
+      content="A peaceful countryside simulation where you can explore, relax, and turn your digital life into a serene escape."
     />
-    <meta property="og:title" content="Gitakure — a little world, shaped by your journey" />
-    <meta
-      property="og:description"
-      content="A peaceful low-poly countryside in the browser. Three.js, Vue, no backend."
-    />
-    <meta property="og:type" content="website" />
-
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..600&family=Karla:wght@300;400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <a class="skip" href="#walk">Skip to the valley</a>
+    <!-- ── Ambient Petals Canvas ────────────────────────── -->
+    <canvas id="petals-canvas" class="petals-canvas" aria-hidden="true"></canvas>
 
-    <header class="bar">
-      <a class="mark" href="#top">
-        <img class="mark-glyph" src="logo.png" width="28" height="28" alt="" aria-hidden="true" />
-        <span>Gitakure</span>
-      </a>
-      <nav class="bar-nav" aria-label="Sections">
-        <a href="#practice">Practice</a>
-        <a href="#valley-built">The valley</a>
-        <a href="#run">Run it</a>
-        <a
-          class="bar-cta"
-          href="https://github.com/Aswanidev-vs/Gitakure"
-          target="_blank"
-          rel="noopener noreferrer"
-          >Source<span class="sr-only"> (opens in a new tab)</span></a
-        >
-      </nav>
-    </header>
+    <!-- ── Floating Sound Toggle ────────────────────────── -->
+    <button
+      class="sound-fab"
+      id="sound-fab"
+      type="button"
+      aria-label="Turn ambient sound off"
+      aria-pressed="true"
+      title="Ambient sound on"
+    >
+      <span class="sound-fab-icon" aria-hidden="true">
+        <svg class="icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 5 6 9H2v6h4l5 4z" />
+          <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+          <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+        </svg>
+        <svg class="icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 5 6 9H2v6h4l5 4z" />
+          <path d="m16 9 5 6" />
+          <path d="m21 9-5 6" />
+        </svg>
+      </span>
+      <span class="sound-fab-bars" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+      </span>
+      <span class="sound-fab-label">Sound On</span>
+    </button>
 
-    <main id="top">
-      <section class="hero" id="walk">
-        <canvas
-          id="valley"
-          role="img"
-          aria-label="A river valley at dusk: layered ridgelines, a treeline of conifers, mist drifting over the water, and reeds on the near bank."
-        >
-          A river valley at dusk, with ridgelines, conifers, drifting mist, a river, and reeds on the
-          near bank.
-        </canvas>
+    <!-- ── Master Container ─────────────────────────────── -->
+    <div class="page-container">
 
-        <div class="hero-body">
-          <p class="hero-place"><span class="dot" aria-hidden="true"></span>River valley, evening</p>
-          <h1>A little world,<br /><em>shaped by your journey</em></h1>
-          <p class="hero-sub">
-            Gitakure is a peaceful low-poly countryside that runs in your browser. There is nothing to
-            complete. Explore a village, sit by the water, watch the monsoon come in, and stay by the
-            fire as long as you like.
+      <!-- ── Hero Section ─────────────────────────────────── -->
+      <section class="hero-section" id="home">
+        <!-- Hero Background Layer -->
+        <div class="hero-bg" aria-hidden="true">
+          <img src="hero-bg.jpg" alt="Gitakure Countryside Sunset" class="hero-bg-img" />
+          <div class="hero-vignette"></div>
+        </div>
+
+        <!-- ── Navigation Bar ─────────────────────────────── -->
+        <header class="navbar">
+          <!-- Brand Logo: Torii Gate + Mountains + Sakura + Gitakure -->
+          <a class="brand-link" href="#home" aria-label="Gitakure Home">
+            <!-- <svg class="brand-torii" viewBox="0 0 54 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> -->
+              <!-- Mountain peaks behind -->
+              <path d="M16 38 L25 25 L34 38" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+              <path d="M29 38 L37 28 L46 38" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+              <!-- Torii Gate -->
+              <!-- Top lintel curved -->
+              <path d="M4 12 C18 9 36 9 50 12" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/>
+              <!-- Second lintel horizontal -->
+              <path d="M9 18 H45" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+              <!-- Left and Right Pillars -->
+              <path d="M15 10 V40" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+              <path d="M39 10 V40" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+              <!-- Center Tie Tab -->
+              <path d="M27 12 V18" stroke="currentColor" stroke-width="2.2"/>
+              <!-- Perched Pink Sakura Accent -->
+              <circle cx="48" cy="8" r="3" fill="#f472b6"/>
+              <circle cx="48" cy="8" r="1.2" fill="#fef08a"/>
+            </svg>
+            <span class="brand-title">Gitakure</span>
+          </a>
+
+          <!-- Center Nav Links -->
+          <nav class="nav-menu" aria-label="Main Navigation">
+            <a class="nav-item active" href="#home">
+              <i data-lucide="home"></i>
+              <span>Home</span>
+            </a>
+            <a class="nav-item" href="#about">
+              <i data-lucide="compass"></i>
+              <span>About</span>
+            </a>
+            <a class="nav-item" href="#features">
+              <i data-lucide="gamepad-2"></i>
+              <span>Features</span>
+            </a>
+            <a class="nav-item" href="https://github.com/Aswanidev-vs/Gitakure" target="_blank" rel="noopener noreferrer">
+              <i data-lucide="github"></i>
+              <span>GitHub</span>
+            </a>
+          </nav>
+
+          <!-- Settings Button -->
+          <button class="settings-btn" id="open-settings-btn" type="button" aria-label="Open Settings">
+            <i data-lucide="settings"></i>
+            <span>Settings</span>
+          </button>
+        </header>
+
+        <!-- ── Hero Content (Left) ────────────────────────── -->
+        <div class="hero-content">
+          <div class="hero-title-container">
+            <h1 class="hero-title">Gitakure</h1>
+            <!-- Sakura flower directly on the 'e' -->
+            <svg class="hero-sakura-flower" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <g fill="#f472b6" opacity="0.95">
+                <ellipse cx="18" cy="8" rx="5.5" ry="8"/>
+                <ellipse cx="27" cy="14" rx="8" ry="5.5"/>
+                <ellipse cx="24" cy="25" rx="5.5" ry="8"/>
+                <ellipse cx="12" cy="25" rx="5.5" ry="8"/>
+                <ellipse cx="9" cy="14" rx="8" ry="5.5"/>
+              </g>
+              <circle cx="18" cy="17" r="3.5" fill="#fde047"/>
+            </svg>
+          </div>
+
+          <p class="hero-tagline">A little world, shaped by your journey.</p>
+
+          <p class="hero-description">
+            A peaceful countryside simulation where you can explore, relax, and turn your digital life into a serene escape.
           </p>
-          <div class="hero-actions">
-            <a
-              class="btn btn-primary"
-              href="https://github.com/Aswanidev-vs/Gitakure"
-              target="_blank"
-              rel="noopener noreferrer"
-              >Get the source<span class="sr-only"> (opens in a new tab)</span></a
-            >
-            <a class="btn btn-quiet" href="#practice">Why it exists</a>
+
+          <div class="hero-button-group">
+            <a class="btn-primary" href="#about" id="start-journey-btn">
+              <span class="btn-play-icon">▶</span>
+              <span class="btn-text">Start Your Journey</span>
+              <span class="btn-chevron">›</span>
+            </a>
+
+            <a class="btn-secondary" href="#about">
+              <i data-lucide="book-open"></i>
+              <span>Learn More</span>
+            </a>
           </div>
-          <p class="hero-meta">
-            Three.js and Vue. No backend, no account, no dedicated GPU.
-          </p>
         </div>
 
-        <p class="hero-hint" aria-hidden="true">Scroll to walk north</p>
-      </section>
-
-      <section class="band" id="practice">
-        <div class="wrap">
-          <header class="band-head">
-            <p class="place"><span class="place-mark" aria-hidden="true">01</span>The near bank</p>
-            <h2>Most games ask for your attention.<br />This one gives it back.</h2>
-          </header>
-
-          <div class="creed">
-            <ol class="creed-list">
-              <li>
-                <span class="creed-term">Rest is the mechanic</span>
-                <span class="creed-def"
-                  >There are no energy meters, no streaks, no crops that die. Sitting down is a real
-                  activity with its own animation, camera and sound.</span
-                >
-              </li>
-              <li>
-                <span class="creed-term">Nothing is missable</span>
-                <span class="creed-def"
-                  >The valley does not decay while you are away and nothing expires. A quiet week is
-                  not a failure state.</span
-                >
-              </li>
-              <li>
-                <span class="creed-term">Atmosphere over objectives</span>
-                <span class="creed-def"
-                  >Weather, light and sound carry the experience. There is no quest log, no XP, no
-                  ranking.</span
-                >
-              </li>
-            </ol>
-
-            <aside class="creed-note">
-              <p>
-                The valley is a real 3D scene, not a stack of sprites. Terrain is generated from a
-                seeded heightfield; the river is a shader; trees, houses and props are built from
-                geometry at runtime.
-              </p>
-              <p>
-                It runs on integrated graphics: pixel ratio capped at 1.5, shadows off by default, one
-                directional light, instanced and merged geometry.
-              </p>
-            </aside>
+        <!-- ── Center Scroll Indicator ────────────────────── -->
+        <div class="hero-scroll-cue" id="scroll-cue">
+          <div class="mouse-icon">
+            <div class="mouse-wheel-dot"></div>
           </div>
+          <span class="scroll-label">Scroll to explore</span>
+          <span class="scroll-arrow">↓</span>
         </div>
       </section>
 
-      <section class="band band-deep" id="keepsakes">
-        <div class="wrap">
-          <header class="band-head">
-            <p class="place"><span class="place-mark" aria-hidden="true">02</span>The shrine path</p>
-            <h2>Your history becomes places,<br />not a dashboard</h2>
-            <p class="lede">
-              Connect a GitHub username and Gitakure reads your public history, picks a few moments
-              that actually mean something, and turns them into objects in the world. You still have to
-              go and find them.
-            </p>
-          </header>
-
-          <figure class="ledger">
-            <div class="ledger-bar">
-              <p class="ledger-title">Keepsake ledger</p>
-              <p class="ledger-key" aria-hidden="true">example account</p>
-            </div>
-            <ul class="ledger-list">
-              <li class="ledger-row">
-                <span class="ledger-glyph glyph-seed" aria-hidden="true"></span>
-                <span class="ledger-name">The First Seed</span>
-                <span class="ledger-when">your earliest commit</span>
-                <span class="ledger-where">a sapling, south meadow</span>
-              </li>
-              <li class="ledger-row">
-                <span class="ledger-glyph glyph-lantern" aria-hidden="true"></span>
-                <span class="ledger-name">River Lantern</span>
-                <span class="ledger-when">five or more repositories</span>
-                <span class="ledger-where">stone lantern, river bend</span>
-              </li>
-              <li class="ledger-row">
-                <span class="ledger-glyph glyph-scroll" aria-hidden="true"></span>
-                <span class="ledger-name">TypeScript Scroll</span>
-                <span class="ledger-when">most-used language</span>
-                <span class="ledger-where">a marked stone, village edge</span>
-              </li>
-              <li class="ledger-row">
-                <span class="ledger-glyph glyph-star" aria-hidden="true"></span>
-                <span class="ledger-name">Constellation</span>
-                <span class="ledger-when">a five-day rhythm</span>
-                <span class="ledger-where">an obelisk on the ridge</span>
-              </li>
-              <li class="ledger-row ledger-row-quiet">
-                <span class="ledger-glyph glyph-stone" aria-hidden="true"></span>
-                <span class="ledger-name">Quiet Solitude</span>
-                <span class="ledger-when">a season with no commits</span>
-                <span class="ledger-where">a smooth pebble, riverbed</span>
-              </li>
-            </ul>
-            <figcaption>
-              Three keepsakes are offered at a time. Each is discovered by walking to it, not by
-              reading a report. An empty history earns a keepsake too.
-            </figcaption>
-          </figure>
-
-          <div class="privacy">
-            <h3>What connecting actually does</h3>
-            <dl class="privacy-grid">
-              <div>
-                <dt>Reads</dt>
-                <dd>Public profile, public repositories, and a sample of commits from your five most
-                  recently pushed repos.</dd>
-              </div>
-              <div>
-                <dt>Requests</dt>
-                <dd>Public read scope only. Gitakure never asks for repository write access.</dd>
-              </div>
-              <div>
-                <dt>Stores</dt>
-                <dd>Keepsakes and player state in your own IndexedDB. A token, if you supply one, is
-                  used for that request and never written to storage.</dd>
-              </div>
-              <div>
-                <dt>Requires</dt>
-                <dd>Nothing. The valley is complete offline; GitHub only adds keepsakes.</dd>
-              </div>
-            </dl>
-          </div>
+      <!-- ── Bottom Overlapping Wavy Showcase Section ──────── -->
+      <section class="showcase-section" id="about">
+        <!-- Wave Divider (Organic curved top) -->
+        <div class="showcase-wave-wrap" aria-hidden="true">
+          <svg class="showcase-wave-svg" viewBox="0 0 1440 140" preserveAspectRatio="none">
+            <path
+              d="M0 60 C 240 10, 480 90, 720 50 C 960 10, 1200 80, 1440 45 L 1440 140 L 0 140 Z"
+              fill="#141f23"
+            />
+          </svg>
         </div>
-      </section>
 
-      <section class="band" id="valley-built">
-        <div class="wrap">
-          <header class="band-head">
-            <p class="place"><span class="place-mark" aria-hidden="true">03</span>The north field</p>
-            <h2>Built from geometry,<br />not from a modelling suite</h2>
-            <p class="lede">
-              There is no Blender in this workflow and no dedicated GPU. Every tree, house and prop is
-              generated in TypeScript at runtime, so adding to the valley is a code change rather than
-              an art pipeline.
-            </p>
-          </header>
-
-          <div class="specs">
-            <article class="spec">
-              <h3>Two kinds of asset</h3>
-              <p>
-                Eighty Quaternius nature models (CC0) ship with the project and are served locally as
-                GLB. Everything else is procedural: palms, bamboo, sakura, pine, Japanese and Kerala
-                houses, torii, bridges, rocks, grass, flowers.
-              </p>
-              <p>
-                A coconut palm is a curved trunk tube with drooping frond cones and optional coconuts.
-                A bamboo cluster is segmented stalks with visible nodes. Both take a seed, so no two
-                instances match.
-              </p>
-            </article>
-
-            <article class="spec">
-              <h3>The ground is real</h3>
-              <p>
-                Terrain is a seeded heightfield: rolling hills, a river channel carved along a sine
-                curve, and a flattened plateau where the village sits. It is vertex-coloured by height
-                and slope — sand at the waterline, grass on the flats, rock on the steep faces.
-              </p>
-              <p>
-                A single <code>heightAt(x, z)</code> sampler places every object and keeps the player
-                on the surface. The river is a custom shader with scrolling noise and a fresnel tint.
-              </p>
-            </article>
-
-            <article class="spec">
-              <h3>Living, on a budget</h3>
-              <p>
-                A ten-minute day moves the sun through colour and intensity. Weather cycles clear,
-                cloudy, rain and mist, driving a particle column and the fog density. Five seasons
-                rotate on their own clock.
-              </p>
-              <p>
-                Audio is synthesised in the browser — filtered noise for wind and water, chirps for
-                birds and crickets. There are no audio files to download.
-              </p>
-            </article>
-
-            <article class="spec">
-              <h3>Two cameras, one key</h3>
-              <p>
-                The default is an elevated third-person follow with damping and obstruction handling.
-                Press <kbd>V</kbd> and it becomes first-person. Follow distance, field of view and
-                camera mode are all in settings and persist between sessions.
-              </p>
-              <p>
-                Movement is camera-relative with acceleration and deceleration, and the character is
-                procedural too — built from primitives, animated in code.
-              </p>
-            </article>
-          </div>
-
-          <div class="workshop-note">
-            <h3>There is a workshop, and it is not for players</h3>
-            <p>
-              A separate dev-only page renders any procedural asset with live sliders for height,
-              thickness, colour, counts and seed, then exports it as GLB. It is a separate build entry,
-              so it never ships in the player bundle.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section class="band band-deep" id="run">
-        <div class="wrap">
-          <header class="band-head">
-            <p class="place"><span class="place-mark" aria-hidden="true">04</span>The gate</p>
-            <h2>Run it locally</h2>
-            <p class="lede">Requires Bun 1.4 or newer. There is no asset build step and no setup beyond installing.</p>
-          </header>
-
-          <div class="run-grid">
-            <div class="term">
-              <div class="term-bar">
-                <span class="term-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-                <button class="term-copy" id="copy" type="button">Copy</button>
-              </div>
-              <pre class="term-body" id="commands"><code><span class="c"># install and run</span>
-bun install
-bun run dev</code></pre>
-              <p class="term-out">Serves on localhost:5173</p>
+        <div class="showcase-container">
+          <!-- ── Left Column: What is Gitakure? ───────────── -->
+          <div class="showcase-left">
+            <div class="showcase-header">
+              <!-- Sakura flower icon -->
+              <svg class="header-sakura-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <g fill="#f472b6">
+                  <ellipse cx="16" cy="7" rx="5" ry="7"/>
+                  <ellipse cx="24" cy="13" rx="7" ry="5"/>
+                  <ellipse cx="21" cy="23" rx="5" ry="7"/>
+                  <ellipse cx="11" cy="23" rx="5" ry="7"/>
+                  <ellipse cx="8" cy="13" rx="7" ry="5"/>
+                </g>
+                <circle cx="16" cy="15" r="3" fill="#fef08a"/>
+              </svg>
+              <h2 class="showcase-title">What is Gitakure?</h2>
             </div>
 
-            <div class="keys">
-              <h3>Controls</h3>
-              <dl class="key-list">
-                <div><dt><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></dt><dd>Walk</dd></div>
-                <div><dt><kbd>Shift</kbd></dt><dd>Run</dd></div>
-                <div><dt><kbd>E</kbd></dt><dd>Sit, rest, interact</dd></div>
-                <div><dt><kbd>V</kbd></dt><dd>Switch camera</dd></div>
-                <div><dt><kbd>Shift</kbd>+<kbd>Space</kbd></dt><dd>Pause</dd></div>
-              </dl>
-              <p class="keys-note">
-                Other commands: <code>bun run build</code>, <code>bun run preview</code>,
-                <code>bun run test</code>, <code>bun run typecheck</code>.
-              </p>
+            <p class="showcase-intro">
+              A cozy countryside world inspired by <span class="highlight-pink">Japanese</span> and <span class="highlight-pink">Kerala</span> landscapes, where you can:
+            </p>
+
+            <!-- 4 Activity Columns -->
+            <div class="activity-row">
+              <div class="activity-item">
+                <div class="activity-icon-box tree-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2L4 14h5v6h6v-6h5z"/>
+                  </svg>
+                </div>
+                <div class="activity-caption">
+                  <span>Explore</span>
+                  <span>lush lands</span>
+                </div>
+              </div>
+
+              <div class="activity-item">
+                <div class="activity-icon-box fire-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/>
+                  </svg>
+                </div>
+                <div class="activity-caption">
+                  <span>Sit by a</span>
+                  <span>campfire</span>
+                </div>
+              </div>
+
+              <div class="activity-item">
+                <div class="activity-icon-box house-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                  </svg>
+                </div>
+                <div class="activity-caption">
+                  <span>Visit a</span>
+                  <span>peaceful village</span>
+                </div>
+              </div>
+
+              <div class="activity-item">
+                <div class="activity-icon-box rain-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
+                    <path d="M16 14v6"/>
+                    <path d="M8 14v6"/>
+                    <path d="M12 16v6"/>
+                  </svg>
+                </div>
+                <div class="activity-caption">
+                  <span>Watch</span>
+                  <span>the rain</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Center Column: 3 Tilted Polaroid Cards ────── -->
+          <div class="showcase-center" id="features">
+            <div class="cards-fan">
+              <!-- Card 1: Kerala/Japanese house (tilted left) -->
+              <div class="polaroid-card card-left" data-title="Kerala & Japanese Architecture" data-desc="A harmonious blend of wooden gables, verandas, clay tiles, and tropical greenery.">
+                <div class="card-inner">
+                  <img src="card-kerala-house.jpg" alt="Countryside wooden house surrounded by palms and grass" class="card-photo" />
+                </div>
+              </div>
+
+              <!-- Card 2: Night Campfire (center, prominent, slight tilt) -->
+              <div class="polaroid-card card-center" data-title="Midnight Campfire" data-desc="Gather around glowing embers beneath the night sky, listening to crickets and crackling logs.">
+                <div class="card-inner">
+                  <img src="card-campfire.jpg" alt="Campfire glowing at night near peaceful cottages" class="card-photo" />
+                </div>
+              </div>
+
+              <!-- Card 3: Misty River & Torii (tilted right) -->
+              <div class="polaroid-card card-right" data-title="Misty Torii Shoreline" data-desc="Tranquil morning fog hovering over the lake with a wooden boat drifting by an ancient Torii gate.">
+                <div class="card-inner">
+                  <img src="card-misty-river.jpg" alt="Misty lake with wooden boat and distant Torii gate" class="card-photo" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Right Column: A World to Unwind In ────────── -->
+          <div class="showcase-right">
+            <div class="unwind-card">
+              <div class="unwind-header">
+                <!-- Sprout/nature icon in circle -->
+                <div class="unwind-icon-wrap">
+                  <svg class="unwind-leaf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+                    <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+                  </svg>
+                </div>
+                <h3 class="unwind-title">A World to Unwind In</h3>
+              </div>
+
+              <ul class="unwind-list">
+                <li class="unwind-item">
+                  <span class="check-icon">✔</span>
+                  <span>Dynamic Seasons &amp; Weather</span>
+                </li>
+                <li class="unwind-item">
+                  <span class="check-icon">✔</span>
+                  <span>Living Village &amp; NPCs</span>
+                </li>
+                <li class="unwind-item">
+                  <span class="check-icon">✔</span>
+                  <span>GitHub Memories</span>
+                </li>
+                <li class="unwind-item">
+                  <span class="check-icon">✔</span>
+                  <span>Relaxing Atmosphere</span>
+                </li>
+                <li class="unwind-item">
+                  <span class="check-icon">✔</span>
+                  <span>Total Freedom</span>
+                </li>
+              </ul>
+
+              <div class="unwind-footer">
+                <span class="unwind-more-text">...and so much more!</span>
+                <!-- Hand-drawn pink underline swirl -->
+                <svg class="unwind-swirl" viewBox="0 0 180 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M4 10 C 45 3, 90 14, 135 6 C 155 3, 172 10, 176 8" stroke="#f472b6" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+              </div>
             </div>
           </div>
         </div>
-      </section>
-    </main>
 
-    <footer class="foot">
-      <div class="wrap foot-row">
-        <p class="foot-mark">
-          <img class="mark-glyph" src="logo.png" width="22" height="22" alt="" aria-hidden="true" />
-          Gitakure
-        </p>
-        <p class="foot-note">
-          Nature models by
-          <a href="https://quaternius.com/" target="_blank" rel="noopener noreferrer">Quaternius</a>
-          (CC0). Built with Three.js, Vue, Pinia and Dexie.
-        </p>
-        <a
-          class="foot-link"
-          href="https://github.com/Aswanidev-vs/Gitakure"
-          target="_blank"
-          rel="noopener noreferrer"
-          >Aswanidev-vs/Gitakure<span class="sr-only"> (opens in a new tab)</span></a
-        >
+        <!-- Floating Petals on Dark Surface -->
+        <div class="dark-petal petal-d1" aria-hidden="true"></div>
+        <div class="dark-petal petal-d2" aria-hidden="true"></div>
+        <div class="dark-petal petal-d3" aria-hidden="true"></div>
+        <div class="dark-petal petal-d4" aria-hidden="true"></div>
+      </section>
+
+      <!-- ── Footer ──────────────────────────────────────── -->
+      <footer class="site-footer">
+        <div class="footer-inner">
+          <p class="footer-copy">© Gitakure — A peaceful countryside simulation blending Japanese &amp; Kerala aesthetics.</p>
+          <div class="footer-links">
+            <a href="https://github.com/Aswanidev-vs/Gitakure" target="_blank" rel="noopener noreferrer">
+              <i data-lucide="github"></i> Repository
+            </a>
+            <button class="audio-toggle-btn" id="audio-toggle-btn" type="button" aria-label="Toggle countryside ambient soundscape" aria-pressed="true">
+              <i data-lucide="volume-2" id="audio-icon"></i>
+              <span id="audio-label">Ambient Sound: On</span>
+            </button>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ── Settings Modal ───────────────────────────────── -->
+    <div class="modal-backdrop" id="settings-modal" aria-hidden="true">
+      <div class="modal-card modal-card-wide" role="dialog" aria-labelledby="settings-heading" aria-modal="true">
+        <div class="modal-header">
+          <h3 id="settings-heading" class="modal-title">Gitakure Experience Settings</h3>
+          <button class="modal-close-btn" id="close-settings-btn" type="button" aria-label="Close Settings">✕</button>
+        </div>
+
+        <div class="modal-body">
+
+          <!-- ── Atmosphere Lighting ─────────────────────── -->
+          <div class="setting-group">
+            <span class="setting-label">Atmosphere Lighting Preset</span>
+            <div class="theme-buttons">
+              <button type="button" class="theme-btn active" data-filter="sunset">Sunset (Default)</button>
+              <button type="button" class="theme-btn" data-filter="golden">Golden Hour</button>
+              <button type="button" class="theme-btn" data-filter="night">Twilight Night</button>
+              <button type="button" class="theme-btn" data-filter="mist">Misty Rain</button>
+            </div>
+          </div>
+
+          <!-- ── Nature Soundscape Mixer ─────────────────── -->
+          <div class="setting-group">
+            <div class="setting-row mixer-header">
+              <div>
+                <span class="setting-name">Nature Soundscape</span>
+                <p class="setting-subtext">Generative wind, river, birds &amp; crickets — sculpt your own mix.</p>
+              </div>
+              <div class="mixer-header-actions">
+                <button type="button" class="mute-btn" id="ambient-mute-btn" aria-pressed="false">Mute</button>
+                <button type="button" class="toggle-pill active" id="modal-audio-toggle" aria-pressed="true">Sound: On</button>
+              </div>
+            </div>
+
+            <div class="preset-row" role="group" aria-label="Ambience presets">
+              <button type="button" class="preset-btn active" data-preset="cozy">Cozy Evening</button>
+              <button type="button" class="preset-btn" data-preset="riverside">Riverside</button>
+              <button type="button" class="preset-btn" data-preset="forest">Forest Morning</button>
+              <button type="button" class="preset-btn" data-preset="night">Cricket Night</button>
+            </div>
+
+            <div class="mixer-grid">
+              <div class="mixer-row" data-layer="wind">
+                <div class="mixer-meta">
+                  <span class="mixer-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 8h11a3 3 0 1 0-3-3" />
+                      <path d="M3 12h15a3 3 0 1 1-3 3" />
+                      <path d="M3 16h8a2.5 2.5 0 1 1-2.5 2.5" />
+                    </svg>
+                  </span>
+                  <span class="mixer-name">Wind</span>
+                </div>
+                <input type="range" id="layer-wind" class="volume-slider layer-slider" min="0" max="100" step="1" value="70" aria-label="Wind volume" />
+                <output class="volume-value" id="layer-wind-value" for="layer-wind">70%</output>
+              </div>
+
+              <div class="mixer-row" data-layer="breeze">
+                <div class="mixer-meta">
+                  <span class="mixer-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 10h9a2.5 2.5 0 1 0-2.5-2.5" />
+                      <path d="M4 14h12a2.5 2.5 0 1 1-2.5 2.5" />
+                      <path d="M4 18h5" />
+                    </svg>
+                  </span>
+                  <span class="mixer-name">Breeze</span>
+                </div>
+                <input type="range" id="layer-breeze" class="volume-slider layer-slider" min="0" max="100" step="1" value="45" aria-label="Breeze volume" />
+                <output class="volume-value" id="layer-breeze-value" for="layer-breeze">45%</output>
+              </div>
+
+              <div class="mixer-row" data-layer="river">
+                <div class="mixer-meta">
+                  <span class="mixer-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M2 7c3 0 3 2 6 2s3-2 6-2 3 2 6 2" />
+                      <path d="M2 12c3 0 3 2 6 2s3-2 6-2 3 2 6 2" />
+                      <path d="M2 17c3 0 3 2 6 2s3-2 6-2 3 2 6 2" />
+                    </svg>
+                  </span>
+                  <span class="mixer-name">Flowing River</span>
+                </div>
+                <input type="range" id="layer-river" class="volume-slider layer-slider" min="0" max="100" step="1" value="65" aria-label="River volume" />
+                <output class="volume-value" id="layer-river-value" for="layer-river">65%</output>
+              </div>
+
+              <div class="mixer-row" data-layer="stream">
+                <div class="mixer-meta">
+                  <span class="mixer-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 3c3 4 6 6.5 6 10a6 6 0 0 1-12 0c0-3.5 3-6 6-10z" />
+                    </svg>
+                  </span>
+                  <span class="mixer-name">Stream Water</span>
+                </div>
+                <input type="range" id="layer-stream" class="volume-slider layer-slider" min="0" max="100" step="1" value="50" aria-label="Stream volume" />
+                <output class="volume-value" id="layer-stream-value" for="layer-stream">50%</output>
+              </div>
+
+              <div class="mixer-row" data-layer="birds">
+                <div class="mixer-meta">
+                  <span class="mixer-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 14c4 1 6-1 7-4 1.5-4 5-6 9-5-1 3-1 6-3 8-2.5 2.5-6 3-9 2l-4 2z" />
+                      <path d="M16 5l.01 0" />
+                    </svg>
+                  </span>
+                  <span class="mixer-name">Birdsong</span>
+                </div>
+                <input type="range" id="layer-birds" class="volume-slider layer-slider" min="0" max="100" step="1" value="50" aria-label="Birdsong volume" />
+                <output class="volume-value" id="layer-birds-value" for="layer-birds">50%</output>
+              </div>
+
+              <div class="mixer-row" data-layer="crickets">
+                <div class="mixer-meta">
+                  <span class="mixer-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="4" />
+                      <path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19" />
+                    </svg>
+                  </span>
+                  <span class="mixer-name">Crickets</span>
+                </div>
+                <input type="range" id="layer-crickets" class="volume-slider layer-slider" min="0" max="100" step="1" value="35" aria-label="Crickets volume" />
+                <output class="volume-value" id="layer-crickets-value" for="layer-crickets">35%</output>
+              </div>
+            </div>
+
+            <div class="volume-row master-row">
+              <label class="volume-label" for="ambient-volume">Master</label>
+              <input type="range" id="ambient-volume" class="volume-slider" min="0" max="100" step="1" value="70" aria-label="Master volume" />
+              <output class="volume-value" id="volume-value" for="ambient-volume">70%</output>
+            </div>
+          </div>
+
+          <!-- ── Petals ────────────────────────────────────── -->
+          <div class="setting-group">
+            <div class="setting-row">
+              <div>
+                <span class="setting-name">Sakura Blossom Petals</span>
+                <p class="setting-subtext">Gently falling cherry blossom breeze</p>
+              </div>
+              <button type="button" class="toggle-pill active" id="modal-petals-toggle" aria-pressed="true">Enabled</button>
+            </div>
+          </div>
+        </div>
       </div>
-    </footer>
+    </div>
 
-    <script src="valley.js"></script>
+    <!-- ── Image Lightbox Modal ─────────────────────────── -->
+    <div class="lightbox-backdrop" id="lightbox-modal" aria-hidden="true">
+      <div class="lightbox-content">
+        <button class="lightbox-close" id="lightbox-close-btn" aria-label="Close lightbox">✕</button>
+        <img src="" alt="" class="lightbox-img" id="lightbox-img" />
+        <div class="lightbox-caption">
+          <h4 id="lightbox-title">Title</h4>
+          <p id="lightbox-desc">Description</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lucide Icons & GSAP -->
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="main.js"></script>
   </body>
 </html>
