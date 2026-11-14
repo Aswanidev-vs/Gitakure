@@ -78,3 +78,14 @@ export const DEFAULT_SETTINGS: GameSettings = {
   showTime: true,
   showWeather: true,
 };
+
+/**
+ * Detach a settings object from Vue reactivity.
+ *
+ * `structuredClone` cannot clone a reactive proxy and throws DataCloneError, so
+ * round-tripping through JSON is used instead. Settings are plain JSON — no
+ * functions, dates or class instances — so this is lossless here.
+ */
+export function plainSettings(s: GameSettings): GameSettings {
+  return JSON.parse(JSON.stringify(s)) as GameSettings;
+}

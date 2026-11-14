@@ -3,9 +3,10 @@ import { ref } from 'vue';
 import GithubModal from './GithubModal.vue';
 
 defineProps<{ hasSave: boolean }>();
-const emit = defineEmits<{ continue: []; newJourney: []; settings: []; github: []; about: [] }>();
+const emit = defineEmits<{ continue: []; newJourney: []; settings: []; github: [] }>();
 
 const showGithub = ref(false);
+const showAbout = ref(false);
 </script>
 
 <template>
@@ -19,13 +20,36 @@ const showGithub = ref(false);
         <button :class="{ primary: !hasSave }" @click="emit('newJourney')">New Journey</button>
         <button @click="showGithub = true">GitHub Connection</button>
         <button @click="emit('settings')">Settings</button>
-        <button @click="emit('about')">About</button>
+        <button @click="showAbout = true">About</button>
       </nav>
 
       <p class="hint">WASD to move · E to interact · V to switch camera · Shift+Space to pause</p>
     </div>
 
     <GithubModal :open="showGithub" @close="showGithub = false" @connected="emit('github')" />
+
+    <div v-if="showAbout" class="modal-backdrop" @click.self="showAbout = false">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="about-title">
+        <h2 id="about-title">About Gitakure</h2>
+        <p class="about-body">
+          A peaceful low-poly countryside that runs in your browser. There is nothing to complete:
+          explore a village, sit by the river, watch the weather turn, and stay by the fire as long
+          as you like.
+        </p>
+        <p class="about-body">
+          Built with Three.js, Vue, Pinia and Dexie. Terrain, water, buildings and vegetation are
+          generated from code at runtime. Nature models are from
+          <a href="https://quaternius.com/" target="_blank" rel="noopener noreferrer">Quaternius</a>
+          (CC0).
+        </p>
+        <p class="about-body about-quiet">
+          Your progress is stored in this browser only. Nothing is uploaded.
+        </p>
+        <div class="modal-actions">
+          <button class="primary" @click="showAbout = false">Close</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -90,5 +114,83 @@ const showGithub = ref(false);
   font-size: 0.75rem;
   opacity: 0.5;
   font-family: system-ui, sans-serif;
+}
+
+/* ── about ────────────────────────────────────────────────── */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 10, 8, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  padding: 1.25rem;
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  background: #162420;
+  border: 1px solid rgba(180, 200, 190, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: min(460px, 100%);
+  color: #e8f0ea;
+  font-family: 'Zen Kaku Gothic New', system-ui, sans-serif;
+}
+
+.modal h2 {
+  margin: 0 0 0.9rem;
+  font-size: 1.2rem;
+  font-weight: 500;
+  font-family: 'Shippori Mincho', Georgia, serif;
+}
+
+.about-body {
+  margin: 0 0 0.9rem;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: #c6cbb4;
+}
+
+.about-body a {
+  color: #8fb3a0;
+  text-underline-offset: 3px;
+}
+
+.about-quiet {
+  font-size: 0.82rem;
+  opacity: 0.72;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: flex-end;
+  margin-top: 1.1rem;
+}
+
+.modal-actions button {
+  padding: 0.5rem 1rem;
+  min-height: 40px;
+  border: 1px solid rgba(180, 200, 190, 0.3);
+  background: transparent;
+  color: #e8f0ea;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background-color 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.modal-actions .primary {
+  background: #8fb3a0;
+  color: #0f1a17;
+  border-color: #8fb3a0;
+}
+
+.modal-actions .primary:hover {
+  background: #a3c5b0;
 }
 </style>

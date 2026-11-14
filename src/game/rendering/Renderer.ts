@@ -6,10 +6,12 @@ import type { GraphicsSettings } from '@/types';
 
 export class Renderer {
   readonly instance: THREE.WebGLRenderer;
+  private readonly container: HTMLElement;
   private settings: GraphicsSettings;
   private maxPixelCount: number;
 
   constructor(container: HTMLElement, settings: GraphicsSettings) {
+    this.container = container;
     this.settings = settings;
     this.maxPixelCount = settings.maxPixelCount;
 
@@ -24,7 +26,9 @@ export class Renderer {
     this.instance.shadowMap.type = THREE.PCFSoftShadowMap;
 
     const { clientWidth, clientHeight } = container;
-    this.instance.setSize(clientWidth, clientHeight, false);
+    // updateStyle must stay true: with `false` the canvas never gets a CSS size
+    // and collapses to 0x0 inside a sized container.
+    this.instance.setSize(clientWidth, clientHeight);
     this.applyPixelCap();
     container.appendChild(this.instance.domElement);
   }
@@ -38,24 +42,31 @@ export class Renderer {
   }
 
   setSize(width: number, height: number): void {
-    this.instance.setSize(width, height, false);
+    this.instance.setSize(width, height);
     this.applyPixelCap();
   }
 
-  /** Cap the drawing buffer so total pixel count stays within budget. */
+  /**
+   * Cap the drawing buffer so total pixels stay within budget.
+   *
+   * Three.js owns the pixel ratio and the canvas CSS size; this only lowers the
+   * ratio when the buffer would exceed the budget, so the canvas keeps filling
+   * its container instead of being sized in device pixels.
+   */
   private applyPixelCap(): void {
     const canvas = this.instance.domElement;
-    const ratio = Math.min(window.devicePixelRatio, this.settings.pixelRatioCap);
-    let w = Math.floor(canvas.clientWidth * ratio);
-    let h = Math.floor(canvas.clientHeight * ratio);
-    const count = w * h;
-    if (count > this.maxPixelCount) {
-      const scale = Math.sqrt(this.maxPixelCount / count);
-      w = Math.floor(w * scale);
-      h = Math.floor(h * scale);
+    const cssW = canvas.clientWidth || this.container.clientWidth;
+    const cssH = canvas.clientHeight || this.container.clientHeight;
+    const wanted = Math.min(window.devicePixelRatio, this.settings.pixelRatioCap);
+    if (cssW > 0 && cssH > 0) {
+      const count = cssW * cssH * wanted * wanted;
+      if (count > this.maxPixelCount) {
+        const scale = Math.sqrt(this.maxPixelCount / count);
+        this.instance.setPixelRatio(Math.max(1, wanted * scale));
+        return;
+      }
     }
-    this.instance.setPixelRatio(1);
-    this.instance.setSize(w, h, false);
+    this.instance.setPixelRatio(wanted);
   }
 
   applySettings(settings: GraphicsSettings): void {

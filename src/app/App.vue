@@ -3,6 +3,7 @@ import { onMounted, onBeforeUnmount, ref, watch, nextTick } from 'vue';
 import { Game } from '@/game/core/Game';
 import { gameBridge } from '@/game/core/GameBridge';
 import type { CameraMode, GameSettings } from '@/types';
+import { plainSettings } from '@/types';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { gameStateRepo, settingsRepo } from '@/database/repositories';
 import MainMenu from '@/components/MainMenu.vue';
@@ -54,8 +55,8 @@ function onKey(e: KeyboardEvent) {
 }
 
 function onSettingsChange(next: GameSettings) {
-  Object.assign(settings, structuredClone(next));
-  settingsStore.settings = structuredClone(next);
+  Object.assign(settings, plainSettings(next));
+  settingsStore.settings = plainSettings(next);
 }
 
 async function startGame(fresh: boolean) {
@@ -69,6 +70,11 @@ async function startGame(fresh: boolean) {
   }
   started.value = true;
   await nextTick();
+  if (!container.value || game.value) return;
+  // Wait for a real layout frame: with v-show the container is display:none
+  // during the same tick, so clientWidth/clientHeight would both be 0 and the
+  // renderer would be sized 0x0.
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
   if (!container.value || game.value) return;
   const g = new Game(container.value, settings);
   game.value = g;
@@ -90,8 +96,8 @@ onMounted(async () => {
     hasSave.value = (await gameStateRepo.load()) !== null;
     const saved = await settingsRepo.load();
     if (saved) {
-      Object.assign(settings, structuredClone(saved));
-      settingsStore.settings = structuredClone(saved);
+      Object.assign(settings, plainSettings(saved));
+      settingsStore.settings = plainSettings(saved);
     }
   } catch {
     // fresh
@@ -114,10 +120,16 @@ onBeforeUnmount(() => {
     @new-journey="startGame(true)"
     @settings="showSettings = true"
     @github="startGame(false)"
-    @about="showSettings = true"
   />
 
-  <div v-show="started" class="gitakure-root">
+  <SettingsModal
+    :settings="settings"
+    :open="showSettings"
+    @close="showSettings = false"
+    @change="onSettingsChange"
+  />
+
+  <div v-if="started" class="gitakure-root">
     <div ref="container" class="game-canvas"></div>
 
     <div class="hud">
@@ -134,8 +146,6 @@ onBeforeUnmount(() => {
     </div>
 
     <div v-if="prompt" class="interaction-pill">{{ prompt }}</div>
-
-    <SettingsModal :settings="settings" :open="showSettings" @close="showSettings = false" @change="onSettingsChange" />
   </div>
 </template>
 
@@ -151,6 +161,12 @@ onBeforeUnmount(() => {
 .game-canvas {
   position: absolute;
   inset: 0;
+}
+
+.game-canvas :deep(canvas) {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 .hud {
   position: absolute;

@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { reactive, watch } from 'vue';
 import { gameBridge } from '@/game/core/GameBridge';
-import type { GameSettings } from '@/types';
+import { plainSettings, type GameSettings } from '@/types';
 
 const props = defineProps<{ settings: GameSettings; open: boolean }>();
 const emit = defineEmits<{ close: []; change: [settings: GameSettings] }>();
 
-const draft = reactive<GameSettings>(structuredClone(props.settings));
+const draft = reactive<GameSettings>(plainSettings(props.settings));
 
 watch(
   () => props.open,
   (open) => {
-    if (open) Object.assign(draft, structuredClone(props.settings));
+    if (open) Object.assign(draft, plainSettings(props.settings));
   },
 );
 
@@ -21,7 +21,7 @@ function apply() {
   gameBridge.emit({ type: 'setCameraMode', mode: draft.camera.mode });
   gameBridge.emit({ type: 'setFollowDistance', distance: draft.camera.followDistance });
   gameBridge.emit({ type: 'setReducedMotion', value: draft.reducedMotion });
-  emit('change', structuredClone(draft));
+  emit('change', plainSettings(draft));
   emit('close');
 }
 </script>
@@ -115,7 +115,7 @@ function apply() {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: 300;
   backdrop-filter: blur(4px);
 }
 .modal {
