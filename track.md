@@ -72,18 +72,19 @@ Status legend: `[x]` done and verified · `[~]` in progress · `[ ]` not started
 
 ---
 
-## Phase 3: First Environment `[~]`
+## Phase 3: First Environment `[x]`
 
-- `[ ]` Terrain (procedural heightfield, hills, riverbank carve).
-- `[ ]` Water (river/canal, custom shader).
-- `[ ]` Vegetation (instanced GLB placement by biome).
-- `[ ]` Village (procedural buildings + GLB props).
-- `[ ]` Paths, campfire spot, scenic viewpoints.
-- `[ ]` Lighting/camera established for the scene.
+- `[x]` **TerrainSystem** — `src/game/world/TerrainSystem.ts`. Procedural fbm heightfield with gentle hills, a sine-winding river channel carved through the middle, and a raised village plateau. Vertex-colored (grass/dirt/sand/rock by height + slope). Provides `heightAt(x,z)` bilinear sampler for object placement, `scatter()` for biome placement, `slopeAt()`.
+- `[x]` **WaterSystem** — `src/game/world/WaterSystem.ts`. Custom GLSL shader river/canal: scrolling noise-based ripples, fresnel sky reflection tint, shallow→deep color gradient, gentle vertex bob. Lightweight (no post-processing).
+- `[x]` **VegetationSystem** — `src/game/world/VegetationSystem.ts`. Scatters ground-cover (grass tufts, flower clusters), hero trees (coconut palms near river/Kerala, sakura + pine near village/Japanese), bamboo clusters, rocks near riverbanks, bushes — all on terrain height via the scatter sampler.
+- `[x]` **VillageGenerator** — `src/game/world/VillageGenerator.ts`. Places 4 houses (Japanese/Kerala mix) on the plateau, a torii shrine gate, an arched bridge over the river, a campfire clearing (stone ring + logs), and a bench.
+- `[x]` **WorldManager** — `src/game/world/WorldManager.ts`. Ties terrain + water + vegetation + village together; exposes `heightAt`, `campfirePosition`, `benchPosition`; `update()` drives water shader.
+- `[x]` Game wired to WorldManager: player capsule placed on terrain at the village bench, glued to terrain height each frame, camera + lighting follow player.
+- `[x]` **Verification**: `bun run typecheck` clean, `bun run build` clean, 16/16 tests pass, dev server launches, full 3D scene (terrain + river + village + vegetation) renders.
 
 ---
 
-## Phase 4: Player & Interaction `[ ]`
+## Phase 4: Player & Interaction `[~]`
 
 - `[ ]` Stylized 3D player (procedural low-poly humanoid; no rigged GLB in pack).
 - `[ ]` Movement (WASD/arrows, accel/decel, terrain-aware, collision).
