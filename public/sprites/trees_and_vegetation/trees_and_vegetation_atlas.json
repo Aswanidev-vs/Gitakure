@@ -1,0 +1,4040 @@
+{
+ "frames": {
+  "trees_and_vegetation_p01_r00_c00": {
+   "frame": {
+    "x": 1662,
+    "y": 0,
+    "w": 133,
+    "h": 88
+   },
+   "group": {
+    "panel": 1,
+    "row": 0,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 17,
+    "y": 145,
+    "w": 137,
+    "h": 87
+   }
+  },
+  "trees_and_vegetation_p01_r00_c01": {
+   "frame": {
+    "x": 150,
+    "y": 211,
+    "w": 69,
+    "h": 48
+   },
+   "group": {
+    "panel": 1,
+    "row": 0,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 69,
+    "y": 216,
+    "w": 65,
+    "h": 48
+   }
+  },
+  "trees_and_vegetation_p01_r00_c02": {
+   "frame": {
+    "x": 532,
+    "y": 126,
+    "w": 117,
+    "h": 75
+   },
+   "group": {
+    "panel": 1,
+    "row": 0,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 159,
+    "y": 146,
+    "w": 119,
+    "h": 75
+   }
+  },
+  "trees_and_vegetation_p01_r00_c03": {
+   "frame": {
+    "x": 244,
+    "y": 263,
+    "w": 89,
+    "h": 41
+   },
+   "group": {
+    "panel": 1,
+    "row": 0,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 179,
+    "y": 223,
+    "w": 85,
+    "h": 41
+   }
+  },
+  "trees_and_vegetation_p01_r00_c04": {
+   "frame": {
+    "x": 317,
+    "y": 0,
+    "w": 118,
+    "h": 114
+   },
+   "group": {
+    "panel": 1,
+    "row": 0,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 282,
+    "y": 146,
+    "w": 121,
+    "h": 118
+   }
+  },
+  "trees_and_vegetation_p01_r00_c05": {
+   "frame": {
+    "x": 437,
+    "y": 0,
+    "w": 106,
+    "h": 111
+   },
+   "group": {
+    "panel": 1,
+    "row": 0,
+    "col": 5
+   },
+   "sourceRect": {
+    "x": 414,
+    "y": 154,
+    "w": 102,
+    "h": 110
+   }
+  },
+  "trees_and_vegetation_p01_r01_c00": {
+   "frame": {
+    "x": 1587,
+    "y": 347,
+    "w": 31,
+    "h": 16
+   },
+   "group": {
+    "panel": 1,
+    "row": 1,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 38,
+    "y": 245,
+    "w": 30,
+    "h": 19
+   }
+  },
+  "trees_and_vegetation_p01_r02_c00": {
+   "frame": {
+    "x": 0,
+    "y": 126,
+    "w": 135,
+    "h": 83
+   },
+   "group": {
+    "panel": 1,
+    "row": 2,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 18,
+    "y": 273,
+    "w": 138,
+    "h": 83
+   }
+  },
+  "trees_and_vegetation_p01_r02_c01": {
+   "frame": {
+    "x": 414,
+    "y": 126,
+    "w": 116,
+    "h": 77
+   },
+   "group": {
+    "panel": 1,
+    "row": 2,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 162,
+    "y": 270,
+    "w": 119,
+    "h": 77
+   }
+  },
+  "trees_and_vegetation_p01_r02_c02": {
+   "frame": {
+    "x": 645,
+    "y": 0,
+    "w": 118,
+    "h": 109
+   },
+   "group": {
+    "panel": 1,
+    "row": 2,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 285,
+    "y": 277,
+    "w": 121,
+    "h": 112
+   }
+  },
+  "trees_and_vegetation_p01_r02_c03": {
+   "frame": {
+    "x": 765,
+    "y": 0,
+    "w": 109,
+    "h": 108
+   },
+   "group": {
+    "panel": 1,
+    "row": 2,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 412,
+    "y": 278,
+    "w": 110,
+    "h": 111
+   }
+  },
+  "trees_and_vegetation_p01_r03_c00": {
+   "frame": {
+    "x": 911,
+    "y": 263,
+    "w": 60,
+    "h": 40
+   },
+   "group": {
+    "panel": 1,
+    "row": 3,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 63,
+    "y": 349,
+    "w": 56,
+    "h": 39
+   }
+  },
+  "trees_and_vegetation_p01_r03_c01": {
+   "frame": {
+    "x": 973,
+    "y": 263,
+    "w": 66,
+    "h": 40
+   },
+   "group": {
+    "panel": 1,
+    "row": 3,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 197,
+    "y": 349,
+    "w": 62,
+    "h": 40
+   }
+  },
+  "trees_and_vegetation_p02_r00_c00": {
+   "frame": {
+    "x": 113,
+    "y": 0,
+    "w": 116,
+    "h": 119
+   },
+   "group": {
+    "panel": 2,
+    "row": 0,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 558,
+    "y": 148,
+    "w": 118,
+    "h": 123
+   }
+  },
+  "trees_and_vegetation_p02_r00_c01": {
+   "frame": {
+    "x": 876,
+    "y": 0,
+    "w": 106,
+    "h": 108
+   },
+   "group": {
+    "panel": 2,
+    "row": 0,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 682,
+    "y": 159,
+    "w": 109,
+    "h": 112
+   }
+  },
+  "trees_and_vegetation_p02_r00_c02": {
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 111,
+    "h": 124
+   },
+   "group": {
+    "panel": 2,
+    "row": 0,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 795,
+    "y": 144,
+    "w": 113,
+    "h": 128
+   }
+  },
+  "trees_and_vegetation_p02_r00_c03": {
+   "frame": {
+    "x": 818,
+    "y": 126,
+    "w": 98,
+    "h": 71
+   },
+   "group": {
+    "panel": 2,
+    "row": 0,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 914,
+    "y": 145,
+    "w": 100,
+    "h": 70
+   }
+  },
+  "trees_and_vegetation_p02_r00_c04": {
+   "frame": {
+    "x": 918,
+    "y": 126,
+    "w": 60,
+    "h": 69
+   },
+   "group": {
+    "panel": 2,
+    "row": 0,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 935,
+    "y": 203,
+    "w": 56,
+    "h": 68
+   }
+  },
+  "trees_and_vegetation_p02_r01_c00": {
+   "frame": {
+    "x": 1064,
+    "y": 0,
+    "w": 86,
+    "h": 107
+   },
+   "group": {
+    "panel": 2,
+    "row": 1,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 555,
+    "y": 278,
+    "w": 88,
+    "h": 109
+   }
+  },
+  "trees_and_vegetation_p02_r01_c01": {
+   "frame": {
+    "x": 1138,
+    "y": 126,
+    "w": 80,
+    "h": 61
+   },
+   "group": {
+    "panel": 2,
+    "row": 1,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 649,
+    "y": 282,
+    "w": 77,
+    "h": 57
+   }
+  },
+  "trees_and_vegetation_p02_r01_c02": {
+   "frame": {
+    "x": 1293,
+    "y": 126,
+    "w": 42,
+    "h": 58
+   },
+   "group": {
+    "panel": 2,
+    "row": 1,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 668,
+    "y": 330,
+    "w": 38,
+    "h": 58
+   }
+  },
+  "trees_and_vegetation_p02_r01_c03": {
+   "frame": {
+    "x": 1418,
+    "y": 0,
+    "w": 90,
+    "h": 100
+   },
+   "group": {
+    "panel": 2,
+    "row": 1,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 731,
+    "y": 284,
+    "w": 94,
+    "h": 103
+   }
+  },
+  "trees_and_vegetation_p02_r01_c04": {
+   "frame": {
+    "x": 651,
+    "y": 126,
+    "w": 87,
+    "h": 75
+   },
+   "group": {
+    "panel": 2,
+    "row": 1,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 829,
+    "y": 279,
+    "w": 88,
+    "h": 74
+   }
+  },
+  "trees_and_vegetation_p02_r01_c05": {
+   "frame": {
+    "x": 0,
+    "y": 263,
+    "w": 37,
+    "h": 42
+   },
+   "group": {
+    "panel": 2,
+    "row": 1,
+    "col": 5
+   },
+   "sourceRect": {
+    "x": 859,
+    "y": 346,
+    "w": 33,
+    "h": 42
+   }
+  },
+  "trees_and_vegetation_p02_r01_c06": {
+   "frame": {
+    "x": 1152,
+    "y": 0,
+    "w": 92,
+    "h": 107
+   },
+   "group": {
+    "panel": 2,
+    "row": 1,
+    "col": 6
+   },
+   "sourceRect": {
+    "x": 920,
+    "y": 279,
+    "w": 95,
+    "h": 110
+   }
+  },
+  "trees_and_vegetation_p03_r00_c00": {
+   "frame": {
+    "x": 740,
+    "y": 126,
+    "w": 76,
+    "h": 75
+   },
+   "group": {
+    "panel": 3,
+    "row": 0,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 1062,
+    "y": 142,
+    "w": 79,
+    "h": 75
+   }
+  },
+  "trees_and_vegetation_p03_r00_c01": {
+   "frame": {
+    "x": 581,
+    "y": 347,
+    "w": 90,
+    "h": 26
+   },
+   "group": {
+    "panel": 3,
+    "row": 0,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 1156,
+    "y": 218,
+    "w": 86,
+    "h": 22
+   }
+  },
+  "trees_and_vegetation_p03_r00_c02": {
+   "frame": {
+    "x": 705,
+    "y": 347,
+    "w": 73,
+    "h": 25
+   },
+   "group": {
+    "panel": 3,
+    "row": 0,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 1163,
+    "y": 194,
+    "w": 70,
+    "h": 22
+   }
+  },
+  "trees_and_vegetation_p03_r00_c03": {
+   "frame": {
+    "x": 1924,
+    "y": 126,
+    "w": 56,
+    "h": 52
+   },
+   "group": {
+    "panel": 3,
+    "row": 0,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 1172,
+    "y": 143,
+    "w": 54,
+    "h": 51
+   }
+  },
+  "trees_and_vegetation_p03_r00_c04": {
+   "frame": {
+    "x": 1510,
+    "y": 0,
+    "w": 68,
+    "h": 93
+   },
+   "group": {
+    "panel": 3,
+    "row": 0,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 1250,
+    "y": 144,
+    "w": 70,
+    "h": 93
+   }
+  },
+  "trees_and_vegetation_p03_r00_c05": {
+   "frame": {
+    "x": 231,
+    "y": 0,
+    "w": 84,
+    "h": 119
+   },
+   "group": {
+    "panel": 3,
+    "row": 0,
+    "col": 5
+   },
+   "sourceRect": {
+    "x": 1326,
+    "y": 142,
+    "w": 88,
+    "h": 122
+   }
+  },
+  "trees_and_vegetation_p03_r00_c06": {
+   "frame": {
+    "x": 137,
+    "y": 126,
+    "w": 103,
+    "h": 83
+   },
+   "group": {
+    "panel": 3,
+    "row": 0,
+    "col": 6
+   },
+   "sourceRect": {
+    "x": 1418,
+    "y": 147,
+    "w": 105,
+    "h": 82
+   }
+  },
+  "trees_and_vegetation_p03_r01_c00": {
+   "frame": {
+    "x": 1365,
+    "y": 307,
+    "w": 94,
+    "h": 33
+   },
+   "group": {
+    "panel": 3,
+    "row": 1,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 1054,
+    "y": 215,
+    "w": 96,
+    "h": 29
+   }
+  },
+  "trees_and_vegetation_p03_r01_c01": {
+   "frame": {
+    "x": 221,
+    "y": 211,
+    "w": 48,
+    "h": 48
+   },
+   "group": {
+    "panel": 3,
+    "row": 1,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 1461,
+    "y": 216,
+    "w": 44,
+    "h": 48
+   }
+  },
+  "trees_and_vegetation_p03_r02_c00": {
+   "frame": {
+    "x": 1024,
+    "y": 347,
+    "w": 34,
+    "h": 22
+   },
+   "group": {
+    "panel": 3,
+    "row": 2,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 1087,
+    "y": 244,
+    "w": 31,
+    "h": 22
+   }
+  },
+  "trees_and_vegetation_p03_r02_c01": {
+   "frame": {
+    "x": 1060,
+    "y": 347,
+    "w": 33,
+    "h": 22
+   },
+   "group": {
+    "panel": 3,
+    "row": 2,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 1185,
+    "y": 243,
+    "w": 30,
+    "h": 22
+   }
+  },
+  "trees_and_vegetation_p03_r02_c02": {
+   "frame": {
+    "x": 780,
+    "y": 347,
+    "w": 20,
+    "h": 25
+   },
+   "group": {
+    "panel": 3,
+    "row": 2,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 1278,
+    "y": 240,
+    "w": 16,
+    "h": 24
+   }
+  },
+  "trees_and_vegetation_p03_r02_c03": {
+   "frame": {
+    "x": 1663,
+    "y": 347,
+    "w": 24,
+    "h": 15
+   },
+   "group": {
+    "panel": 3,
+    "row": 2,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 1438,
+    "y": 246,
+    "w": 21,
+    "h": 18
+   }
+  },
+  "trees_and_vegetation_p03_r03_c00": {
+   "frame": {
+    "x": 984,
+    "y": 0,
+    "w": 78,
+    "h": 108
+   },
+   "group": {
+    "panel": 3,
+    "row": 3,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 1052,
+    "y": 276,
+    "w": 77,
+    "h": 112
+   }
+  },
+  "trees_and_vegetation_p03_r03_c01": {
+   "frame": {
+    "x": 1348,
+    "y": 0,
+    "w": 68,
+    "h": 105
+   },
+   "group": {
+    "panel": 3,
+    "row": 3,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 1141,
+    "y": 280,
+    "w": 68,
+    "h": 108
+   }
+  },
+  "trees_and_vegetation_p03_r03_c02": {
+   "frame": {
+    "x": 329,
+    "y": 126,
+    "w": 83,
+    "h": 79
+   },
+   "group": {
+    "panel": 3,
+    "row": 3,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 1217,
+    "y": 278,
+    "w": 86,
+    "h": 78
+   }
+  },
+  "trees_and_vegetation_p03_r03_c03": {
+   "frame": {
+    "x": 1871,
+    "y": 126,
+    "w": 51,
+    "h": 54
+   },
+   "group": {
+    "panel": 3,
+    "row": 3,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 1236,
+    "y": 334,
+    "w": 48,
+    "h": 54
+   }
+  },
+  "trees_and_vegetation_p03_r03_c04": {
+   "frame": {
+    "x": 545,
+    "y": 0,
+    "w": 98,
+    "h": 111
+   },
+   "group": {
+    "panel": 3,
+    "row": 3,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 1311,
+    "y": 273,
+    "w": 102,
+    "h": 115
+   }
+  },
+  "trees_and_vegetation_p03_r03_c05": {
+   "frame": {
+    "x": 1246,
+    "y": 0,
+    "w": 100,
+    "h": 106
+   },
+   "group": {
+    "panel": 3,
+    "row": 3,
+    "col": 5
+   },
+   "sourceRect": {
+    "x": 1420,
+    "y": 278,
+    "w": 103,
+    "h": 110
+   }
+  },
+  "trees_and_vegetation_p04_r00_c00": {
+   "frame": {
+    "x": 936,
+    "y": 347,
+    "w": 31,
+    "h": 24
+   },
+   "group": {
+    "panel": 4,
+    "row": 0,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 97,
+    "y": 483,
+    "w": 34,
+    "h": 24
+   }
+  },
+  "trees_and_vegetation_p04_r00_c01": {
+   "frame": {
+    "x": 1461,
+    "y": 307,
+    "w": 45,
+    "h": 33
+   },
+   "group": {
+    "panel": 4,
+    "row": 0,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 159,
+    "y": 468,
+    "w": 47,
+    "h": 32
+   }
+  },
+  "trees_and_vegetation_p04_r00_c02": {
+   "frame": {
+    "x": 84,
+    "y": 211,
+    "w": 64,
+    "h": 49
+   },
+   "group": {
+    "panel": 4,
+    "row": 0,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 230,
+    "y": 451,
+    "w": 67,
+    "h": 49
+   }
+  },
+  "trees_and_vegetation_p04_r00_c03": {
+   "frame": {
+    "x": 980,
+    "y": 126,
+    "w": 76,
+    "h": 62
+   },
+   "group": {
+    "panel": 4,
+    "row": 0,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 312,
+    "y": 440,
+    "w": 78,
+    "h": 61
+   }
+  },
+  "trees_and_vegetation_p04_r00_c04": {
+   "frame": {
+    "x": 1580,
+    "y": 0,
+    "w": 80,
+    "h": 93
+   },
+   "group": {
+    "panel": 4,
+    "row": 0,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 400,
+    "y": 436,
+    "w": 83,
+    "h": 97
+   }
+  },
+  "trees_and_vegetation_p04_r01_c00": {
+   "frame": {
+    "x": 1731,
+    "y": 347,
+    "w": 30,
+    "h": 13
+   },
+   "group": {
+    "panel": 4,
+    "row": 1,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 32,
+    "y": 519,
+    "w": 33,
+    "h": 12
+   }
+  },
+  "trees_and_vegetation_p04_r01_c01": {
+   "frame": {
+    "x": 1689,
+    "y": 347,
+    "w": 24,
+    "h": 14
+   },
+   "group": {
+    "panel": 4,
+    "row": 1,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 35,
+    "y": 501,
+    "w": 27,
+    "h": 13
+   }
+  },
+  "trees_and_vegetation_p04_r01_c02": {
+   "frame": {
+    "x": 802,
+    "y": 347,
+    "w": 30,
+    "h": 25
+   },
+   "group": {
+    "panel": 4,
+    "row": 1,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 98,
+    "y": 507,
+    "w": 31,
+    "h": 24
+   }
+  },
+  "trees_and_vegetation_p04_r01_c03": {
+   "frame": {
+    "x": 118,
+    "y": 347,
+    "w": 32,
+    "h": 30
+   },
+   "group": {
+    "panel": 4,
+    "row": 1,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 168,
+    "y": 502,
+    "w": 32,
+    "h": 30
+   }
+  },
+  "trees_and_vegetation_p04_r01_c04": {
+   "frame": {
+    "x": 85,
+    "y": 307,
+    "w": 37,
+    "h": 37
+   },
+   "group": {
+    "panel": 4,
+    "row": 1,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 246,
+    "y": 495,
+    "w": 36,
+    "h": 37
+   }
+  },
+  "trees_and_vegetation_p04_r01_c05": {
+   "frame": {
+    "x": 1041,
+    "y": 263,
+    "w": 43,
+    "h": 40
+   },
+   "group": {
+    "panel": 4,
+    "row": 1,
+    "col": 5
+   },
+   "sourceRect": {
+    "x": 333,
+    "y": 493,
+    "w": 39,
+    "h": 40
+   }
+  },
+  "trees_and_vegetation_p05_r00_c00": {
+   "frame": {
+    "x": 1103,
+    "y": 211,
+    "w": 69,
+    "h": 45
+   },
+   "group": {
+    "panel": 5,
+    "row": 0,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 521,
+    "y": 444,
+    "w": 71,
+    "h": 47
+   }
+  },
+  "trees_and_vegetation_p05_r00_c01": {
+   "frame": {
+    "x": 717,
+    "y": 211,
+    "w": 62,
+    "h": 46
+   },
+   "group": {
+    "panel": 5,
+    "row": 0,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 604,
+    "y": 442,
+    "w": 61,
+    "h": 50
+   }
+  },
+  "trees_and_vegetation_p05_r00_c02": {
+   "frame": {
+    "x": 1174,
+    "y": 211,
+    "w": 63,
+    "h": 45
+   },
+   "group": {
+    "panel": 5,
+    "row": 0,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 676,
+    "y": 444,
+    "w": 65,
+    "h": 48
+   }
+  },
+  "trees_and_vegetation_p05_r00_c03": {
+   "frame": {
+    "x": 781,
+    "y": 211,
+    "w": 63,
+    "h": 46
+   },
+   "group": {
+    "panel": 5,
+    "row": 0,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 750,
+    "y": 444,
+    "w": 63,
+    "h": 46
+   }
+  },
+  "trees_and_vegetation_p05_r00_c04": {
+   "frame": {
+    "x": 1239,
+    "y": 211,
+    "w": 60,
+    "h": 45
+   },
+   "group": {
+    "panel": 5,
+    "row": 0,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 825,
+    "y": 443,
+    "w": 60,
+    "h": 47
+   }
+  },
+  "trees_and_vegetation_p05_r00_c05": {
+   "frame": {
+    "x": 457,
+    "y": 211,
+    "w": 63,
+    "h": 47
+   },
+   "group": {
+    "panel": 5,
+    "row": 0,
+    "col": 5
+   },
+   "sourceRect": {
+    "x": 896,
+    "y": 441,
+    "w": 65,
+    "h": 50
+   }
+  },
+  "trees_and_vegetation_p05_r00_c06": {
+   "frame": {
+    "x": 1301,
+    "y": 211,
+    "w": 42,
+    "h": 45
+   },
+   "group": {
+    "panel": 5,
+    "row": 0,
+    "col": 6
+   },
+   "sourceRect": {
+    "x": 971,
+    "y": 443,
+    "w": 43,
+    "h": 49
+   }
+  },
+  "trees_and_vegetation_p05_r01_c00": {
+   "frame": {
+    "x": 749,
+    "y": 307,
+    "w": 81,
+    "h": 35
+   },
+   "group": {
+    "panel": 5,
+    "row": 1,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 521,
+    "y": 504,
+    "w": 83,
+    "h": 39
+   }
+  },
+  "trees_and_vegetation_p05_r01_c01": {
+   "frame": {
+    "x": 124,
+    "y": 307,
+    "w": 97,
+    "h": 37
+   },
+   "group": {
+    "panel": 5,
+    "row": 1,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 617,
+    "y": 504,
+    "w": 101,
+    "h": 39
+   }
+  },
+  "trees_and_vegetation_p05_r01_c02": {
+   "frame": {
+    "x": 495,
+    "y": 307,
+    "w": 77,
+    "h": 36
+   },
+   "group": {
+    "panel": 5,
+    "row": 1,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 731,
+    "y": 504,
+    "w": 80,
+    "h": 40
+   }
+  },
+  "trees_and_vegetation_p05_r01_c03": {
+   "frame": {
+    "x": 340,
+    "y": 347,
+    "w": 92,
+    "h": 28
+   },
+   "group": {
+    "panel": 5,
+    "row": 1,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 823,
+    "y": 511,
+    "w": 95,
+    "h": 32
+   }
+  },
+  "trees_and_vegetation_p05_r01_c04": {
+   "frame": {
+    "x": 574,
+    "y": 307,
+    "w": 78,
+    "h": 36
+   },
+   "group": {
+    "panel": 5,
+    "row": 1,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 932,
+    "y": 504,
+    "w": 80,
+    "h": 36
+   }
+  },
+  "trees_and_vegetation_p06_r00_c00": {
+   "frame": {
+    "x": 39,
+    "y": 263,
+    "w": 57,
+    "h": 42
+   },
+   "group": {
+    "panel": 6,
+    "row": 0,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 1055,
+    "y": 441,
+    "w": 58,
+    "h": 45
+   }
+  },
+  "trees_and_vegetation_p06_r00_c01": {
+   "frame": {
+    "x": 1472,
+    "y": 211,
+    "w": 55,
+    "h": 44
+   },
+   "group": {
+    "panel": 6,
+    "row": 0,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 1132,
+    "y": 438,
+    "w": 56,
+    "h": 48
+   }
+  },
+  "trees_and_vegetation_p06_r00_c02": {
+   "frame": {
+    "x": 846,
+    "y": 211,
+    "w": 58,
+    "h": 46
+   },
+   "group": {
+    "panel": 6,
+    "row": 0,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 1206,
+    "y": 438,
+    "w": 60,
+    "h": 48
+   }
+  },
+  "trees_and_vegetation_p06_r00_c03": {
+   "frame": {
+    "x": 271,
+    "y": 211,
+    "w": 57,
+    "h": 48
+   },
+   "group": {
+    "panel": 6,
+    "row": 0,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 1285,
+    "y": 435,
+    "w": 56,
+    "h": 51
+   }
+  },
+  "trees_and_vegetation_p06_r00_c04": {
+   "frame": {
+    "x": 522,
+    "y": 211,
+    "w": 64,
+    "h": 47
+   },
+   "group": {
+    "panel": 6,
+    "row": 0,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 1361,
+    "y": 436,
+    "w": 66,
+    "h": 50
+   }
+  },
+  "trees_and_vegetation_p06_r00_c05": {
+   "frame": {
+    "x": 588,
+    "y": 211,
+    "w": 65,
+    "h": 47
+   },
+   "group": {
+    "panel": 6,
+    "row": 0,
+    "col": 5
+   },
+   "sourceRect": {
+    "x": 1444,
+    "y": 437,
+    "w": 68,
+    "h": 49
+   }
+  },
+  "trees_and_vegetation_p06_r01_c00": {
+   "frame": {
+    "x": 1529,
+    "y": 211,
+    "w": 57,
+    "h": 44
+   },
+   "group": {
+    "panel": 6,
+    "row": 1,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 1054,
+    "y": 497,
+    "w": 60,
+    "h": 46
+   }
+  },
+  "trees_and_vegetation_p06_r01_c01": {
+   "frame": {
+    "x": 330,
+    "y": 211,
+    "w": 58,
+    "h": 48
+   },
+   "group": {
+    "panel": 6,
+    "row": 1,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 1134,
+    "y": 492,
+    "w": 60,
+    "h": 51
+   }
+  },
+  "trees_and_vegetation_p06_r01_c02": {
+   "frame": {
+    "x": 1982,
+    "y": 126,
+    "w": 63,
+    "h": 51
+   },
+   "group": {
+    "panel": 6,
+    "row": 1,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 1214,
+    "y": 490,
+    "w": 63,
+    "h": 53
+   }
+  },
+  "trees_and_vegetation_p06_r01_c03": {
+   "frame": {
+    "x": 655,
+    "y": 211,
+    "w": 60,
+    "h": 47
+   },
+   "group": {
+    "panel": 6,
+    "row": 1,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 1296,
+    "y": 493,
+    "w": 61,
+    "h": 50
+   }
+  },
+  "trees_and_vegetation_p06_r01_c04": {
+   "frame": {
+    "x": 335,
+    "y": 263,
+    "w": 59,
+    "h": 41
+   },
+   "group": {
+    "panel": 6,
+    "row": 1,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 1375,
+    "y": 498,
+    "w": 61,
+    "h": 45
+   }
+  },
+  "trees_and_vegetation_p06_r01_c05": {
+   "frame": {
+    "x": 1086,
+    "y": 263,
+    "w": 60,
+    "h": 40
+   },
+   "group": {
+    "panel": 6,
+    "row": 1,
+    "col": 5
+   },
+   "sourceRect": {
+    "x": 1451,
+    "y": 500,
+    "w": 62,
+    "h": 43
+   }
+  },
+  "trees_and_vegetation_p07_r00_c00": {
+   "frame": {
+    "x": 1508,
+    "y": 307,
+    "w": 46,
+    "h": 33
+   },
+   "group": {
+    "panel": 7,
+    "row": 0,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 27,
+    "y": 615,
+    "w": 42,
+    "h": 34
+   }
+  },
+  "trees_and_vegetation_p07_r00_c01": {
+   "frame": {
+    "x": 972,
+    "y": 307,
+    "w": 43,
+    "h": 34
+   },
+   "group": {
+    "panel": 7,
+    "row": 0,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 87,
+    "y": 616,
+    "w": 42,
+    "h": 33
+   }
+  },
+  "trees_and_vegetation_p07_r00_c02": {
+   "frame": {
+    "x": 396,
+    "y": 263,
+    "w": 58,
+    "h": 41
+   },
+   "group": {
+    "panel": 7,
+    "row": 0,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 148,
+    "y": 606,
+    "w": 54,
+    "h": 43
+   }
+  },
+  "trees_and_vegetation_p07_r00_c03": {
+   "frame": {
+    "x": 456,
+    "y": 263,
+    "w": 61,
+    "h": 41
+   },
+   "group": {
+    "panel": 7,
+    "row": 0,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 216,
+    "y": 605,
+    "w": 63,
+    "h": 43
+   }
+  },
+  "trees_and_vegetation_p07_r00_c04": {
+   "frame": {
+    "x": 519,
+    "y": 263,
+    "w": 61,
+    "h": 41
+   },
+   "group": {
+    "panel": 7,
+    "row": 0,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 289,
+    "y": 608,
+    "w": 61,
+    "h": 39
+   }
+  },
+  "trees_and_vegetation_p07_r01_c00": {
+   "frame": {
+    "x": 1513,
+    "y": 263,
+    "w": 61,
+    "h": 39
+   },
+   "group": {
+    "panel": 7,
+    "row": 1,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 24,
+    "y": 664,
+    "w": 58,
+    "h": 42
+   }
+  },
+  "trees_and_vegetation_p07_r01_c01": {
+   "frame": {
+    "x": 582,
+    "y": 263,
+    "w": 59,
+    "h": 41
+   },
+   "group": {
+    "panel": 7,
+    "row": 1,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 94,
+    "y": 664,
+    "w": 59,
+    "h": 40
+   }
+  },
+  "trees_and_vegetation_p07_r01_c02": {
+   "frame": {
+    "x": 1148,
+    "y": 263,
+    "w": 55,
+    "h": 40
+   },
+   "group": {
+    "panel": 7,
+    "row": 1,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 165,
+    "y": 664,
+    "w": 57,
+    "h": 42
+   }
+  },
+  "trees_and_vegetation_p07_r01_c03": {
+   "frame": {
+    "x": 1205,
+    "y": 263,
+    "w": 57,
+    "h": 40
+   },
+   "group": {
+    "panel": 7,
+    "row": 1,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 232,
+    "y": 662,
+    "w": 59,
+    "h": 44
+   }
+  },
+  "trees_and_vegetation_p07_r01_c04": {
+   "frame": {
+    "x": 1713,
+    "y": 263,
+    "w": 47,
+    "h": 38
+   },
+   "group": {
+    "panel": 7,
+    "row": 1,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 301,
+    "y": 665,
+    "w": 49,
+    "h": 41
+   }
+  },
+  "trees_and_vegetation_p07_r02_c00": {
+   "frame": {
+    "x": 98,
+    "y": 263,
+    "w": 70,
+    "h": 42
+   },
+   "group": {
+    "panel": 7,
+    "row": 2,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 21,
+    "y": 718,
+    "w": 72,
+    "h": 44
+   }
+  },
+  "trees_and_vegetation_p07_r02_c01": {
+   "frame": {
+    "x": 643,
+    "y": 263,
+    "w": 55,
+    "h": 41
+   },
+   "group": {
+    "panel": 7,
+    "row": 2,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 105,
+    "y": 718,
+    "w": 55,
+    "h": 44
+   }
+  },
+  "trees_and_vegetation_p07_r02_c02": {
+   "frame": {
+    "x": 1762,
+    "y": 263,
+    "w": 41,
+    "h": 38
+   },
+   "group": {
+    "panel": 7,
+    "row": 2,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 166,
+    "y": 721,
+    "w": 43,
+    "h": 41
+   }
+  },
+  "trees_and_vegetation_p07_r02_c03": {
+   "frame": {
+    "x": 906,
+    "y": 211,
+    "w": 58,
+    "h": 46
+   },
+   "group": {
+    "panel": 7,
+    "row": 2,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 221,
+    "y": 714,
+    "w": 59,
+    "h": 48
+   }
+  },
+  "trees_and_vegetation_p07_r02_c04": {
+   "frame": {
+    "x": 1264,
+    "y": 263,
+    "w": 55,
+    "h": 40
+   },
+   "group": {
+    "panel": 7,
+    "row": 2,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 292,
+    "y": 720,
+    "w": 57,
+    "h": 42
+   }
+  },
+  "trees_and_vegetation_p08_r00_c00": {
+   "frame": {
+    "x": 1201,
+    "y": 347,
+    "w": 37,
+    "h": 19
+   },
+   "group": {
+    "panel": 8,
+    "row": 0,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 444,
+    "y": 610,
+    "w": 40,
+    "h": 22
+   }
+  },
+  "trees_and_vegetation_p08_r00_c01": {
+   "frame": {
+    "x": 1533,
+    "y": 347,
+    "w": 26,
+    "h": 17
+   },
+   "group": {
+    "panel": 8,
+    "row": 0,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 506,
+    "y": 610,
+    "w": 26,
+    "h": 20
+   }
+  },
+  "trees_and_vegetation_p08_r00_c02": {
+   "frame": {
+    "x": 1937,
+    "y": 307,
+    "w": 28,
+    "h": 31
+   },
+   "group": {
+    "panel": 8,
+    "row": 0,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 562,
+    "y": 598,
+    "w": 27,
+    "h": 33
+   }
+  },
+  "trees_and_vegetation_p08_r00_c03": {
+   "frame": {
+    "x": 1556,
+    "y": 307,
+    "w": 31,
+    "h": 33
+   },
+   "group": {
+    "panel": 8,
+    "row": 0,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 617,
+    "y": 593,
+    "w": 34,
+    "h": 36
+   }
+  },
+  "trees_and_vegetation_p08_r00_c04": {
+   "frame": {
+    "x": 700,
+    "y": 263,
+    "w": 48,
+    "h": 41
+   },
+   "group": {
+    "panel": 8,
+    "row": 0,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 675,
+    "y": 589,
+    "w": 52,
+    "h": 40
+   }
+  },
+  "trees_and_vegetation_p08_r00_c05": {
+   "frame": {
+    "x": 1240,
+    "y": 347,
+    "w": 36,
+    "h": 19
+   },
+   "group": {
+    "panel": 8,
+    "row": 0,
+    "col": 5
+   },
+   "sourceRect": {
+    "x": 838,
+    "y": 610,
+    "w": 39,
+    "h": 21
+   }
+  },
+  "trees_and_vegetation_p08_r00_c06": {
+   "frame": {
+    "x": 1150,
+    "y": 347,
+    "w": 25,
+    "h": 21
+   },
+   "group": {
+    "panel": 8,
+    "row": 0,
+    "col": 6
+   },
+   "sourceRect": {
+    "x": 896,
+    "y": 606,
+    "w": 26,
+    "h": 24
+   }
+  },
+  "trees_and_vegetation_p08_r00_c07": {
+   "frame": {
+    "x": 673,
+    "y": 347,
+    "w": 30,
+    "h": 26
+   },
+   "group": {
+    "panel": 8,
+    "row": 0,
+    "col": 7
+   },
+   "sourceRect": {
+    "x": 947,
+    "y": 601,
+    "w": 33,
+    "h": 28
+   }
+  },
+  "trees_and_vegetation_p08_r00_c08": {
+   "frame": {
+    "x": 152,
+    "y": 347,
+    "w": 38,
+    "h": 30
+   },
+   "group": {
+    "panel": 8,
+    "row": 0,
+    "col": 8
+   },
+   "sourceRect": {
+    "x": 1002,
+    "y": 595,
+    "w": 41,
+    "h": 33
+   }
+  },
+  "trees_and_vegetation_p08_r00_c09": {
+   "frame": {
+    "x": 1805,
+    "y": 263,
+    "w": 48,
+    "h": 38
+   },
+   "group": {
+    "panel": 8,
+    "row": 0,
+    "col": 9
+   },
+   "sourceRect": {
+    "x": 1062,
+    "y": 585,
+    "w": 51,
+    "h": 41
+   }
+  },
+  "trees_and_vegetation_p08_r01_c00": {
+   "frame": {
+    "x": 1278,
+    "y": 347,
+    "w": 38,
+    "h": 19
+   },
+   "group": {
+    "panel": 8,
+    "row": 1,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 444,
+    "y": 654,
+    "w": 41,
+    "h": 22
+   }
+  },
+  "trees_and_vegetation_p08_r01_c01": {
+   "frame": {
+    "x": 1095,
+    "y": 347,
+    "w": 26,
+    "h": 22
+   },
+   "group": {
+    "panel": 8,
+    "row": 1,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 505,
+    "y": 649,
+    "w": 27,
+    "h": 25
+   }
+  },
+  "trees_and_vegetation_p08_r01_c02": {
+   "frame": {
+    "x": 1017,
+    "y": 307,
+    "w": 27,
+    "h": 34
+   },
+   "group": {
+    "panel": 8,
+    "row": 1,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 561,
+    "y": 637,
+    "w": 28,
+    "h": 37
+   }
+  },
+  "trees_and_vegetation_p08_r01_c03": {
+   "frame": {
+    "x": 1855,
+    "y": 263,
+    "w": 31,
+    "h": 38
+   },
+   "group": {
+    "panel": 8,
+    "row": 1,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 617,
+    "y": 634,
+    "w": 34,
+    "h": 40
+   }
+  },
+  "trees_and_vegetation_p08_r01_c04": {
+   "frame": {
+    "x": 1888,
+    "y": 263,
+    "w": 47,
+    "h": 38
+   },
+   "group": {
+    "panel": 8,
+    "row": 1,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 675,
+    "y": 633,
+    "w": 51,
+    "h": 40
+   }
+  },
+  "trees_and_vegetation_p08_r01_c05": {
+   "frame": {
+    "x": 1458,
+    "y": 347,
+    "w": 36,
+    "h": 18
+   },
+   "group": {
+    "panel": 8,
+    "row": 1,
+    "col": 5
+   },
+   "sourceRect": {
+    "x": 839,
+    "y": 654,
+    "w": 39,
+    "h": 22
+   }
+  },
+  "trees_and_vegetation_p08_r01_c06": {
+   "frame": {
+    "x": 192,
+    "y": 347,
+    "w": 25,
+    "h": 30
+   },
+   "group": {
+    "panel": 8,
+    "row": 1,
+    "col": 6
+   },
+   "sourceRect": {
+    "x": 897,
+    "y": 642,
+    "w": 26,
+    "h": 32
+   }
+  },
+  "trees_and_vegetation_p08_r01_c07": {
+   "frame": {
+    "x": 1576,
+    "y": 263,
+    "w": 32,
+    "h": 39
+   },
+   "group": {
+    "panel": 8,
+    "row": 1,
+    "col": 7
+   },
+   "sourceRect": {
+    "x": 947,
+    "y": 633,
+    "w": 35,
+    "h": 40
+   }
+  },
+  "trees_and_vegetation_p08_r01_c08": {
+   "frame": {
+    "x": 750,
+    "y": 263,
+    "w": 39,
+    "h": 41
+   },
+   "group": {
+    "panel": 8,
+    "row": 1,
+    "col": 8
+   },
+   "sourceRect": {
+    "x": 1004,
+    "y": 630,
+    "w": 40,
+    "h": 43
+   }
+  },
+  "trees_and_vegetation_p08_r01_c09": {
+   "frame": {
+    "x": 1321,
+    "y": 263,
+    "w": 41,
+    "h": 40
+   },
+   "group": {
+    "panel": 8,
+    "row": 1,
+    "col": 9
+   },
+   "sourceRect": {
+    "x": 1067,
+    "y": 629,
+    "w": 44,
+    "h": 43
+   }
+  },
+  "trees_and_vegetation_p08_r02_c00": {
+   "frame": {
+    "x": 1318,
+    "y": 347,
+    "w": 38,
+    "h": 19
+   },
+   "group": {
+    "panel": 8,
+    "row": 2,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 444,
+    "y": 698,
+    "w": 41,
+    "h": 22
+   }
+  },
+  "trees_and_vegetation_p08_r02_c01": {
+   "frame": {
+    "x": 1123,
+    "y": 347,
+    "w": 25,
+    "h": 22
+   },
+   "group": {
+    "panel": 8,
+    "row": 2,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 507,
+    "y": 694,
+    "w": 25,
+    "h": 24
+   }
+  },
+  "trees_and_vegetation_p08_r02_c02": {
+   "frame": {
+    "x": 270,
+    "y": 347,
+    "w": 32,
+    "h": 29
+   },
+   "group": {
+    "panel": 8,
+    "row": 2,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 558,
+    "y": 687,
+    "w": 35,
+    "h": 31
+   }
+  },
+  "trees_and_vegetation_p08_r02_c03": {
+   "frame": {
+    "x": 832,
+    "y": 307,
+    "w": 38,
+    "h": 35
+   },
+   "group": {
+    "panel": 8,
+    "row": 2,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 615,
+    "y": 680,
+    "w": 41,
+    "h": 38
+   }
+  },
+  "trees_and_vegetation_p08_r02_c04": {
+   "frame": {
+    "x": 223,
+    "y": 307,
+    "w": 43,
+    "h": 37
+   },
+   "group": {
+    "panel": 8,
+    "row": 2,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 677,
+    "y": 678,
+    "w": 46,
+    "h": 40
+   }
+  },
+  "trees_and_vegetation_p08_r02_c05": {
+   "frame": {
+    "x": 1358,
+    "y": 347,
+    "w": 35,
+    "h": 19
+   },
+   "group": {
+    "panel": 8,
+    "row": 2,
+    "col": 5
+   },
+   "sourceRect": {
+    "x": 841,
+    "y": 697,
+    "w": 36,
+    "h": 22
+   }
+  },
+  "trees_and_vegetation_p08_r02_c06": {
+   "frame": {
+    "x": 995,
+    "y": 347,
+    "w": 27,
+    "h": 23
+   },
+   "group": {
+    "panel": 8,
+    "row": 2,
+    "col": 6
+   },
+   "sourceRect": {
+    "x": 896,
+    "y": 692,
+    "w": 28,
+    "h": 26
+   }
+  },
+  "trees_and_vegetation_p08_r02_c07": {
+   "frame": {
+    "x": 545,
+    "y": 347,
+    "w": 34,
+    "h": 27
+   },
+   "group": {
+    "panel": 8,
+    "row": 2,
+    "col": 7
+   },
+   "sourceRect": {
+    "x": 945,
+    "y": 688,
+    "w": 36,
+    "h": 30
+   }
+  },
+  "trees_and_vegetation_p08_r02_c08": {
+   "frame": {
+    "x": 1046,
+    "y": 307,
+    "w": 43,
+    "h": 34
+   },
+   "group": {
+    "panel": 8,
+    "row": 2,
+    "col": 8
+   },
+   "sourceRect": {
+    "x": 1001,
+    "y": 680,
+    "w": 45,
+    "h": 38
+   }
+  },
+  "trees_and_vegetation_p08_r02_c09": {
+   "frame": {
+    "x": 268,
+    "y": 307,
+    "w": 49,
+    "h": 37
+   },
+   "group": {
+    "panel": 8,
+    "row": 2,
+    "col": 9
+   },
+   "sourceRect": {
+    "x": 1063,
+    "y": 678,
+    "w": 51,
+    "h": 39
+   }
+  },
+  "trees_and_vegetation_p08_r03_c00": {
+   "frame": {
+    "x": 1395,
+    "y": 347,
+    "w": 38,
+    "h": 19
+   },
+   "group": {
+    "panel": 8,
+    "row": 3,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 444,
+    "y": 742,
+    "w": 41,
+    "h": 23
+   }
+  },
+  "trees_and_vegetation_p08_r03_c01": {
+   "frame": {
+    "x": 1561,
+    "y": 347,
+    "w": 24,
+    "h": 17
+   },
+   "group": {
+    "panel": 8,
+    "row": 3,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 509,
+    "y": 742,
+    "w": 22,
+    "h": 21
+   }
+  },
+  "trees_and_vegetation_p08_r03_c02": {
+   "frame": {
+    "x": 304,
+    "y": 347,
+    "w": 34,
+    "h": 29
+   },
+   "group": {
+    "panel": 8,
+    "row": 3,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 557,
+    "y": 731,
+    "w": 38,
+    "h": 33
+   }
+  },
+  "trees_and_vegetation_p08_r03_c03": {
+   "frame": {
+    "x": 319,
+    "y": 307,
+    "w": 40,
+    "h": 37
+   },
+   "group": {
+    "panel": 8,
+    "row": 3,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 615,
+    "y": 724,
+    "w": 44,
+    "h": 41
+   }
+  },
+  "trees_and_vegetation_p08_r03_c04": {
+   "frame": {
+    "x": 1610,
+    "y": 263,
+    "w": 43,
+    "h": 39
+   },
+   "group": {
+    "panel": 8,
+    "row": 3,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 679,
+    "y": 722,
+    "w": 45,
+    "h": 43
+   }
+  },
+  "trees_and_vegetation_p08_r03_c05": {
+   "frame": {
+    "x": 1496,
+    "y": 347,
+    "w": 35,
+    "h": 18
+   },
+   "group": {
+    "panel": 8,
+    "row": 3,
+    "col": 5
+   },
+   "sourceRect": {
+    "x": 840,
+    "y": 741,
+    "w": 38,
+    "h": 22
+   }
+  },
+  "trees_and_vegetation_p08_r03_c06": {
+   "frame": {
+    "x": 834,
+    "y": 347,
+    "w": 28,
+    "h": 25
+   },
+   "group": {
+    "panel": 8,
+    "row": 3,
+    "col": 6
+   },
+   "sourceRect": {
+    "x": 896,
+    "y": 734,
+    "w": 30,
+    "h": 28
+   }
+  },
+  "trees_and_vegetation_p08_r03_c07": {
+   "frame": {
+    "x": 434,
+    "y": 347,
+    "w": 39,
+    "h": 28
+   },
+   "group": {
+    "panel": 8,
+    "row": 3,
+    "col": 7
+   },
+   "sourceRect": {
+    "x": 943,
+    "y": 731,
+    "w": 41,
+    "h": 32
+   }
+  },
+  "trees_and_vegetation_p08_r03_c08": {
+   "frame": {
+    "x": 1091,
+    "y": 307,
+    "w": 42,
+    "h": 34
+   },
+   "group": {
+    "panel": 8,
+    "row": 3,
+    "col": 8
+   },
+   "sourceRect": {
+    "x": 1001,
+    "y": 728,
+    "w": 46,
+    "h": 36
+   }
+  },
+  "trees_and_vegetation_p08_r03_c09": {
+   "frame": {
+    "x": 361,
+    "y": 307,
+    "w": 49,
+    "h": 37
+   },
+   "group": {
+    "panel": 8,
+    "row": 3,
+    "col": 9
+   },
+   "sourceRect": {
+    "x": 1063,
+    "y": 723,
+    "w": 51,
+    "h": 40
+   }
+  },
+  "trees_and_vegetation_p09_r00_c00": {
+   "frame": {
+    "x": 242,
+    "y": 126,
+    "w": 85,
+    "h": 83
+   },
+   "group": {
+    "panel": 9,
+    "row": 0,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 1152,
+    "y": 603,
+    "w": 88,
+    "h": 87
+   }
+  },
+  "trees_and_vegetation_p09_r00_c01": {
+   "frame": {
+    "x": 1938,
+    "y": 0,
+    "w": 93,
+    "h": 86
+   },
+   "group": {
+    "panel": 9,
+    "row": 0,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 1250,
+    "y": 600,
+    "w": 97,
+    "h": 90
+   }
+  },
+  "trees_and_vegetation_p09_r00_c02": {
+   "frame": {
+    "x": 1797,
+    "y": 0,
+    "w": 67,
+    "h": 88
+   },
+   "group": {
+    "panel": 9,
+    "row": 0,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 1367,
+    "y": 598,
+    "w": 71,
+    "h": 92
+   }
+  },
+  "trees_and_vegetation_p09_r00_c03": {
+   "frame": {
+    "x": 1866,
+    "y": 0,
+    "w": 70,
+    "h": 88
+   },
+   "group": {
+    "panel": 9,
+    "row": 0,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 1447,
+    "y": 599,
+    "w": 73,
+    "h": 91
+   }
+  },
+  "trees_and_vegetation_p09_r01_c00": {
+   "frame": {
+    "x": 1469,
+    "y": 126,
+    "w": 190,
+    "h": 56
+   },
+   "group": {
+    "panel": 9,
+    "row": 1,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 1157,
+    "y": 704,
+    "w": 192,
+    "h": 58
+   }
+  },
+  "trees_and_vegetation_p09_r01_c01": {
+   "frame": {
+    "x": 1661,
+    "y": 126,
+    "w": 148,
+    "h": 55
+   },
+   "group": {
+    "panel": 9,
+    "row": 1,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 1367,
+    "y": 705,
+    "w": 149,
+    "h": 58
+   }
+  },
+  "trees_and_vegetation_p10_r00_c00": {
+   "frame": {
+    "x": 1967,
+    "y": 307,
+    "w": 49,
+    "h": 31
+   },
+   "group": {
+    "panel": 10,
+    "row": 0,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 138,
+    "y": 822,
+    "w": 47,
+    "h": 34
+   }
+  },
+  "trees_and_vegetation_p10_r00_c01": {
+   "frame": {
+    "x": 0,
+    "y": 347,
+    "w": 44,
+    "h": 31
+   },
+   "group": {
+    "panel": 10,
+    "row": 0,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 206,
+    "y": 821,
+    "w": 43,
+    "h": 35
+   }
+  },
+  "trees_and_vegetation_p10_r00_c02": {
+   "frame": {
+    "x": 219,
+    "y": 347,
+    "w": 21,
+    "h": 30
+   },
+   "group": {
+    "panel": 10,
+    "row": 0,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 267,
+    "y": 826,
+    "w": 17,
+    "h": 29
+   }
+  },
+  "trees_and_vegetation_p10_r00_c03": {
+   "frame": {
+    "x": 242,
+    "y": 347,
+    "w": 26,
+    "h": 30
+   },
+   "group": {
+    "panel": 10,
+    "row": 0,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 285,
+    "y": 826,
+    "w": 22,
+    "h": 30
+   }
+  },
+  "trees_and_vegetation_p10_r00_c04": {
+   "frame": {
+    "x": 864,
+    "y": 347,
+    "w": 44,
+    "h": 25
+   },
+   "group": {
+    "panel": 10,
+    "row": 0,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 329,
+    "y": 831,
+    "w": 40,
+    "h": 25
+   }
+  },
+  "trees_and_vegetation_p10_r01_c01": {
+   "frame": {
+    "x": 1589,
+    "y": 307,
+    "w": 56,
+    "h": 33
+   },
+   "group": {
+    "panel": 10,
+    "row": 1,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 133,
+    "y": 864,
+    "w": 57,
+    "h": 35
+   }
+  },
+  "trees_and_vegetation_p10_r01_c02": {
+   "frame": {
+    "x": 1647,
+    "y": 307,
+    "w": 51,
+    "h": 33
+   },
+   "group": {
+    "panel": 10,
+    "row": 1,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 199,
+    "y": 865,
+    "w": 52,
+    "h": 33
+   }
+  },
+  "trees_and_vegetation_p10_r01_c03": {
+   "frame": {
+    "x": 1700,
+    "y": 307,
+    "w": 52,
+    "h": 33
+   },
+   "group": {
+    "panel": 10,
+    "row": 1,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 260,
+    "y": 864,
+    "w": 53,
+    "h": 33
+   }
+  },
+  "trees_and_vegetation_p10_r01_c04": {
+   "frame": {
+    "x": 1754,
+    "y": 307,
+    "w": 52,
+    "h": 33
+   },
+   "group": {
+    "panel": 10,
+    "row": 1,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 321,
+    "y": 864,
+    "w": 55,
+    "h": 33
+   }
+  },
+  "trees_and_vegetation_p10_r02_c00": {
+   "frame": {
+    "x": 1763,
+    "y": 347,
+    "w": 16,
+    "h": 13
+   },
+   "group": {
+    "panel": 10,
+    "row": 2,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 142,
+    "y": 915,
+    "w": 18,
+    "h": 15
+   }
+  },
+  "trees_and_vegetation_p10_r02_c01": {
+   "frame": {
+    "x": 1852,
+    "y": 347,
+    "w": 12,
+    "h": 12
+   },
+   "group": {
+    "panel": 10,
+    "row": 2,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 217,
+    "y": 916,
+    "w": 14,
+    "h": 15
+   }
+  },
+  "trees_and_vegetation_p10_r02_c02": {
+   "frame": {
+    "x": 1896,
+    "y": 347,
+    "w": 11,
+    "h": 9
+   },
+   "group": {
+    "panel": 10,
+    "row": 2,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 280,
+    "y": 916,
+    "w": 11,
+    "h": 11
+   }
+  },
+  "trees_and_vegetation_p10_r02_c03": {
+   "frame": {
+    "x": 1881,
+    "y": 347,
+    "w": 13,
+    "h": 10
+   },
+   "group": {
+    "panel": 10,
+    "row": 2,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 356,
+    "y": 916,
+    "w": 15,
+    "h": 14
+   }
+  },
+  "trees_and_vegetation_p10_r03_c00": {
+   "frame": {
+    "x": 1781,
+    "y": 347,
+    "w": 14,
+    "h": 13
+   },
+   "group": {
+    "panel": 10,
+    "row": 3,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 23,
+    "y": 924,
+    "w": 14,
+    "h": 16
+   }
+  },
+  "trees_and_vegetation_p10_r03_c01": {
+   "frame": {
+    "x": 1797,
+    "y": 347,
+    "w": 16,
+    "h": 13
+   },
+   "group": {
+    "panel": 10,
+    "row": 3,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 165,
+    "y": 929,
+    "w": 17,
+    "h": 15
+   }
+  },
+  "trees_and_vegetation_p10_r03_c02": {
+   "frame": {
+    "x": 1909,
+    "y": 347,
+    "w": 10,
+    "h": 9
+   },
+   "group": {
+    "panel": 10,
+    "row": 3,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 203,
+    "y": 931,
+    "w": 12,
+    "h": 11
+   }
+  },
+  "trees_and_vegetation_p10_r03_c03": {
+   "frame": {
+    "x": 1921,
+    "y": 347,
+    "w": 12,
+    "h": 9
+   },
+   "group": {
+    "panel": 10,
+    "row": 3,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 233,
+    "y": 931,
+    "w": 15,
+    "h": 13
+   }
+  },
+  "trees_and_vegetation_p10_r03_c04": {
+   "frame": {
+    "x": 1866,
+    "y": 347,
+    "w": 13,
+    "h": 12
+   },
+   "group": {
+    "panel": 10,
+    "row": 3,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 296,
+    "y": 928,
+    "w": 14,
+    "h": 15
+   }
+  },
+  "trees_and_vegetation_p10_r03_c05": {
+   "frame": {
+    "x": 1935,
+    "y": 347,
+    "w": 14,
+    "h": 9
+   },
+   "group": {
+    "panel": 10,
+    "row": 3,
+    "col": 5
+   },
+   "sourceRect": {
+    "x": 330,
+    "y": 932,
+    "w": 16,
+    "h": 11
+   }
+  },
+  "trees_and_vegetation_p10_r04_c00": {
+   "frame": {
+    "x": 1135,
+    "y": 307,
+    "w": 46,
+    "h": 34
+   },
+   "group": {
+    "panel": 10,
+    "row": 4,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 140,
+    "y": 958,
+    "w": 45,
+    "h": 35
+   }
+  },
+  "trees_and_vegetation_p10_r04_c01": {
+   "frame": {
+    "x": 872,
+    "y": 307,
+    "w": 46,
+    "h": 35
+   },
+   "group": {
+    "panel": 10,
+    "row": 4,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 206,
+    "y": 956,
+    "w": 44,
+    "h": 38
+   }
+  },
+  "trees_and_vegetation_p10_r04_c02": {
+   "frame": {
+    "x": 654,
+    "y": 307,
+    "w": 45,
+    "h": 36
+   },
+   "group": {
+    "panel": 10,
+    "row": 4,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 268,
+    "y": 956,
+    "w": 47,
+    "h": 38
+   }
+  },
+  "trees_and_vegetation_p10_r04_c03": {
+   "frame": {
+    "x": 1183,
+    "y": 307,
+    "w": 46,
+    "h": 34
+   },
+   "group": {
+    "panel": 10,
+    "row": 4,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 328,
+    "y": 958,
+    "w": 47,
+    "h": 37
+   }
+  },
+  "trees_and_vegetation_p11_r00_c00": {
+   "frame": {
+    "x": 1058,
+    "y": 126,
+    "w": 78,
+    "h": 62
+   },
+   "group": {
+    "panel": 11,
+    "row": 0,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 432,
+    "y": 823,
+    "w": 80,
+    "h": 65
+   }
+  },
+  "trees_and_vegetation_p11_r00_c01": {
+   "frame": {
+    "x": 1337,
+    "y": 126,
+    "w": 62,
+    "h": 58
+   },
+   "group": {
+    "panel": 11,
+    "row": 0,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 520,
+    "y": 824,
+    "w": 64,
+    "h": 61
+   }
+  },
+  "trees_and_vegetation_p11_r00_c02": {
+   "frame": {
+    "x": 1401,
+    "y": 126,
+    "w": 66,
+    "h": 58
+   },
+   "group": {
+    "panel": 11,
+    "row": 0,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 596,
+    "y": 825,
+    "w": 67,
+    "h": 60
+   }
+  },
+  "trees_and_vegetation_p11_r00_c03": {
+   "frame": {
+    "x": 1220,
+    "y": 126,
+    "w": 71,
+    "h": 59
+   },
+   "group": {
+    "panel": 11,
+    "row": 0,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 675,
+    "y": 825,
+    "w": 71,
+    "h": 60
+   }
+  },
+  "trees_and_vegetation_p11_r00_c04": {
+   "frame": {
+    "x": 1811,
+    "y": 126,
+    "w": 58,
+    "h": 55
+   },
+   "group": {
+    "panel": 11,
+    "row": 0,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 759,
+    "y": 824,
+    "w": 58,
+    "h": 54
+   }
+  },
+  "trees_and_vegetation_p11_r00_c05": {
+   "frame": {
+    "x": 1715,
+    "y": 347,
+    "w": 14,
+    "h": 14
+   },
+   "group": {
+    "panel": 11,
+    "row": 0,
+    "col": 5
+   },
+   "sourceRect": {
+    "x": 795,
+    "y": 836,
+    "w": 13,
+    "h": 13
+   }
+  },
+  "trees_and_vegetation_p11_r01_c00": {
+   "frame": {
+    "x": 1808,
+    "y": 307,
+    "w": 57,
+    "h": 32
+   },
+   "group": {
+    "panel": 11,
+    "row": 1,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 438,
+    "y": 904,
+    "w": 58,
+    "h": 35
+   }
+  },
+  "trees_and_vegetation_p11_r01_c01": {
+   "frame": {
+    "x": 1937,
+    "y": 263,
+    "w": 70,
+    "h": 38
+   },
+   "group": {
+    "panel": 11,
+    "row": 1,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 508,
+    "y": 898,
+    "w": 74,
+    "h": 41
+   }
+  },
+  "trees_and_vegetation_p11_r01_c02": {
+   "frame": {
+    "x": 170,
+    "y": 263,
+    "w": 72,
+    "h": 42
+   },
+   "group": {
+    "panel": 11,
+    "row": 1,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 594,
+    "y": 897,
+    "w": 74,
+    "h": 44
+   }
+  },
+  "trees_and_vegetation_p11_r01_c03": {
+   "frame": {
+    "x": 1730,
+    "y": 211,
+    "w": 61,
+    "h": 43
+   },
+   "group": {
+    "panel": 11,
+    "row": 1,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 685,
+    "y": 892,
+    "w": 60,
+    "h": 42
+   }
+  },
+  "trees_and_vegetation_p11_r01_c04": {
+   "frame": {
+    "x": 791,
+    "y": 263,
+    "w": 57,
+    "h": 41
+   },
+   "group": {
+    "panel": 11,
+    "row": 1,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 757,
+    "y": 898,
+    "w": 60,
+    "h": 43
+   }
+  },
+  "trees_and_vegetation_p11_r02_c00": {
+   "frame": {
+    "x": 1655,
+    "y": 263,
+    "w": 56,
+    "h": 39
+   },
+   "group": {
+    "panel": 11,
+    "row": 2,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 438,
+    "y": 952,
+    "w": 53,
+    "h": 41
+   }
+  },
+  "trees_and_vegetation_p11_r02_c01": {
+   "frame": {
+    "x": 1620,
+    "y": 347,
+    "w": 22,
+    "h": 16
+   },
+   "group": {
+    "panel": 11,
+    "row": 2,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 482,
+    "y": 975,
+    "w": 20,
+    "h": 13
+   }
+  },
+  "trees_and_vegetation_p11_r02_c02": {
+   "frame": {
+    "x": 1793,
+    "y": 211,
+    "w": 51,
+    "h": 43
+   },
+   "group": {
+    "panel": 11,
+    "row": 2,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 520,
+    "y": 946,
+    "w": 54,
+    "h": 45
+   }
+  },
+  "trees_and_vegetation_p11_r02_c03": {
+   "frame": {
+    "x": 920,
+    "y": 307,
+    "w": 50,
+    "h": 35
+   },
+   "group": {
+    "panel": 11,
+    "row": 2,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 590,
+    "y": 954,
+    "w": 54,
+    "h": 39
+   }
+  },
+  "trees_and_vegetation_p11_r02_c04": {
+   "frame": {
+    "x": 1364,
+    "y": 263,
+    "w": 46,
+    "h": 40
+   },
+   "group": {
+    "panel": 11,
+    "row": 2,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 657,
+    "y": 952,
+    "w": 48,
+    "h": 41
+   }
+  },
+  "trees_and_vegetation_p11_r02_c05": {
+   "frame": {
+    "x": 1588,
+    "y": 211,
+    "w": 31,
+    "h": 44
+   },
+   "group": {
+    "panel": 11,
+    "row": 2,
+    "col": 5
+   },
+   "sourceRect": {
+    "x": 716,
+    "y": 946,
+    "w": 43,
+    "h": 44
+   }
+  },
+  "trees_and_vegetation_p11_r02_c06": {
+   "frame": {
+    "x": 1621,
+    "y": 211,
+    "w": 40,
+    "h": 44
+   },
+   "group": {
+    "panel": 11,
+    "row": 2,
+    "col": 6
+   },
+   "sourceRect": {
+    "x": 773,
+    "y": 946,
+    "w": 39,
+    "h": 48
+   }
+  },
+  "trees_and_vegetation_p12_r00_c00": {
+   "frame": {
+    "x": 1977,
+    "y": 347,
+    "w": 8,
+    "h": 8
+   },
+   "group": {
+    "panel": 12,
+    "row": 0,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 949,
+    "y": 832,
+    "w": 10,
+    "h": 10
+   }
+  },
+  "trees_and_vegetation_p12_r00_c01": {
+   "frame": {
+    "x": 1951,
+    "y": 347,
+    "w": 9,
+    "h": 9
+   },
+   "group": {
+    "panel": 12,
+    "row": 0,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 995,
+    "y": 832,
+    "w": 11,
+    "h": 11
+   }
+  },
+  "trees_and_vegetation_p12_r00_c02": {
+   "frame": {
+    "x": 1435,
+    "y": 347,
+    "w": 21,
+    "h": 19
+   },
+   "group": {
+    "panel": 12,
+    "row": 0,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 1031,
+    "y": 829,
+    "w": 23,
+    "h": 22
+   }
+  },
+  "trees_and_vegetation_p12_r00_c03": {
+   "frame": {
+    "x": 1987,
+    "y": 347,
+    "w": 8,
+    "h": 8
+   },
+   "group": {
+    "panel": 12,
+    "row": 0,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 1065,
+    "y": 829,
+    "w": 10,
+    "h": 12
+   }
+  },
+  "trees_and_vegetation_p12_r01_c00": {
+   "frame": {
+    "x": 1412,
+    "y": 263,
+    "w": 67,
+    "h": 40
+   },
+   "group": {
+    "panel": 12,
+    "row": 1,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 857,
+    "y": 833,
+    "w": 69,
+    "h": 44
+   }
+  },
+  "trees_and_vegetation_p12_r01_c02": {
+   "frame": {
+    "x": 1815,
+    "y": 347,
+    "w": 17,
+    "h": 13
+   },
+   "group": {
+    "panel": 12,
+    "row": 1,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 983,
+    "y": 842,
+    "w": 19,
+    "h": 16
+   }
+  },
+  "trees_and_vegetation_p12_r01_c03": {
+   "frame": {
+    "x": 969,
+    "y": 347,
+    "w": 24,
+    "h": 24
+   },
+   "group": {
+    "panel": 12,
+    "row": 1,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 1060,
+    "y": 843,
+    "w": 26,
+    "h": 26
+   }
+  },
+  "trees_and_vegetation_p12_r01_c04": {
+   "frame": {
+    "x": 1177,
+    "y": 347,
+    "w": 22,
+    "h": 21
+   },
+   "group": {
+    "panel": 12,
+    "row": 1,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 1085,
+    "y": 834,
+    "w": 25,
+    "h": 21
+   }
+  },
+  "trees_and_vegetation_p12_r02_c01": {
+   "frame": {
+    "x": 1644,
+    "y": 347,
+    "w": 17,
+    "h": 16
+   },
+   "group": {
+    "panel": 12,
+    "row": 2,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 1042,
+    "y": 855,
+    "w": 18,
+    "h": 18
+   }
+  },
+  "trees_and_vegetation_p12_r02_c02": {
+   "frame": {
+    "x": 1834,
+    "y": 347,
+    "w": 16,
+    "h": 13
+   },
+   "group": {
+    "panel": 12,
+    "row": 2,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 1091,
+    "y": 857,
+    "w": 17,
+    "h": 16
+   }
+  },
+  "trees_and_vegetation_p12_r03_c00": {
+   "frame": {
+    "x": 1231,
+    "y": 307,
+    "w": 48,
+    "h": 34
+   },
+   "group": {
+    "panel": 12,
+    "row": 3,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 858,
+    "y": 896,
+    "w": 68,
+    "h": 37
+   }
+  },
+  "trees_and_vegetation_p12_r03_c01": {
+   "frame": {
+    "x": 1962,
+    "y": 347,
+    "w": 13,
+    "h": 9
+   },
+   "group": {
+    "panel": 12,
+    "row": 3,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 903,
+    "y": 897,
+    "w": 15,
+    "h": 12
+   }
+  },
+  "trees_and_vegetation_p12_r03_c02": {
+   "frame": {
+    "x": 1867,
+    "y": 307,
+    "w": 68,
+    "h": 32
+   },
+   "group": {
+    "panel": 12,
+    "row": 3,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 945,
+    "y": 898,
+    "w": 69,
+    "h": 36
+   }
+  },
+  "trees_and_vegetation_p12_r03_c03": {
+   "frame": {
+    "x": 0,
+    "y": 307,
+    "w": 83,
+    "h": 38
+   },
+   "group": {
+    "panel": 12,
+    "row": 3,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 1030,
+    "y": 893,
+    "w": 85,
+    "h": 42
+   }
+  },
+  "trees_and_vegetation_p12_r04_c00": {
+   "frame": {
+    "x": 475,
+    "y": 347,
+    "w": 68,
+    "h": 28
+   },
+   "group": {
+    "panel": 12,
+    "row": 4,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 857,
+    "y": 952,
+    "w": 71,
+    "h": 37
+   }
+  },
+  "trees_and_vegetation_p12_r04_c01": {
+   "frame": {
+    "x": 46,
+    "y": 347,
+    "w": 70,
+    "h": 31
+   },
+   "group": {
+    "panel": 12,
+    "row": 4,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 943,
+    "y": 952,
+    "w": 74,
+    "h": 35
+   }
+  },
+  "trees_and_vegetation_p12_r04_c02": {
+   "frame": {
+    "x": 1281,
+    "y": 307,
+    "w": 82,
+    "h": 34
+   },
+   "group": {
+    "panel": 12,
+    "row": 4,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 1031,
+    "y": 952,
+    "w": 83,
+    "h": 37
+   }
+  },
+  "trees_and_vegetation_p13_r00_c00": {
+   "frame": {
+    "x": 0,
+    "y": 211,
+    "w": 82,
+    "h": 50
+   },
+   "group": {
+    "panel": 13,
+    "row": 0,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 1164,
+    "y": 823,
+    "w": 83,
+    "h": 53
+   }
+  },
+  "trees_and_vegetation_p13_r00_c01": {
+   "frame": {
+    "x": 412,
+    "y": 307,
+    "w": 81,
+    "h": 37
+   },
+   "group": {
+    "panel": 13,
+    "row": 0,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 1272,
+    "y": 826,
+    "w": 85,
+    "h": 39
+   }
+  },
+  "trees_and_vegetation_p13_r00_c02": {
+   "frame": {
+    "x": 701,
+    "y": 307,
+    "w": 46,
+    "h": 36
+   },
+   "group": {
+    "panel": 13,
+    "row": 0,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 1381,
+    "y": 827,
+    "w": 49,
+    "h": 37
+   }
+  },
+  "trees_and_vegetation_p13_r00_c03": {
+   "frame": {
+    "x": 390,
+    "y": 211,
+    "w": 65,
+    "h": 48
+   },
+   "group": {
+    "panel": 13,
+    "row": 0,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 1448,
+    "y": 822,
+    "w": 66,
+    "h": 51
+   }
+  },
+  "trees_and_vegetation_p13_r01_c00": {
+   "frame": {
+    "x": 850,
+    "y": 263,
+    "w": 59,
+    "h": 41
+   },
+   "group": {
+    "panel": 13,
+    "row": 1,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 1172,
+    "y": 885,
+    "w": 58,
+    "h": 44
+   }
+  },
+  "trees_and_vegetation_p13_r01_c01": {
+   "frame": {
+    "x": 966,
+    "y": 211,
+    "w": 58,
+    "h": 46
+   },
+   "group": {
+    "panel": 13,
+    "row": 1,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 1250,
+    "y": 879,
+    "w": 58,
+    "h": 47
+   }
+  },
+  "trees_and_vegetation_p13_r01_c02": {
+   "frame": {
+    "x": 910,
+    "y": 347,
+    "w": 24,
+    "h": 25
+   },
+   "group": {
+    "panel": 13,
+    "row": 1,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 1298,
+    "y": 901,
+    "w": 22,
+    "h": 22
+   }
+  },
+  "trees_and_vegetation_p13_r01_c03": {
+   "frame": {
+    "x": 1663,
+    "y": 211,
+    "w": 65,
+    "h": 44
+   },
+   "group": {
+    "panel": 13,
+    "row": 1,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 1338,
+    "y": 880,
+    "w": 66,
+    "h": 45
+   }
+  },
+  "trees_and_vegetation_p13_r01_c04": {
+   "frame": {
+    "x": 1345,
+    "y": 211,
+    "w": 63,
+    "h": 45
+   },
+   "group": {
+    "panel": 13,
+    "row": 1,
+    "col": 4
+   },
+   "sourceRect": {
+    "x": 1417,
+    "y": 890,
+    "w": 64,
+    "h": 48
+   }
+  },
+  "trees_and_vegetation_p13_r01_c05": {
+   "frame": {
+    "x": 1481,
+    "y": 263,
+    "w": 30,
+    "h": 40
+   },
+   "group": {
+    "panel": 13,
+    "row": 1,
+    "col": 5
+   },
+   "sourceRect": {
+    "x": 1486,
+    "y": 893,
+    "w": 29,
+    "h": 42
+   }
+  },
+  "trees_and_vegetation_p13_r02_c00": {
+   "frame": {
+    "x": 1846,
+    "y": 211,
+    "w": 79,
+    "h": 43
+   },
+   "group": {
+    "panel": 13,
+    "row": 2,
+    "col": 0
+   },
+   "sourceRect": {
+    "x": 1165,
+    "y": 943,
+    "w": 80,
+    "h": 46
+   }
+  },
+  "trees_and_vegetation_p13_r02_c01": {
+   "frame": {
+    "x": 1026,
+    "y": 211,
+    "w": 75,
+    "h": 46
+   },
+   "group": {
+    "panel": 13,
+    "row": 2,
+    "col": 1
+   },
+   "sourceRect": {
+    "x": 1262,
+    "y": 941,
+    "w": 74,
+    "h": 49
+   }
+  },
+  "trees_and_vegetation_p13_r02_c02": {
+   "frame": {
+    "x": 1410,
+    "y": 211,
+    "w": 60,
+    "h": 45
+   },
+   "group": {
+    "panel": 13,
+    "row": 2,
+    "col": 2
+   },
+   "sourceRect": {
+    "x": 1351,
+    "y": 948,
+    "w": 61,
+    "h": 46
+   }
+  },
+  "trees_and_vegetation_p13_r02_c03": {
+   "frame": {
+    "x": 1927,
+    "y": 211,
+    "w": 87,
+    "h": 43
+   },
+   "group": {
+    "panel": 13,
+    "row": 2,
+    "col": 3
+   },
+   "sourceRect": {
+    "x": 1428,
+    "y": 949,
+    "w": 88,
+    "h": 47
+   }
+  }
+ },
+ "meta": {
+  "image": "trees_and_vegetation_atlas.png",
+  "size": {
+   "w": 2047,
+   "h": 380
+  },
+  "source": "Gitakure Trees and Vegetation Tileset.png"
+ }
+}

@@ -2,7 +2,7 @@
  "frames": {
   "buildings_interiors_p00_r00_c00": {
    "frame": {
-    "x": 1507,
+    "x": 1201,
     "y": 459,
     "w": 24,
     "h": 20
@@ -17,25 +17,6 @@
     "y": 103,
     "w": 28,
     "h": 24
-   }
-  },
-  "buildings_interiors_p00_r00_c01": {
-   "frame": {
-    "x": 1629,
-    "y": 459,
-    "w": 37,
-    "h": 17
-   },
-   "group": {
-    "panel": 0,
-    "row": 0,
-    "col": 1
-   },
-   "sourceRect": {
-    "x": 965,
-    "y": 105,
-    "w": 35,
-    "h": 19
    }
   },
   "buildings_interiors_p00_r01_c00": {
@@ -287,7 +268,7 @@
   },
   "buildings_interiors_p01_r00_c01": {
    "frame": {
-    "x": 1603,
+    "x": 1297,
     "y": 459,
     "w": 24,
     "h": 18
@@ -380,25 +361,6 @@
     "h": 111
    }
   },
-  "buildings_interiors_p01_r01_c00": {
-   "frame": {
-    "x": 1668,
-    "y": 459,
-    "w": 22,
-    "h": 13
-   },
-   "group": {
-    "panel": 1,
-    "row": 1,
-    "col": 0
-   },
-   "sourceRect": {
-    "x": 109,
-    "y": 240,
-    "w": 22,
-    "h": 13
-   }
-  },
   "buildings_interiors_p01_r02_c00": {
    "frame": {
     "x": 1841,
@@ -477,7 +439,7 @@
   },
   "buildings_interiors_p01_r02_c04": {
    "frame": {
-    "x": 1533,
+    "x": 1227,
     "y": 459,
     "w": 31,
     "h": 20
@@ -494,28 +456,9 @@
     "h": 16
    }
   },
-  "buildings_interiors_p02_r00_c00": {
-   "frame": {
-    "x": 840,
-    "y": 403,
-    "w": 328,
-    "h": 47
-   },
-   "group": {
-    "panel": 2,
-    "row": 0,
-    "col": 0
-   },
-   "sourceRect": {
-    "x": 1192,
-    "y": 132,
-    "w": 331,
-    "h": 46
-   }
-  },
   "buildings_interiors_p02_r00_c01": {
    "frame": {
-    "x": 1267,
+    "x": 961,
     "y": 459,
     "w": 53,
     "h": 27
@@ -534,7 +477,7 @@
   },
   "buildings_interiors_p02_r01_c00": {
    "frame": {
-    "x": 348,
+    "x": 42,
     "y": 459,
     "w": 82,
     "h": 34
@@ -553,7 +496,7 @@
   },
   "buildings_interiors_p02_r01_c01": {
    "frame": {
-    "x": 1501,
+    "x": 1171,
     "y": 403,
     "w": 71,
     "h": 41
@@ -572,7 +515,7 @@
   },
   "buildings_interiors_p02_r01_c02": {
    "frame": {
-    "x": 636,
+    "x": 330,
     "y": 459,
     "w": 69,
     "h": 33
@@ -589,28 +532,9 @@
     "h": 32
    }
   },
-  "buildings_interiors_p02_r01_c04": {
-   "frame": {
-    "x": 1708,
-    "y": 459,
-    "w": 12,
-    "h": 11
-   },
-   "group": {
-    "panel": 2,
-    "row": 1,
-    "col": 4
-   },
-   "sourceRect": {
-    "x": 1416,
-    "y": 214,
-    "w": 11,
-    "h": 12
-   }
-  },
   "buildings_interiors_p02_r01_c05": {
    "frame": {
-    "x": 1883,
+    "x": 1553,
     "y": 403,
     "w": 74,
     "h": 38
@@ -648,7 +572,7 @@
   },
   "buildings_interiors_p02_r02_c01": {
    "frame": {
-    "x": 1574,
+    "x": 1244,
     "y": 403,
     "w": 37,
     "h": 41
@@ -724,8 +648,8 @@
   },
   "buildings_interiors_p02_r02_c05": {
    "frame": {
-    "x": 116,
-    "y": 459,
+    "x": 1830,
+    "y": 403,
     "w": 29,
     "h": 37
    },
@@ -743,7 +667,7 @@
   },
   "buildings_interiors_p02_r02_c06": {
    "frame": {
-    "x": 1852,
+    "x": 1522,
     "y": 403,
     "w": 29,
     "h": 39
@@ -876,7 +800,7 @@
   },
   "buildings_interiors_p02_r04_c00": {
    "frame": {
-    "x": 1424,
+    "x": 1094,
     "y": 403,
     "w": 49,
     "h": 42
@@ -895,7 +819,7 @@
   },
   "buildings_interiors_p02_r04_c01": {
    "frame": {
-    "x": 1959,
+    "x": 1629,
     "y": 403,
     "w": 40,
     "h": 38
@@ -914,7 +838,7 @@
   },
   "buildings_interiors_p02_r04_c02": {
    "frame": {
-    "x": 2001,
+    "x": 1671,
     "y": 403,
     "w": 41,
     "h": 38
@@ -933,7 +857,7 @@
   },
   "buildings_interiors_p02_r04_c03": {
    "frame": {
-    "x": 1659,
+    "x": 1329,
     "y": 403,
     "w": 44,
     "h": 40
@@ -952,8 +876,8 @@
   },
   "buildings_interiors_p02_r04_c04": {
    "frame": {
-    "x": 0,
-    "y": 459,
+    "x": 1714,
+    "y": 403,
     "w": 114,
     "h": 38
    },
@@ -1142,7 +1066,7 @@
   },
   "buildings_interiors_p04_r00_c04": {
    "frame": {
-    "x": 1475,
+    "x": 1145,
     "y": 403,
     "w": 24,
     "h": 42
@@ -1254,25 +1178,6 @@
     "h": 136
    }
   },
-  "buildings_interiors_p05_r01_c00": {
-   "frame": {
-    "x": 1692,
-    "y": 459,
-    "w": 14,
-    "h": 12
-   },
-   "group": {
-    "panel": 5,
-    "row": 1,
-    "col": 0
-   },
-   "sourceRect": {
-    "x": 75,
-    "y": 733,
-    "w": 14,
-    "h": 12
-   }
-  },
   "buildings_interiors_p06_r00_c00": {
    "frame": {
     "x": 648,
@@ -1313,7 +1218,7 @@
   },
   "buildings_interiors_p06_r00_c02": {
    "frame": {
-    "x": 1453,
+    "x": 1147,
     "y": 459,
     "w": 13,
     "h": 23
@@ -1332,7 +1237,7 @@
   },
   "buildings_interiors_p06_r00_c03": {
    "frame": {
-    "x": 1566,
+    "x": 1260,
     "y": 459,
     "w": 13,
     "h": 19
@@ -1351,7 +1256,7 @@
   },
   "buildings_interiors_p06_r00_c04": {
    "frame": {
-    "x": 1468,
+    "x": 1162,
     "y": 459,
     "w": 14,
     "h": 23
@@ -1465,7 +1370,7 @@
   },
   "buildings_interiors_p07_r00_c02": {
    "frame": {
-    "x": 1356,
+    "x": 1026,
     "y": 403,
     "w": 66,
     "h": 43
@@ -1560,7 +1465,7 @@
   },
   "buildings_interiors_p07_r00_c07": {
    "frame": {
-    "x": 1284,
+    "x": 954,
     "y": 403,
     "w": 33,
     "h": 45
@@ -1579,7 +1484,7 @@
   },
   "buildings_interiors_p07_r01_c00": {
    "frame": {
-    "x": 1359,
+    "x": 1053,
     "y": 459,
     "w": 27,
     "h": 25
@@ -1598,7 +1503,7 @@
   },
   "buildings_interiors_p07_r01_c01": {
    "frame": {
-    "x": 1388,
+    "x": 1082,
     "y": 459,
     "w": 27,
     "h": 25
@@ -1617,8 +1522,8 @@
   },
   "buildings_interiors_p07_r02_c00": {
    "frame": {
-    "x": 147,
-    "y": 459,
+    "x": 1861,
+    "y": 403,
     "w": 52,
     "h": 37
    },
@@ -1636,8 +1541,8 @@
   },
   "buildings_interiors_p07_r02_c01": {
    "frame": {
-    "x": 201,
-    "y": 459,
+    "x": 1915,
+    "y": 403,
     "w": 41,
     "h": 37
    },
@@ -1655,7 +1560,7 @@
   },
   "buildings_interiors_p07_r02_c02": {
    "frame": {
-    "x": 432,
+    "x": 126,
     "y": 459,
     "w": 27,
     "h": 34
@@ -1674,7 +1579,7 @@
   },
   "buildings_interiors_p07_r02_c03": {
    "frame": {
-    "x": 461,
+    "x": 155,
     "y": 459,
     "w": 36,
     "h": 34
@@ -1712,7 +1617,7 @@
   },
   "buildings_interiors_p07_r02_c05": {
    "frame": {
-    "x": 1170,
+    "x": 840,
     "y": 403,
     "w": 59,
     "h": 46
@@ -1731,7 +1636,7 @@
   },
   "buildings_interiors_p07_r02_c06": {
    "frame": {
-    "x": 1231,
+    "x": 901,
     "y": 403,
     "w": 51,
     "h": 46
@@ -1788,7 +1693,7 @@
   },
   "buildings_interiors_p07_r03_c00": {
    "frame": {
-    "x": 942,
+    "x": 636,
     "y": 459,
     "w": 39,
     "h": 31
@@ -1807,7 +1712,7 @@
   },
   "buildings_interiors_p07_r03_c01": {
    "frame": {
-    "x": 499,
+    "x": 193,
     "y": 459,
     "w": 60,
     "h": 34
@@ -1826,7 +1731,7 @@
   },
   "buildings_interiors_p07_r03_c02": {
    "frame": {
-    "x": 1059,
+    "x": 753,
     "y": 459,
     "w": 44,
     "h": 30
@@ -1845,7 +1750,7 @@
   },
   "buildings_interiors_p07_r03_c03": {
    "frame": {
-    "x": 1705,
+    "x": 1375,
     "y": 403,
     "w": 59,
     "h": 40
@@ -1864,7 +1769,7 @@
   },
   "buildings_interiors_p07_r03_c04": {
    "frame": {
-    "x": 1105,
+    "x": 799,
     "y": 459,
     "w": 29,
     "h": 30
@@ -1883,7 +1788,7 @@
   },
   "buildings_interiors_p07_r03_c05": {
    "frame": {
-    "x": 983,
+    "x": 677,
     "y": 459,
     "w": 30,
     "h": 31
@@ -1902,8 +1807,8 @@
   },
   "buildings_interiors_p07_r03_c06": {
    "frame": {
-    "x": 244,
-    "y": 459,
+    "x": 1958,
+    "y": 403,
     "w": 31,
     "h": 37
    },
@@ -1940,7 +1845,7 @@
   },
   "buildings_interiors_p07_r04_c01": {
    "frame": {
-    "x": 707,
+    "x": 401,
     "y": 459,
     "w": 30,
     "h": 33
@@ -1959,7 +1864,7 @@
   },
   "buildings_interiors_p07_r04_c02": {
    "frame": {
-    "x": 1417,
+    "x": 1111,
     "y": 459,
     "w": 34,
     "h": 25
@@ -1978,7 +1883,7 @@
   },
   "buildings_interiors_p07_r04_c03": {
    "frame": {
-    "x": 1187,
+    "x": 881,
     "y": 459,
     "w": 31,
     "h": 28
@@ -1997,7 +1902,7 @@
   },
   "buildings_interiors_p07_r04_c04": {
    "frame": {
-    "x": 739,
+    "x": 433,
     "y": 459,
     "w": 28,
     "h": 33
@@ -2016,7 +1921,7 @@
   },
   "buildings_interiors_p07_r04_c05": {
    "frame": {
-    "x": 769,
+    "x": 463,
     "y": 459,
     "w": 29,
     "h": 33
@@ -2035,7 +1940,7 @@
   },
   "buildings_interiors_p07_r04_c06": {
    "frame": {
-    "x": 1136,
+    "x": 830,
     "y": 459,
     "w": 25,
     "h": 30
@@ -2054,7 +1959,7 @@
   },
   "buildings_interiors_p07_r04_c07": {
    "frame": {
-    "x": 913,
+    "x": 607,
     "y": 459,
     "w": 27,
     "h": 32
@@ -2073,7 +1978,7 @@
   },
   "buildings_interiors_p07_r04_c08": {
    "frame": {
-    "x": 1220,
+    "x": 914,
     "y": 459,
     "w": 45,
     "h": 28
@@ -2092,7 +1997,7 @@
   },
   "buildings_interiors_p07_r04_c09": {
    "frame": {
-    "x": 561,
+    "x": 255,
     "y": 459,
     "w": 31,
     "h": 34
@@ -2130,7 +2035,7 @@
   },
   "buildings_interiors_p07_r04_c11": {
    "frame": {
-    "x": 1163,
+    "x": 857,
     "y": 459,
     "w": 22,
     "h": 30
@@ -2149,7 +2054,7 @@
   },
   "buildings_interiors_p08_r00_c00": {
    "frame": {
-    "x": 1322,
+    "x": 1016,
     "y": 459,
     "w": 35,
     "h": 27
@@ -2168,7 +2073,7 @@
   },
   "buildings_interiors_p08_r00_c01": {
    "frame": {
-    "x": 1484,
+    "x": 1178,
     "y": 459,
     "w": 21,
     "h": 21
@@ -2206,7 +2111,7 @@
   },
   "buildings_interiors_p08_r00_c03": {
    "frame": {
-    "x": 1319,
+    "x": 989,
     "y": 403,
     "w": 35,
     "h": 45
@@ -2358,7 +2263,7 @@
   },
   "buildings_interiors_p08_r01_c01": {
    "frame": {
-    "x": 306,
+    "x": 0,
     "y": 459,
     "w": 40,
     "h": 36
@@ -2396,8 +2301,8 @@
   },
   "buildings_interiors_p08_r01_c03": {
    "frame": {
-    "x": 277,
-    "y": 459,
+    "x": 1991,
+    "y": 403,
     "w": 27,
     "h": 37
    },
@@ -2472,7 +2377,7 @@
   },
   "buildings_interiors_p08_r01_c07": {
    "frame": {
-    "x": 800,
+    "x": 494,
     "y": 459,
     "w": 40,
     "h": 33
@@ -2491,7 +2396,7 @@
   },
   "buildings_interiors_p08_r01_c08": {
    "frame": {
-    "x": 1581,
+    "x": 1275,
     "y": 459,
     "w": 20,
     "h": 19
@@ -2510,7 +2415,7 @@
   },
   "buildings_interiors_p08_r02_c00": {
    "frame": {
-    "x": 594,
+    "x": 288,
     "y": 459,
     "w": 40,
     "h": 34
@@ -2529,7 +2434,7 @@
   },
   "buildings_interiors_p08_r02_c01": {
    "frame": {
-    "x": 842,
+    "x": 536,
     "y": 459,
     "w": 40,
     "h": 33
@@ -2548,7 +2453,7 @@
   },
   "buildings_interiors_p08_r02_c02": {
    "frame": {
-    "x": 1015,
+    "x": 709,
     "y": 459,
     "w": 42,
     "h": 31
@@ -2567,7 +2472,7 @@
   },
   "buildings_interiors_p08_r03_c00": {
    "frame": {
-    "x": 1766,
+    "x": 1436,
     "y": 403,
     "w": 28,
     "h": 40
@@ -2586,7 +2491,7 @@
   },
   "buildings_interiors_p08_r03_c01": {
    "frame": {
-    "x": 1613,
+    "x": 1283,
     "y": 403,
     "w": 44,
     "h": 41
@@ -2605,7 +2510,7 @@
   },
   "buildings_interiors_p08_r03_c02": {
    "frame": {
-    "x": 1796,
+    "x": 1466,
     "y": 403,
     "w": 54,
     "h": 40
@@ -2662,7 +2567,7 @@
   },
   "buildings_interiors_p08_r03_c05": {
    "frame": {
-    "x": 1722,
+    "x": 1323,
     "y": 459,
     "w": 10,
     "h": 10
@@ -2681,7 +2586,7 @@
   },
   "buildings_interiors_p08_r03_c06": {
    "frame": {
-    "x": 884,
+    "x": 578,
     "y": 459,
     "w": 27,
     "h": 33
@@ -3215,8 +3120,8 @@
  "meta": {
   "image": "buildings_interiors_atlas.png",
   "size": {
-   "w": 2044,
-   "h": 499
+   "w": 2034,
+   "h": 497
   },
   "source": "Gitakure Buildings & Interiors Tileset Atlas.png"
  }
