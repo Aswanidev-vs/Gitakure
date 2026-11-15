@@ -20,6 +20,7 @@ export type GameEvent =
   | { type: 'snapshot'; snapshot: GameSnapshot }
   | { type: 'error'; message: string }
   | { type: 'interaction'; prompt: string | null }
+  | { type: 'dialogue'; speaker: string; text: string }
   | { type: 'pause' }
   | { type: 'resume' };
 

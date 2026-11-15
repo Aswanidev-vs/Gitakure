@@ -10,6 +10,7 @@ import MainMenu from '@/components/MainMenu.vue';
 import SettingsModal from '@/components/SettingsModal.vue';
 import InventoryModal from '@/components/InventoryModal.vue';
 import GameplayHUD from '@/components/GameplayHUD.vue';
+import DialogueBox from '@/components/DialogueBox.vue';
 import '@/styles.css';
 
 const settingsStore = useSettingsStore();
@@ -29,6 +30,10 @@ const paused = ref(false);
 const showSettings = ref(false);
 const showInventory = ref(false);
 
+const dialogueOpen = ref(false);
+const dialogueSpeaker = ref('');
+const dialogueText = ref('');
+
 const started = ref(false);
 const hasSave = ref(false);
 
@@ -41,6 +46,11 @@ const offSnapshot = gameBridge.on('snapshot', (e) => {
 });
 const offInteraction = gameBridge.on('interaction', (e) => {
   prompt.value = e.prompt;
+});
+const offDialogue = gameBridge.on('dialogue', (e) => {
+  dialogueSpeaker.value = e.speaker;
+  dialogueText.value = e.text;
+  dialogueOpen.value = true;
 });
 
 function toggleCamera() {
@@ -77,6 +87,10 @@ function returnToMenu() {
 }
 
 function onKey(e: KeyboardEvent) {
+  if (dialogueOpen.value && (e.code === 'KeyE' || e.code === 'Space' || e.code === 'Escape')) {
+    dialogueOpen.value = false;
+    return;
+  }
   if (e.code === 'Escape') {
     if (showInventory.value) {
       showInventory.value = false;
@@ -136,6 +150,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKey);
   offSnapshot();
   offInteraction();
+  offDialogue();
   game.value?.dispose();
 });
 </script>
@@ -174,6 +189,13 @@ onBeforeUnmount(() => {
     <InventoryModal
       :open="showInventory"
       @close="showInventory = false"
+    />
+
+    <DialogueBox
+      :open="dialogueOpen"
+      :speaker="dialogueSpeaker"
+      :text="dialogueText"
+      @close="dialogueOpen = false"
     />
 
     <SettingsModal

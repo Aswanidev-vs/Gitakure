@@ -9,7 +9,7 @@ import { Lighting } from '@/game/rendering/Lighting';
 import { WorldManager } from '@/game/world/WorldManager';
 import { Player } from '@/game/entities/Player';
 import { Campfire } from '@/game/entities/Campfire';
-import { NPC } from '@/game/entities/NPC';
+import { NPC, type NPCRole } from '@/game/entities/NPC';
 import { MovementSystem } from '@/game/systems/MovementSystem';
 import { InteractionSystem } from '@/game/systems/InteractionSystem';
 import { TimeSystem } from '@/game/systems/TimeSystem';
@@ -190,23 +190,39 @@ export class Game {
       sit: true,
     });
 
-    // Peaceful NPCs: a villager walking a path, someone by the river,
-    // someone tending a garden near the houses.
+    // Peaceful NPCs: 5 distinct villager archetypes from Image 4
     const npcRng = new Rng(4242);
     const villageCenter = this.worldManager.village.group.position;
-    const npcDefs = [
-      { name: 'Ren', shirt: 0x6a8fbf, pants: 0x3a4a5a, at: new THREE.Vector3(villageCenter.x + 4, 0, villageCenter.z + 6) },
-      { name: 'Amma', shirt: 0xc86a8a, pants: 0x5a3a4a, at: new THREE.Vector3(villageCenter.x - 3, 0, villageCenter.z + 2) },
-      { name: 'Appu', shirt: 0x6abf8a, pants: 0x3a5a4a, at: new THREE.Vector3(villageCenter.x - 10, 0, villageCenter.z + 8) },
+    const npcDefs: Array<{ name: string; role: NPCRole; dx: number; dz: number }> = [
+      { name: 'Mika', role: 'maiden', dx: 3, dz: 4 },
+      { name: 'Jiro', role: 'elder-man', dx: -5, dz: -2 },
+      { name: 'Kashi', role: 'elder-woman', dx: 5, dz: -3 },
+      { name: 'Haru', role: 'child', dx: -8, dz: 6 },
+      { name: 'Devan', role: 'farmer', dx: 8, dz: 7 },
     ];
     for (const def of npcDefs) {
-      const y = this.worldManager.heightAt(def.at.x, def.at.z);
+      const posX = villageCenter.x + def.dx;
+      const posZ = villageCenter.z + def.dz;
+      const y = this.worldManager.heightAt(posX, posZ);
       const npc = new NPC(
-        { name: def.name, shirtColor: def.shirt, pantsColor: def.pants, wanderRadius: 5, seed: npcRng.int(0, 9999) },
-        new THREE.Vector3(def.at.x, y, def.at.z),
+        { name: def.name, role: def.role, wanderRadius: 4.5, seed: npcRng.int(0, 9999) },
+        new THREE.Vector3(posX, y, posZ),
       );
       this.npcs.push(npc);
       scene.add(npc.group);
+
+      this.interactions.add({
+        id: `npc-${def.name}`,
+        label: `Talk to ${def.name}`,
+        position: npc.group.position,
+        radius: 2.4,
+        onInteract: () => {
+          if (this.player) {
+            const dialogue = npc.talkTo(this.player.group.position);
+            this.bridge.send({ type: 'dialogue', speaker: def.name, text: dialogue });
+          }
+        },
+      });
     }
 
     // E key interacts.
