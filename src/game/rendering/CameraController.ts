@@ -14,6 +14,12 @@ export interface CameraControllerOptions {
   focusHeight?: number;
 }
 
+// Fixed camera yaw (spec §11: fixed orientation, no uncontrolled rotation).
+// 0 places the camera on the +Z axis looking toward -Z. That keeps the
+// world-axis WASD input screen-aligned (W moves away from the camera) and
+// shows the player from behind while walking forward.
+const FIXED_CAMERA_YAW = 0;
+
 export class CameraController {
   readonly camera: THREE.PerspectiveCamera;
   private mode: CameraMode;
@@ -113,11 +119,11 @@ export class CameraController {
         target.y + this.focusHeight + 0.4,
         target.z,
       );
-      // Look slightly ahead of the player.
+      // Look ahead in the direction the player is facing.
       const ahead = new THREE.Vector3(
-        target.x - Math.sin(rotation) * 4,
+        target.x + Math.sin(rotation) * 4,
         target.y + this.focusHeight,
-        target.z - Math.cos(rotation) * 4,
+        target.z + Math.cos(rotation) * 4,
       );
       this.currentPos.x = damp(this.currentPos.x, eye.x, 18, dt);
       this.currentPos.y = damp(this.currentPos.y, eye.y, 18, dt);
@@ -127,13 +133,15 @@ export class CameraController {
       this.currentTarget.z = damp(this.currentTarget.z, ahead.z, 18, dt);
     } else {
       // Third-person: fixed orientation, elevated, slight downward angle.
-      // Camera sits behind the player based on yaw.
+      // The camera keeps a constant yaw so world-axis movement stays
+      // screen-aligned and the player is viewed from behind while walking
+      // forward, regardless of which way they turn.
       const behind = this.followDistance;
       const height = this.followDistance * 0.55 + 1.5;
       const offset = new THREE.Vector3(
-        Math.sin(rotation) * behind,
+        Math.sin(FIXED_CAMERA_YAW) * behind,
         height,
-        Math.cos(rotation) * behind,
+        Math.cos(FIXED_CAMERA_YAW) * behind,
       );
       const idealPos = new THREE.Vector3().copy(focus).add(offset);
 
@@ -172,17 +180,17 @@ export class CameraController {
     } else if (this.mode === 'firstPerson') {
       this.currentPos.set(target.x, target.y + this.focusHeight + 0.4, target.z);
       this.currentTarget.set(
-        target.x - Math.sin(rotation) * 4,
+        target.x + Math.sin(rotation) * 4,
         target.y + this.focusHeight,
-        target.z - Math.cos(rotation) * 4,
+        target.z + Math.cos(rotation) * 4,
       );
     } else {
       const behind = this.followDistance;
       const height = this.followDistance * 0.55 + 1.5;
       this.currentPos.set(
-        focus.x + Math.sin(rotation) * behind,
+        focus.x + Math.sin(FIXED_CAMERA_YAW) * behind,
         focus.y + height,
-        focus.z + Math.cos(rotation) * behind,
+        focus.z + Math.cos(FIXED_CAMERA_YAW) * behind,
       );
       this.currentTarget.copy(focus);
     }
