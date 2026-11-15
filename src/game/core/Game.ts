@@ -397,6 +397,9 @@ export class Game {
       case 'setMenuMode':
         this.setMenuMode(cmd.isMenu);
         break;
+      case 'setCharacterModel':
+        this.player?.setModel(cmd.model);
+        break;
       case 'setCameraMode':
         this.camera.setMode(cmd.mode);
         this.settings.camera.mode = cmd.mode;
