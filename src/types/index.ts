@@ -2,7 +2,7 @@
 
 export type GraphicsQuality = 'low' | 'medium' | 'high';
 
-export type CameraMode = 'firstPerson' | 'thirdPerson';
+export type CameraMode = 'firstPerson' | 'thirdPerson' | 'menu';
 
 export type Season = 'spring' | 'summer' | 'monsoon' | 'autumn' | 'winter';
 

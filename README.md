@@ -61,8 +61,11 @@ No backend, no React/Next, no Phaser, no Blender, no external CDNs.
 |---|---|
 | `WASD` / arrows | Move |
 | `Shift` | Run |
-| `E` | Interact (sit by campfire / bench) |
+| `E` | Interact (sit by campfire / bench, talk to NPCs) |
+| `Tab` / `I` | Open 10-slot Inventory |
+| `M` | Open illustrated World Map |
 | `V` | Toggle first-person / third-person camera |
+| `Esc` | Close modal / Open Settings menu |
 | `Shift+Space` | Pause |
 
 ---
@@ -72,12 +75,12 @@ No backend, no React/Next, no Phaser, no Blender, no external CDNs.
 ```
 src/
   app/            Vue entry (main.ts, App.vue, workshop.ts)
-  components/     MainMenu, SettingsModal, GithubModal, Workshop (dev)
+  components/     MainMenu, GameplayHUD, InventoryModal, WorldMapModal, DialogueBox, SettingsModal, GithubModal, Workshop (dev)
   game/
     core/         Game, GameLoop, GameBridge, GameConfig
     rendering/    Renderer, SceneManager, CameraController, Lighting
     world/        TerrainSystem, WaterSystem, VegetationSystem, VillageGenerator, WorldManager
-    entities/     Player, NPC, Campfire
+    entities/     Player, CharacterFactory, NPC, Cat, Campfire
     systems/      Movement, Interaction, Time, Weather, Season, Audio, GitHubWorld
     procedural/   materials, geometry helpers, vegetation/buildings/props generators
     assets/       AssetManager (GLTFLoader), AssetRegistry
@@ -92,6 +95,19 @@ src/
 Three.js owns the world and rendering. Vue owns menus/HUD/settings. Pinia
 coordinates app state. Dexie persists player/world/settings/memories. The
 typed `GameBridge` connects them — **no Three.js objects in Pinia**.
+
+---
+
+## Dynamic Game Interface & Asset System
+
+All visual elements, character models, and interface screens are built programmatically in code (Three.js WebGL + Vue 3):
+
+- **Main Menu & Cinematic Vista:** Live Three.js engine boots immediately in menu mode with procedural calico companion cat (`Cat.ts`), glowing stone lantern, arched wooden bridge, and riverside bench.
+- **Dynamic Character Models & Expressions:** Canvas-textured anime faces (`CharacterFactory.ts`), female and male archetypes with customizable hair styles, accessories (sakura flower clip, obi sash), and procedural animations (walk bob, idle breathing, sit).
+- **Parchment Settings & Inventory HUD:** Styled after classic Japanese countryside journals with graphics quality pills, sound sliders, 5 inventory categories, SVG icons, and item actions.
+- **Living NPCs & Dialogue System:** 5 unique villager archetypes (Elder Grandfather, Elder Grandmother, Village Boy, Maiden Mika, Farmer Devan) with interactive dialogue triggered via proximity `[E] Interact`.
+- **Illustrated World Map:** SVG-rendered watercolor map displaying village locations, rice paddies, winding river, and real-time player position.
+- **Atmospheric Golden-Hour Lighting:** Directional honey-amber sunlight with rose-lavender sky ambient and soil bounce light.
 
 ---
 

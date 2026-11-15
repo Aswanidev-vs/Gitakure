@@ -20,10 +20,13 @@ export type GameEvent =
   | { type: 'snapshot'; snapshot: GameSnapshot }
   | { type: 'error'; message: string }
   | { type: 'interaction'; prompt: string | null }
+  | { type: 'dialogue'; speaker: string; text: string }
   | { type: 'pause' }
   | { type: 'resume' };
 
 export type GameCommand =
+  | { type: 'setMenuMode'; isMenu: boolean }
+  | { type: 'setCharacterModel'; model: 'female' | 'male' }
   | { type: 'setCameraMode'; mode: CameraMode }
   | { type: 'setFollowDistance'; distance: number }
   | { type: 'setQuality'; settings: GameSettings['graphics'] }

@@ -14,6 +14,18 @@ export interface CameraControllerOptions {
   focusHeight?: number;
 }
 
+// Default camera yaw (spec §11: fixed orientation, no uncontrolled rotation).
+// 0 places the camera on the +Z axis looking toward -Z, keeping world-axis WASD
+// screen-aligned (W moves away from the camera) with the player seen from
+// behind. The player can orbit away from this default by dragging.
+const DEFAULT_CAMERA_YAW = 0;
+
+// Orbit input sensitivity (radians per pixel dragged).
+const ORBIT_SENSITIVITY = 0.005;
+// Vertical orbit clamp (radians added to the base elevation).
+const PITCH_MIN = -0.5;
+const PITCH_MAX = 0.65;
+
 export class CameraController {
   readonly camera: THREE.PerspectiveCamera;
   private mode: CameraMode;
@@ -25,6 +37,10 @@ export class CameraController {
   private desiredPos = new THREE.Vector3();
   private desiredTarget = new THREE.Vector3();
   private raycaster = new THREE.Raycaster();
+
+  // User-controlled orbit (third-person) around the player.
+  private yaw = DEFAULT_CAMERA_YAW;
+  private pitchOffset = 0;
 
   constructor(aspect: number, opts: CameraControllerOptions) {
     this.mode = opts.mode;
@@ -62,19 +78,82 @@ export class CameraController {
     this.camera.updateProjectionMatrix();
   }
 
+  /** Horizontal look yaw used for camera-relative movement. */
+  get lookYaw(): number {
+    return this.yaw;
+  }
+
+  /** Mouse drag (dx/dy in pixels): orbit the camera around the player. */
+  orbit(dx: number, dy: number): void {
+    this.yaw -= dx * ORBIT_SENSITIVITY;
+    this.pitchOffset = clamp(
+      this.pitchOffset + dy * ORBIT_SENSITIVITY,
+      PITCH_MIN,
+      PITCH_MAX,
+    );
+  }
+
+  /** Mouse wheel (deltaY): zoom the follow distance in/out. */
+  zoom(deltaY: number): void {
+    this.followDistance = clamp(this.followDistance + deltaY * 0.01, 2, 14);
+  }
+
+  /** Third-person camera offset from the focus for the current yaw/zoom. */
+  private thirdPersonOffset(): THREE.Vector3 {
+    const behind = this.followDistance;
+    const height = this.followDistance * 0.55 + 1.5;
+    const dist = Math.hypot(behind, height);
+    const pitch = Math.atan2(height, behind) + this.pitchOffset;
+    const cp = Math.cos(pitch);
+    return new THREE.Vector3(
+      Math.sin(this.yaw) * cp * dist,
+      Math.sin(pitch) * dist,
+      Math.cos(this.yaw) * cp * dist,
+    );
+  }
+
   /**
    * @param target    player root position (feet)
-   * @param rotation  player yaw in radians
    * @param dt        delta seconds
    * @param colliders optional meshes the third-person camera should not clip through
    */
   update(
     target: THREE.Vector3,
-    rotation: number,
     dt: number,
     colliders?: THREE.Object3D[],
   ): void {
     const focus = this.desiredTarget.set(target.x, target.y + this.focusHeight, target.z);
+
+    if (this.mode === 'menu') {
+      // Cinematic menu vista: behind and to the left of the bench,
+      // framing the seated character & cat on the right while leaving
+      // the left open for the menu UI, looking toward the village bridge & sunset.
+      const time = performance.now() * 0.0003;
+      const breatheX = Math.sin(time) * 0.25;
+      const breatheY = Math.cos(time * 0.7) * 0.12;
+
+      const menuCamPos = new THREE.Vector3(
+        target.x - 2.8 + breatheX,
+        target.y + 1.35 + breatheY,
+        target.z + 4.2,
+      );
+      const menuLookTarget = new THREE.Vector3(
+        target.x + 3.5,
+        target.y + 1.2,
+        target.z - 7.0,
+      );
+
+      this.currentPos.x = damp(this.currentPos.x, menuCamPos.x, 4, dt);
+      this.currentPos.y = damp(this.currentPos.y, menuCamPos.y, 4, dt);
+      this.currentPos.z = damp(this.currentPos.z, menuCamPos.z, 4, dt);
+      this.currentTarget.x = damp(this.currentTarget.x, menuLookTarget.x, 4, dt);
+      this.currentTarget.y = damp(this.currentTarget.y, menuLookTarget.y, 4, dt);
+      this.currentTarget.z = damp(this.currentTarget.z, menuLookTarget.z, 4, dt);
+
+      this.camera.position.copy(this.currentPos);
+      this.camera.lookAt(this.currentTarget);
+      return;
+    }
 
     if (this.mode === 'firstPerson') {
       const eye = this.desiredPos.set(
@@ -82,11 +161,11 @@ export class CameraController {
         target.y + this.focusHeight + 0.4,
         target.z,
       );
-      // Look slightly ahead of the player.
+      // Look along the camera's yaw (into the screen), matching third-person.
       const ahead = new THREE.Vector3(
-        target.x - Math.sin(rotation) * 4,
+        target.x - Math.sin(this.yaw) * 4,
         target.y + this.focusHeight,
-        target.z - Math.cos(rotation) * 4,
+        target.z - Math.cos(this.yaw) * 4,
       );
       this.currentPos.x = damp(this.currentPos.x, eye.x, 18, dt);
       this.currentPos.y = damp(this.currentPos.y, eye.y, 18, dt);
@@ -95,16 +174,10 @@ export class CameraController {
       this.currentTarget.y = damp(this.currentTarget.y, ahead.y, 18, dt);
       this.currentTarget.z = damp(this.currentTarget.z, ahead.z, 18, dt);
     } else {
-      // Third-person: fixed orientation, elevated, slight downward angle.
-      // Camera sits behind the player based on yaw.
-      const behind = this.followDistance;
-      const height = this.followDistance * 0.55 + 1.5;
-      const offset = new THREE.Vector3(
-        Math.sin(rotation) * behind,
-        height,
-        Math.cos(rotation) * behind,
-      );
-      const idealPos = new THREE.Vector3().copy(focus).add(offset);
+      // Third-person: elevated follow the player can orbit (drag) and zoom
+      // (wheel). Defaults to a fixed behind-the-player view; movement stays
+      // screen-aligned because it is camera-relative.
+      const idealPos = new THREE.Vector3().copy(focus).add(this.thirdPersonOffset());
 
       // Camera collision: pull in if something blocks the view.
       if (colliders && colliders.length > 0) {
@@ -133,23 +206,21 @@ export class CameraController {
   }
 
   /** Snap immediately (no damping) — used on first frame / teleport. */
-  snap(target: THREE.Vector3, rotation: number): void {
+  snap(target: THREE.Vector3): void {
     const focus = this.desiredTarget.set(target.x, target.y + this.focusHeight, target.z);
-    if (this.mode === 'firstPerson') {
+    if (this.mode === 'menu') {
+      this.currentPos.set(target.x - 2.8, target.y + 1.35, target.z + 4.2);
+      this.currentTarget.set(target.x + 3.5, target.y + 1.2, target.z - 7.0);
+    } else if (this.mode === 'firstPerson') {
       this.currentPos.set(target.x, target.y + this.focusHeight + 0.4, target.z);
       this.currentTarget.set(
-        target.x - Math.sin(rotation) * 4,
+        target.x - Math.sin(this.yaw) * 4,
         target.y + this.focusHeight,
-        target.z - Math.cos(rotation) * 4,
+        target.z - Math.cos(this.yaw) * 4,
       );
     } else {
-      const behind = this.followDistance;
-      const height = this.followDistance * 0.55 + 1.5;
-      this.currentPos.set(
-        focus.x + Math.sin(rotation) * behind,
-        focus.y + height,
-        focus.z + Math.cos(rotation) * behind,
-      );
+      const off = this.thirdPersonOffset();
+      this.currentPos.set(focus.x + off.x, focus.y + off.y, focus.z + off.z);
       this.currentTarget.copy(focus);
     }
     this.camera.position.copy(this.currentPos);

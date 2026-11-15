@@ -9,7 +9,7 @@ import { Lighting } from '@/game/rendering/Lighting';
 import { WorldManager } from '@/game/world/WorldManager';
 import { Player } from '@/game/entities/Player';
 import { Campfire } from '@/game/entities/Campfire';
-import { NPC } from '@/game/entities/NPC';
+import { NPC, type NPCRole } from '@/game/entities/NPC';
 import { MovementSystem } from '@/game/systems/MovementSystem';
 import { InteractionSystem } from '@/game/systems/InteractionSystem';
 import { TimeSystem } from '@/game/systems/TimeSystem';
@@ -17,6 +17,8 @@ import { WeatherSystem } from '@/game/systems/WeatherSystem';
 import { SeasonSystem } from '@/game/systems/SeasonSystem';
 import { AudioSystem } from '@/game/systems/AudioSystem';
 import { GitHubWorldSystem } from '@/game/systems/GitHubWorldSystem';
+import { Cat } from '@/game/entities/Cat';
+import { createStoneLantern } from '@/game/procedural/props';
 import { Rng } from '@/utils/rng';
 import { gameStateRepo, settingsRepo } from '@/database/repositories';
 import { DEFAULT_SETTINGS, type GameSettings, type PlayerState, type WorldState } from '@/types';
@@ -45,6 +47,9 @@ export class Game {
   private audioSystem: AudioSystem;
   private githubWorld: GitHubWorldSystem;
   private npcs: NPC[] = [];
+  private cat: Cat | null = null;
+  private lantern: THREE.Group | null = null;
+  private isMenuMode = true;
   private lastSaveTime = 0;
 
   private settings: GameSettings;
@@ -53,6 +58,11 @@ export class Game {
   private running = false;
   private lastInteraction: string | null = null;
   private lastSentPrompt: string | null = null;
+  private dragging = false;
+  private dragButton = 0;
+  private dragDistance = 0;
+  private lastPointerX = 0;
+  private lastPointerY = 0;
   private fpsAccum = 0;
   private fpsFrames = 0;
   private fps = 0;
@@ -102,6 +112,14 @@ export class Game {
     this.loop.onTick((dt) => this.update(dt));
 
     window.addEventListener('resize', this.onResize);
+
+    const canvas = this.renderer.domElement;
+    canvas.addEventListener('wheel', this.onWheel, { passive: false });
+    canvas.addEventListener('pointerdown', this.onPointerDown);
+    window.addEventListener('pointermove', this.onPointerMove);
+    window.addEventListener('pointerup', this.onPointerUp);
+    canvas.addEventListener('contextmenu', this.onContextMenu);
+
     this.bridge.send({ type: 'ready' });
   }
 
@@ -185,23 +203,39 @@ export class Game {
       sit: true,
     });
 
-    // Peaceful NPCs: a villager walking a path, someone by the river,
-    // someone tending a garden near the houses.
+    // Peaceful NPCs: 5 distinct villager archetypes from Image 4
     const npcRng = new Rng(4242);
     const villageCenter = this.worldManager.village.group.position;
-    const npcDefs = [
-      { name: 'Ren', shirt: 0x6a8fbf, pants: 0x3a4a5a, at: new THREE.Vector3(villageCenter.x + 4, 0, villageCenter.z + 6) },
-      { name: 'Amma', shirt: 0xc86a8a, pants: 0x5a3a4a, at: new THREE.Vector3(villageCenter.x - 3, 0, villageCenter.z + 2) },
-      { name: 'Appu', shirt: 0x6abf8a, pants: 0x3a5a4a, at: new THREE.Vector3(villageCenter.x - 10, 0, villageCenter.z + 8) },
+    const npcDefs: Array<{ name: string; role: NPCRole; dx: number; dz: number }> = [
+      { name: 'Mika', role: 'maiden', dx: 3, dz: 4 },
+      { name: 'Jiro', role: 'elder-man', dx: -5, dz: -2 },
+      { name: 'Kashi', role: 'elder-woman', dx: 5, dz: -3 },
+      { name: 'Haru', role: 'child', dx: -8, dz: 6 },
+      { name: 'Devan', role: 'farmer', dx: 8, dz: 7 },
     ];
     for (const def of npcDefs) {
-      const y = this.worldManager.heightAt(def.at.x, def.at.z);
+      const posX = villageCenter.x + def.dx;
+      const posZ = villageCenter.z + def.dz;
+      const y = this.worldManager.heightAt(posX, posZ);
       const npc = new NPC(
-        { name: def.name, shirtColor: def.shirt, pantsColor: def.pants, wanderRadius: 5, seed: npcRng.int(0, 9999) },
-        new THREE.Vector3(def.at.x, y, def.at.z),
+        { name: def.name, role: def.role, wanderRadius: 4.5, seed: npcRng.int(0, 9999) },
+        new THREE.Vector3(posX, y, posZ),
       );
       this.npcs.push(npc);
       scene.add(npc.group);
+
+      this.interactions.add({
+        id: `npc-${def.name}`,
+        label: `Talk to ${def.name}`,
+        position: npc.group.position,
+        radius: 2.4,
+        onInteract: () => {
+          if (this.player) {
+            const dialogue = npc.talkTo(this.player.group.position);
+            this.bridge.send({ type: 'dialogue', speaker: def.name, text: dialogue });
+          }
+        },
+      });
     }
 
     // E key interacts.
@@ -210,9 +244,48 @@ export class Game {
     window.addEventListener('pointerdown', this.onFirstGesture);
     window.addEventListener('keydown', this.onFirstGesture);
 
+    // Companion Cat on the bench
+    this.cat = new Cat();
+    const benchPos = this.worldManager.benchPosition;
+    this.cat.group.position.set(benchPos.x + 0.35, benchPos.y + 0.5, benchPos.z - 0.05);
+    this.cat.group.rotation.y = Math.PI * 0.9;
+    scene.add(this.cat.group);
+
+    // Stone Lantern near bench on riverbank
+    this.lantern = createStoneLantern({ withLight: true });
+    this.lantern.position.set(benchPos.x + 1.8, this.worldManager.heightAt(benchPos.x + 1.8, benchPos.z - 0.8), benchPos.z - 0.8);
+    scene.add(this.lantern);
+
     this.lighting.setTimeOfDay(this.world.time);
-    const p = new THREE.Vector3(...this.playerState.position);
-    this.camera.snap(p, this.playerState.rotation);
+    this.setMenuMode(this.isMenuMode);
+  }
+
+  setMenuMode(isMenu: boolean): void {
+    this.isMenuMode = isMenu;
+    const benchPos = this.worldManager.benchPosition;
+    if (isMenu) {
+      this.movement?.disable();
+      if (this.player) {
+        this.player.group.position.set(benchPos.x - 0.25, benchPos.y + 0.5, benchPos.z - 0.05);
+        this.player.setFacing(Math.PI * 0.9);
+        this.player.setAnim('sit');
+      }
+      this.timeSystem.setTime(0.78);
+      this.lighting.setTimeOfDay(0.78);
+      this.camera.setMode('menu');
+      this.camera.snap(benchPos);
+    } else {
+      if (this.player) {
+        this.player.stand();
+        this.player.setAnim('idle');
+        this.player.group.position.set(benchPos.x, this.worldManager.heightAt(benchPos.x, benchPos.z + 1.6), benchPos.z + 1.6);
+        this.playerState.position = [this.player.group.position.x, this.player.group.position.y, this.player.group.position.z];
+      }
+      this.movement?.enable();
+      this.camera.setMode(this.settings.camera.mode);
+      const p = new THREE.Vector3(...this.playerState.position);
+      this.camera.snap(p);
+    }
   }
 
   private onInteractKey = (e: KeyboardEvent): void => {
@@ -225,6 +298,43 @@ export class Game {
     this.audioSystem.start();
     window.removeEventListener('pointerdown', this.onFirstGesture);
     window.removeEventListener('keydown', this.onFirstGesture);
+  };
+
+  // Mouse camera control: wheel zooms, drag orbits, a short left-click interacts.
+  private onWheel = (e: WheelEvent): void => {
+    e.preventDefault();
+    this.camera.zoom(e.deltaY);
+  };
+
+  private onPointerDown = (e: PointerEvent): void => {
+    if (e.button !== 0 && e.button !== 2) return;
+    this.dragging = true;
+    this.dragButton = e.button;
+    this.dragDistance = 0;
+    this.lastPointerX = e.clientX;
+    this.lastPointerY = e.clientY;
+  };
+
+  private onPointerMove = (e: PointerEvent): void => {
+    if (!this.dragging) return;
+    const dx = e.clientX - this.lastPointerX;
+    const dy = e.clientY - this.lastPointerY;
+    this.lastPointerX = e.clientX;
+    this.lastPointerY = e.clientY;
+    this.dragDistance += Math.abs(dx) + Math.abs(dy);
+    this.camera.orbit(dx, dy);
+  };
+
+  private onPointerUp = (): void => {
+    if (!this.dragging) return;
+    this.dragging = false;
+    if (this.dragButton === 0 && this.dragDistance < 6) {
+      this.interactions?.interact();
+    }
+  };
+
+  private onContextMenu = (e: Event): void => {
+    e.preventDefault();
   };
 
   private elapsedTime = 0;
@@ -250,10 +360,16 @@ export class Game {
     this.sceneManager.setFogDensity(this.weatherSystem.fogDensity());
 
     if (this.player && this.movement) {
-      // Movement + terrain-aware height.
-      this.movement.update(dt, this.player.group.position);
+      // Movement is camera-relative in both modes: W always moves away from
+      // the camera. In first-person the character faces the look direction;
+      // in third-person it faces its movement direction.
+      const lookYaw = this.camera.lookYaw;
+      this.movement.update(dt, this.player.group.position, lookYaw);
       this.playerState.position = [this.player.group.position.x, this.player.group.position.y, this.player.group.position.z];
-      this.playerState.rotation = this.movement.facingYaw;
+      this.playerState.rotation =
+        this.camera.cameraMode === 'firstPerson'
+          ? lookYaw + Math.PI
+          : this.movement.facingYaw;
       this.player.setFacing(this.playerState.rotation);
 
       // Animation state.
@@ -270,14 +386,18 @@ export class Game {
       // Interaction proximity.
       this.interactions?.update(this.player.group.position);
 
-      // Camera follow.
+      // Camera follow. No collider list: raycasting against the player's own
+      // meshes would pull the camera into the character.
       const playerVec = this.player.group.position;
-      this.camera.update(playerVec, this.playerState.rotation, dt, [this.player.group]);
+      this.camera.update(playerVec, dt);
       this.lighting.setFollowTarget(this.player.group);
     }
 
     // NPCs wander.
     for (const npc of this.npcs) npc.update(dt);
+
+    // Companion cat animation.
+    this.cat?.update(dt);
 
     // Campfire flame/smoke animation.
     this.campfire?.update(dt, this.elapsedTime);
@@ -347,6 +467,12 @@ export class Game {
 
   private handleCommand(cmd: GameCommand): void {
     switch (cmd.type) {
+      case 'setMenuMode':
+        this.setMenuMode(cmd.isMenu);
+        break;
+      case 'setCharacterModel':
+        this.player?.setModel(cmd.model);
+        break;
       case 'setCameraMode':
         this.camera.setMode(cmd.mode);
         this.settings.camera.mode = cmd.mode;
@@ -437,6 +563,12 @@ export class Game {
     window.removeEventListener('keydown', this.onInteractKey);
     window.removeEventListener('pointerdown', this.onFirstGesture);
     window.removeEventListener('keydown', this.onFirstGesture);
+    const canvas = this.renderer.domElement;
+    canvas.removeEventListener('wheel', this.onWheel);
+    canvas.removeEventListener('pointerdown', this.onPointerDown);
+    window.removeEventListener('pointermove', this.onPointerMove);
+    window.removeEventListener('pointerup', this.onPointerUp);
+    canvas.removeEventListener('contextmenu', this.onContextMenu);
     this.movement?.dispose();
     this.interactions?.dispose();
     this.campfire?.dispose();
