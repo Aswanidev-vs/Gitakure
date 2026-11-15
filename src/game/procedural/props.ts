@@ -98,3 +98,68 @@ export function createBush(p: Partial<BushParams> = {}): THREE.Group {
   }
   return g;
 }
+
+export interface StoneLanternParams {
+  withLight?: boolean;
+}
+
+export function createStoneLantern(p: StoneLanternParams = {}): THREE.Group {
+  const g = new THREE.Group();
+  g.name = 'stone-lantern';
+  const stoneMat = MAT.stone();
+
+  // Base
+  const base1 = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.15, 0.6), stoneMat);
+  base1.position.y = 0.075;
+  base1.castShadow = true;
+  g.add(base1);
+
+  const base2 = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.12, 0.46), stoneMat);
+  base2.position.y = 0.21;
+  base2.castShadow = true;
+  g.add(base2);
+
+  // Post / column
+  const post = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.6, 0.24), stoneMat);
+  post.position.y = 0.57;
+  post.castShadow = true;
+  g.add(post);
+
+  // Platform (chudai)
+  const platform = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.1, 0.55), stoneMat);
+  platform.position.y = 0.92;
+  platform.castShadow = true;
+  g.add(platform);
+
+  // Light chamber (hibukuro) - outer frame
+  const glowMat = new THREE.MeshStandardMaterial({
+    color: 0xffdf78,
+    emissive: 0xffaa22,
+    emissiveIntensity: 0.8,
+    roughness: 0.2,
+  });
+  const chamber = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.32, 0.34), glowMat);
+  chamber.position.y = 1.13;
+  g.add(chamber);
+
+  // Roof (kasa) - 4-sided flared pagoda roof
+  const roofGeo = new THREE.ConeGeometry(0.52, 0.25, 4);
+  roofGeo.rotateY(Math.PI / 4);
+  const roof = new THREE.Mesh(roofGeo, stoneMat);
+  roof.position.y = 1.41;
+  roof.castShadow = true;
+  g.add(roof);
+
+  // Finial (hoju)
+  const finial = new THREE.Mesh(new THREE.SphereGeometry(0.08, 6, 6), stoneMat);
+  finial.position.y = 1.58;
+  g.add(finial);
+
+  if (p.withLight !== false) {
+    const light = new THREE.PointLight(0xffa834, 1.4, 7);
+    light.position.set(0, 1.13, 0);
+    g.add(light);
+  }
+
+  return g;
+}

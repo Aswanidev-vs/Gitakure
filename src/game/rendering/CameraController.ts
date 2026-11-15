@@ -76,6 +76,37 @@ export class CameraController {
   ): void {
     const focus = this.desiredTarget.set(target.x, target.y + this.focusHeight, target.z);
 
+    if (this.mode === 'menu') {
+      // Cinematic menu vista: behind and to the left of the bench,
+      // framing the seated character & cat on the right while leaving
+      // the left open for the menu UI, looking toward the village bridge & sunset.
+      const time = performance.now() * 0.0003;
+      const breatheX = Math.sin(time) * 0.25;
+      const breatheY = Math.cos(time * 0.7) * 0.12;
+
+      const menuCamPos = new THREE.Vector3(
+        target.x - 2.8 + breatheX,
+        target.y + 1.35 + breatheY,
+        target.z + 4.2,
+      );
+      const menuLookTarget = new THREE.Vector3(
+        target.x + 3.5,
+        target.y + 1.2,
+        target.z - 7.0,
+      );
+
+      this.currentPos.x = damp(this.currentPos.x, menuCamPos.x, 4, dt);
+      this.currentPos.y = damp(this.currentPos.y, menuCamPos.y, 4, dt);
+      this.currentPos.z = damp(this.currentPos.z, menuCamPos.z, 4, dt);
+      this.currentTarget.x = damp(this.currentTarget.x, menuLookTarget.x, 4, dt);
+      this.currentTarget.y = damp(this.currentTarget.y, menuLookTarget.y, 4, dt);
+      this.currentTarget.z = damp(this.currentTarget.z, menuLookTarget.z, 4, dt);
+
+      this.camera.position.copy(this.currentPos);
+      this.camera.lookAt(this.currentTarget);
+      return;
+    }
+
     if (this.mode === 'firstPerson') {
       const eye = this.desiredPos.set(
         target.x,
@@ -135,7 +166,10 @@ export class CameraController {
   /** Snap immediately (no damping) — used on first frame / teleport. */
   snap(target: THREE.Vector3, rotation: number): void {
     const focus = this.desiredTarget.set(target.x, target.y + this.focusHeight, target.z);
-    if (this.mode === 'firstPerson') {
+    if (this.mode === 'menu') {
+      this.currentPos.set(target.x - 2.8, target.y + 1.35, target.z + 4.2);
+      this.currentTarget.set(target.x + 3.5, target.y + 1.2, target.z - 7.0);
+    } else if (this.mode === 'firstPerson') {
       this.currentPos.set(target.x, target.y + this.focusHeight + 0.4, target.z);
       this.currentTarget.set(
         target.x - Math.sin(rotation) * 4,

@@ -17,6 +17,8 @@ import { WeatherSystem } from '@/game/systems/WeatherSystem';
 import { SeasonSystem } from '@/game/systems/SeasonSystem';
 import { AudioSystem } from '@/game/systems/AudioSystem';
 import { GitHubWorldSystem } from '@/game/systems/GitHubWorldSystem';
+import { Cat } from '@/game/entities/Cat';
+import { createStoneLantern } from '@/game/procedural/props';
 import { Rng } from '@/utils/rng';
 import { gameStateRepo, settingsRepo } from '@/database/repositories';
 import { DEFAULT_SETTINGS, type GameSettings, type PlayerState, type WorldState } from '@/types';
@@ -45,6 +47,9 @@ export class Game {
   private audioSystem: AudioSystem;
   private githubWorld: GitHubWorldSystem;
   private npcs: NPC[] = [];
+  private cat: Cat | null = null;
+  private lantern: THREE.Group | null = null;
+  private isMenuMode = true;
   private lastSaveTime = 0;
 
   private settings: GameSettings;
@@ -210,9 +215,48 @@ export class Game {
     window.addEventListener('pointerdown', this.onFirstGesture);
     window.addEventListener('keydown', this.onFirstGesture);
 
+    // Companion Cat on the bench
+    this.cat = new Cat();
+    const benchPos = this.worldManager.benchPosition;
+    this.cat.group.position.set(benchPos.x + 0.35, benchPos.y + 0.5, benchPos.z - 0.05);
+    this.cat.group.rotation.y = Math.PI * 0.9;
+    scene.add(this.cat.group);
+
+    // Stone Lantern near bench on riverbank
+    this.lantern = createStoneLantern({ withLight: true });
+    this.lantern.position.set(benchPos.x + 1.8, this.worldManager.heightAt(benchPos.x + 1.8, benchPos.z - 0.8), benchPos.z - 0.8);
+    scene.add(this.lantern);
+
     this.lighting.setTimeOfDay(this.world.time);
-    const p = new THREE.Vector3(...this.playerState.position);
-    this.camera.snap(p, this.playerState.rotation);
+    this.setMenuMode(this.isMenuMode);
+  }
+
+  setMenuMode(isMenu: boolean): void {
+    this.isMenuMode = isMenu;
+    const benchPos = this.worldManager.benchPosition;
+    if (isMenu) {
+      this.movement?.disable();
+      if (this.player) {
+        this.player.group.position.set(benchPos.x - 0.25, benchPos.y + 0.5, benchPos.z - 0.05);
+        this.player.setFacing(Math.PI * 0.9);
+        this.player.setAnim('sit');
+      }
+      this.timeSystem.setTime(0.78);
+      this.lighting.setTimeOfDay(0.78);
+      this.camera.setMode('menu');
+      this.camera.snap(benchPos, Math.PI * 0.9);
+    } else {
+      if (this.player) {
+        this.player.stand();
+        this.player.setAnim('idle');
+        this.player.group.position.set(benchPos.x, this.worldManager.heightAt(benchPos.x, benchPos.z + 1.6), benchPos.z + 1.6);
+        this.playerState.position = [this.player.group.position.x, this.player.group.position.y, this.player.group.position.z];
+      }
+      this.movement?.enable();
+      this.camera.setMode(this.settings.camera.mode);
+      const p = new THREE.Vector3(...this.playerState.position);
+      this.camera.snap(p, this.playerState.rotation);
+    }
   }
 
   private onInteractKey = (e: KeyboardEvent): void => {
@@ -278,6 +322,9 @@ export class Game {
 
     // NPCs wander.
     for (const npc of this.npcs) npc.update(dt);
+
+    // Companion cat animation.
+    this.cat?.update(dt);
 
     // Campfire flame/smoke animation.
     this.campfire?.update(dt, this.elapsedTime);
@@ -347,6 +394,9 @@ export class Game {
 
   private handleCommand(cmd: GameCommand): void {
     switch (cmd.type) {
+      case 'setMenuMode':
+        this.setMenuMode(cmd.isMenu);
+        break;
       case 'setCameraMode':
         this.camera.setMode(cmd.mode);
         this.settings.camera.mode = cmd.mode;

@@ -24,6 +24,8 @@ export type GameEvent =
   | { type: 'resume' };
 
 export type GameCommand =
+  | { type: 'setMenuMode'; isMenu: boolean }
+  | { type: 'setCharacterModel'; model: 'female' | 'male' }
   | { type: 'setCameraMode'; mode: CameraMode }
   | { type: 'setFollowDistance'; distance: number }
   | { type: 'setQuality'; settings: GameSettings['graphics'] }

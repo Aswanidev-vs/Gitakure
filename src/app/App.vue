@@ -44,16 +44,6 @@ function togglePause() {
   gameBridge.emit({ type: 'setPaused', paused: paused.value });
 }
 
-function onKey(e: KeyboardEvent) {
-  if (!started.value) return;
-  if (e.code === 'KeyV' && !e.repeat) {
-    toggleCamera();
-  } else if (e.code === 'Space' && e.shiftKey) {
-    e.preventDefault();
-    togglePause();
-  }
-}
-
 function onSettingsChange(next: GameSettings) {
   Object.assign(settings, plainSettings(next));
   settingsStore.settings = plainSettings(next);
@@ -61,7 +51,6 @@ function onSettingsChange(next: GameSettings) {
 
 async function startGame(fresh: boolean) {
   if (fresh) {
-    // New journey: clear saved state.
     try {
       await gameStateRepo.save({ position: [0, 0, 0], rotation: 0 }, { time: 0.35, day: 1, season: 'spring', weather: 'clear' });
     } catch {
@@ -69,16 +58,30 @@ async function startGame(fresh: boolean) {
     }
   }
   started.value = true;
-  await nextTick();
-  if (!container.value || game.value) return;
-  // Wait for a real layout frame: with v-show the container is display:none
-  // during the same tick, so clientWidth/clientHeight would both be 0 and the
-  // renderer would be sized 0x0.
-  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-  if (!container.value || game.value) return;
-  const g = new Game(container.value, settings);
-  game.value = g;
-  void g.start();
+  gameBridge.emit({ type: 'setMenuMode', isMenu: false });
+}
+
+function returnToMenu() {
+  started.value = false;
+  gameBridge.emit({ type: 'setMenuMode', isMenu: true });
+}
+
+function onKey(e: KeyboardEvent) {
+  if (e.code === 'Escape') {
+    if (showSettings.value) {
+      showSettings.value = false;
+    } else if (started.value) {
+      showSettings.value = true;
+    }
+    return;
+  }
+  if (!started.value) return;
+  if (e.code === 'KeyV' && !e.repeat) {
+    toggleCamera();
+  } else if (e.code === 'Space' && e.shiftKey) {
+    e.preventDefault();
+    togglePause();
+  }
 }
 
 watch(
@@ -102,6 +105,14 @@ onMounted(async () => {
   } catch {
     // fresh
   }
+
+  // Boot Three.js 3D engine immediately on page load in menu mode
+  await nextTick();
+  if (container.value && !game.value) {
+    const g = new Game(container.value, settings);
+    game.value = g;
+    void g.start();
+  }
 });
 
 onBeforeUnmount(() => {
@@ -113,39 +124,40 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <MainMenu
-    v-if="!started"
-    :has-save="hasSave"
-    @continue="startGame(false)"
-    @new-journey="startGame(true)"
-    @settings="showSettings = true"
-    @github="startGame(false)"
-  />
-
-  <SettingsModal
-    :settings="settings"
-    :open="showSettings"
-    @close="showSettings = false"
-    @change="onSettingsChange"
-  />
-
-  <div v-if="started" class="gitakure-root">
+  <div class="gitakure-root">
     <div ref="container" class="game-canvas"></div>
 
-    <div class="hud">
+    <MainMenu
+      v-if="!started"
+      :has-save="hasSave"
+      @continue="startGame(false)"
+      @new-journey="startGame(true)"
+      @settings="showSettings = true"
+      @github="startGame(false)"
+    />
+
+    <SettingsModal
+      :settings="settings"
+      :open="showSettings"
+      @close="showSettings = false"
+      @change="onSettingsChange"
+    />
+
+    <div v-if="started" class="hud">
       <div class="hud-left">
         <button class="hud-btn" @click="toggleCamera">
           {{ cameraMode === 'thirdPerson' ? 'Third-person' : 'First-person' }} · V
         </button>
         <button class="hud-btn" @click="togglePause">Pause</button>
         <button class="hud-btn" @click="showSettings = true">Settings</button>
+        <button class="hud-btn" @click="returnToMenu">Main Menu</button>
       </div>
       <div class="hud-right">
         <span class="stat">{{ fps }} fps · {{ drawCalls }} calls</span>
       </div>
     </div>
 
-    <div v-if="prompt" class="interaction-pill">{{ prompt }}</div>
+    <div v-if="started && prompt" class="interaction-pill">{{ prompt }}</div>
   </div>
 </template>
 
