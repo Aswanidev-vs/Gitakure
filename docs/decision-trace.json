@@ -1,0 +1,38 @@
+[
+  {
+    "decision": "Keep Three.js as the only scene renderer and Vue as the only DOM UI owner",
+    "reason": "The repo already has a fixed-timestep Three.js engine, GLB assets, and Vue components; the references require a live 3D world plus accessible dialogue and settings.",
+    "alternatives": ["Babylon.js rewrite", "React Three Fiber migration", "Static reference-image backgrounds"],
+    "tradeoff": "The current imperative scene code keeps more lifecycle responsibility in the game layer, but avoids a migration and preserves the existing asset pipeline."
+  },
+  {
+    "decision": "Use lantern amber and leaf green as rare interface accents over parchment neutrals",
+    "reason": "The references repeatedly use sunset amber, green foliage, pale paper panels, and dark ink; the palette ties UI to the world without adding a second visual language.",
+    "alternatives": ["Cool blue HUD", "Near-black neon interface", "Purple atmospheric gradient"],
+    "tradeoff": "The muted palette has less immediate contrast than a neon HUD, so every live-scene label needs a backing surface and contrast check."
+  },
+  {
+    "decision": "Anchor the menu left and keep the world visible on the right",
+    "reason": "The main-menu reference uses the open village and seated characters as the emotional hook; the menu should not cover the strongest scene composition.",
+    "alternatives": ["Centered full-screen menu", "Opaque modal menu", "Right-side menu rail"],
+    "tradeoff": "A left anchor gives less room on narrow screens, so the responsive layout must collapse into a centered sheet below the mobile breakpoint."
+  },
+  {
+    "decision": "Use DOM dialogue and HUD rather than canvas text",
+    "reason": "The s4 reference depends on readable captions, and DOM text provides keyboard focus, screen-reader access, responsive wrapping, and predictable contrast over the 3D scene.",
+    "alternatives": ["troika-three-text in the world", "Canvas 2D text overlay", "Image-baked captions"],
+    "tradeoff": "The dialogue is screen-space rather than fully diegetic, but it remains readable at every camera distance and device size."
+  },
+  {
+    "decision": "Treat inventory as a spatial field kit and settings as a sequential list",
+    "reason": "The invent reference places items in a grid while settings are organized as labeled rows; each screen gets the native metaphor instead of a generic card layout.",
+    "alternatives": ["Shared card grid for both", "Tabbed single-column modal", "Radial inventory wheel"],
+    "tradeoff": "Two layouts require more component-specific CSS, but they reduce cognitive load and match the reference hierarchy."
+  },
+  {
+    "decision": "Keep the simulation fixed at 60Hz and cap rendering through the existing quality presets",
+    "reason": "The project is a realtime 3D game and the reference world contains many vegetation meshes; stable movement and honest frame budgets matter more than post-processing.",
+    "alternatives": ["Variable timestep only", "WebGPU-only renderer", "Bloom-heavy post stack"],
+    "tradeoff": "The look will remain material-and-light driven rather than cinematic, but it is easier to sustain on lower-end devices and easier to debug."
+  }
+]
