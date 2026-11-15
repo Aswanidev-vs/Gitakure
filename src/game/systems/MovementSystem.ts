@@ -29,6 +29,21 @@ export interface Collider {
   max: THREE.Vector3;
 }
 
+/**
+ * Camera-relative move direction from raw input and the camera's look yaw.
+ * `ix` is +1 for D / -1 for A; `iz` is -1 for W / +1 for S. The result is the
+ * horizontal direction "into the screen" for forward and "screen-right" for D,
+ * rotated by the camera yaw, so W always moves away from the camera.
+ */
+export function moveInputToDir(ix: number, iz: number, cameraYaw: number): { x: number; z: number } {
+  const sin = Math.sin(cameraYaw);
+  const cos = Math.cos(cameraYaw);
+  return {
+    x: sin * iz + cos * ix,
+    z: cos * iz - sin * ix,
+  };
+}
+
 export class MovementSystem {
   private velocity = new THREE.Vector3();
   private moveDir = new THREE.Vector3();
@@ -97,11 +112,12 @@ export class MovementSystem {
     return codes.some((c) => this.keys.has(c));
   }
 
-  update(dt: number, position: THREE.Vector3): void {
+  update(dt: number, position: THREE.Vector3, cameraYaw = 0): void {
     if (!this.enabled) return;
 
-    // Input → desired direction (camera-relative is out of scope here;
-    // world-axis movement for simplicity; Phase 5 can make it camera-relative).
+    // Input → desired direction, relative to the camera's look yaw so that
+    // W always moves away from the camera and A/D stay screen-left/right even
+    // after the player orbits the view.
     let ix = 0;
     let iz = 0;
     if (this.isDown('KeyW', 'ArrowUp')) iz -= 1;
@@ -115,7 +131,8 @@ export class MovementSystem {
     this.targetSpeed = damp(this.targetSpeed, target, hasInput ? this.cfg.accel : this.cfg.decel, dt);
 
     if (hasInput) {
-      this.moveDir.set(ix, 0, iz).normalize();
+      const dir = moveInputToDir(ix, iz, cameraYaw);
+      this.moveDir.set(dir.x, 0, dir.z).normalize();
       const desiredFacing = Math.atan2(this.moveDir.x, this.moveDir.z);
       this.facing = this.lerpAngle(this.facing, desiredFacing, this.cfg.turnSpeed * dt);
     }

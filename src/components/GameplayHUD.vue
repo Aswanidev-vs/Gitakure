@@ -215,6 +215,8 @@ const weatherLabel = computed(() => {
 
     <!-- ── 5. Bottom Left: Control Hints ─────────────────── -->
     <div class="bottom-control-hints">
+      <div class="hint-chip"><kbd>Drag</kbd> Look</div>
+      <div class="hint-chip"><kbd>Scroll</kbd> Zoom</div>
       <div class="hint-chip"><kbd>E</kbd> Interact</div>
       <div class="hint-chip" @click="emit('openInventory')"><kbd>Tab</kbd> Inventory</div>
       <div class="hint-chip" @click="emit('openMap')"><kbd>M</kbd> Map</div>
