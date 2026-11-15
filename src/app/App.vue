@@ -8,6 +8,8 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { gameStateRepo, settingsRepo } from '@/database/repositories';
 import MainMenu from '@/components/MainMenu.vue';
 import SettingsModal from '@/components/SettingsModal.vue';
+import InventoryModal from '@/components/InventoryModal.vue';
+import GameplayHUD from '@/components/GameplayHUD.vue';
 import '@/styles.css';
 
 const settingsStore = useSettingsStore();
@@ -18,9 +20,14 @@ const game = ref<Game | null>(null);
 const cameraMode = ref<CameraMode>(settings.camera.mode);
 const fps = ref(0);
 const drawCalls = ref(0);
+const timeOfDay = ref(0.78);
+const season = ref('spring');
+const weather = ref('clear');
+const characterGender = ref<'female' | 'male'>('female');
 const prompt = ref<string | null>(null);
 const paused = ref(false);
 const showSettings = ref(false);
+const showInventory = ref(false);
 
 const started = ref(false);
 const hasSave = ref(false);
@@ -28,6 +35,9 @@ const hasSave = ref(false);
 const offSnapshot = gameBridge.on('snapshot', (e) => {
   fps.value = e.snapshot.fps;
   drawCalls.value = e.snapshot.drawCalls;
+  timeOfDay.value = e.snapshot.time;
+  season.value = e.snapshot.season;
+  weather.value = e.snapshot.weather;
 });
 const offInteraction = gameBridge.on('interaction', (e) => {
   prompt.value = e.prompt;
@@ -68,7 +78,9 @@ function returnToMenu() {
 
 function onKey(e: KeyboardEvent) {
   if (e.code === 'Escape') {
-    if (showSettings.value) {
+    if (showInventory.value) {
+      showInventory.value = false;
+    } else if (showSettings.value) {
       showSettings.value = false;
     } else if (started.value) {
       showSettings.value = true;
@@ -76,6 +88,11 @@ function onKey(e: KeyboardEvent) {
     return;
   }
   if (!started.value) return;
+  if ((e.code === 'KeyI' || e.code === 'Tab') && !e.repeat) {
+    e.preventDefault();
+    showInventory.value = !showInventory.value;
+    return;
+  }
   if (e.code === 'KeyV' && !e.repeat) {
     toggleCamera();
   } else if (e.code === 'Space' && e.shiftKey) {
@@ -136,28 +153,35 @@ onBeforeUnmount(() => {
       @github="startGame(false)"
     />
 
+    <GameplayHUD
+      v-if="started"
+      :fps="fps"
+      :draw-calls="drawCalls"
+      :time-of-day="timeOfDay"
+      :season="season"
+      :weather="weather"
+      :camera-mode="cameraMode"
+      :prompt="prompt"
+      :character-gender="characterGender"
+      @toggle-camera="toggleCamera"
+      @toggle-pause="togglePause"
+      @open-settings="showSettings = true"
+      @open-inventory="showInventory = true"
+      @open-map="() => {}"
+      @return-to-menu="returnToMenu"
+    />
+
+    <InventoryModal
+      :open="showInventory"
+      @close="showInventory = false"
+    />
+
     <SettingsModal
       :settings="settings"
       :open="showSettings"
       @close="showSettings = false"
       @change="onSettingsChange"
     />
-
-    <div v-if="started" class="hud">
-      <div class="hud-left">
-        <button class="hud-btn" @click="toggleCamera">
-          {{ cameraMode === 'thirdPerson' ? 'Third-person' : 'First-person' }} · V
-        </button>
-        <button class="hud-btn" @click="togglePause">Pause</button>
-        <button class="hud-btn" @click="showSettings = true">Settings</button>
-        <button class="hud-btn" @click="returnToMenu">Main Menu</button>
-      </div>
-      <div class="hud-right">
-        <span class="stat">{{ fps }} fps · {{ drawCalls }} calls</span>
-      </div>
-    </div>
-
-    <div v-if="started && prompt" class="interaction-pill">{{ prompt }}</div>
   </div>
 </template>
 
