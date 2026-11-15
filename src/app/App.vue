@@ -11,6 +11,7 @@ import SettingsModal from '@/components/SettingsModal.vue';
 import InventoryModal from '@/components/InventoryModal.vue';
 import GameplayHUD from '@/components/GameplayHUD.vue';
 import DialogueBox from '@/components/DialogueBox.vue';
+import WorldMapModal from '@/components/WorldMapModal.vue';
 import '@/styles.css';
 
 const settingsStore = useSettingsStore();
@@ -29,6 +30,7 @@ const prompt = ref<string | null>(null);
 const paused = ref(false);
 const showSettings = ref(false);
 const showInventory = ref(false);
+const showMap = ref(false);
 
 const dialogueOpen = ref(false);
 const dialogueSpeaker = ref('');
@@ -92,7 +94,9 @@ function onKey(e: KeyboardEvent) {
     return;
   }
   if (e.code === 'Escape') {
-    if (showInventory.value) {
+    if (showMap.value) {
+      showMap.value = false;
+    } else if (showInventory.value) {
       showInventory.value = false;
     } else if (showSettings.value) {
       showSettings.value = false;
@@ -102,6 +106,11 @@ function onKey(e: KeyboardEvent) {
     return;
   }
   if (!started.value) return;
+  if ((e.code === 'KeyM') && !e.repeat) {
+    e.preventDefault();
+    showMap.value = !showMap.value;
+    return;
+  }
   if ((e.code === 'KeyI' || e.code === 'Tab') && !e.repeat) {
     e.preventDefault();
     showInventory.value = !showInventory.value;
@@ -182,13 +191,18 @@ onBeforeUnmount(() => {
       @toggle-pause="togglePause"
       @open-settings="showSettings = true"
       @open-inventory="showInventory = true"
-      @open-map="() => {}"
+      @open-map="showMap = true"
       @return-to-menu="returnToMenu"
     />
 
     <InventoryModal
       :open="showInventory"
       @close="showInventory = false"
+    />
+
+    <WorldMapModal
+      :open="showMap"
+      @close="showMap = false"
     />
 
     <DialogueBox

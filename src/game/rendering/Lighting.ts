@@ -43,24 +43,34 @@ export class Lighting {
     const x = Math.cos(angle) * 30;
     this.sun.position.set(x, Math.max(height, -0.2) * 35, 14);
 
-    if (height > 0.15) {
-      // Day: warm white
-      this.sun.color.setHex(0xfff1d0);
-      this.sun.intensity = 2.2;
-      this.hemi.intensity = 0.9;
-      this.hemi.color.setHex(0xbfd8e0);
-    } else if (height > -0.1) {
-      // Sunrise/sunset: golden
-      this.sun.color.setHex(0xff9a4d);
-      this.sun.intensity = 1.4;
-      this.hemi.intensity = 0.5;
-      this.hemi.color.setHex(0xe8a06a);
+    if (height > 0.2) {
+      // Day: bright warm white sunlight + clear blue sky ambient
+      this.sun.color.setHex(0xfff5dd);
+      this.sun.intensity = 2.4;
+      this.hemi.intensity = 0.95;
+      this.hemi.color.setHex(0xc8e4ff);
+      this.hemi.groundColor.setHex(0x5a7a44);
+    } else if (height > -0.05) {
+      // Golden Hour / Sunset (Images 1, 5, 6, 7): rich honey-amber sunlight + rose-lavender sky + warm soil ambient
+      this.sun.color.setHex(0xff9e4a);
+      this.sun.intensity = 2.8;
+      this.hemi.intensity = 0.85;
+      this.hemi.color.setHex(0xf4ad8e);
+      this.hemi.groundColor.setHex(0x6b4a3a);
+    } else if (height > -0.2) {
+      // Twilight / Dusk: deep violet ambient
+      this.sun.color.setHex(0xcc6655);
+      this.sun.intensity = 0.6;
+      this.hemi.intensity = 0.45;
+      this.hemi.color.setHex(0x755885);
+      this.hemi.groundColor.setHex(0x2a2536);
     } else {
-      // Night: cool blue
-      this.sun.color.setHex(0x6688cc);
-      this.sun.intensity = 0.25;
-      this.hemi.intensity = 0.25;
+      // Night: serene moonlight
+      this.sun.color.setHex(0x7da4e8);
+      this.sun.intensity = 0.35;
+      this.hemi.intensity = 0.3;
       this.hemi.color.setHex(0x223355);
+      this.hemi.groundColor.setHex(0x111c22);
     }
   }
 
