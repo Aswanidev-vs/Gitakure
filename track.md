@@ -154,3 +154,35 @@ Status legend: `[x]` done and verified · `[~]` in progress · `[ ]` not started
 - `[x]` **Low/Medium/High presets** — Low (no shadows, 1080p cap), Medium (shadows, 1440p), High (shadows, 4K).
 - `[x]` **Multi-page build** — `index.html` (player) + `workshop.html` (dev tool, not in player build).
 - `[x]` **Verification**: full `typecheck + build + test` green; dev server launches; production dist emits both entries.
+
+---
+
+## Phase 10: Reference Image Visual Replica & Dynamic Asset System `[x]`
+
+Complete code-driven programmatic recreation of 10 reference images (Three.js WebGL + Vue 3 UI, zero static image generation):
+
+### 1. Main Menu & 3D Environment (Image 1) `[x]` — Commit `0fbf4d3`
+- `[x]` **Immediate Engine Mount**: Three.js engine boots immediately in `'menu'` cinematic camera mode; transparent overlay for Vue HUD.
+- `[x]` **Procedural Companion Cat**: `src/game/entities/Cat.ts` with breathing spine, tail twitch, and calico patch coloring.
+- `[x]` **Stone Lantern Prop**: `src/game/procedural/props.ts` (`createStoneLantern`) with interior glowing `PointLight`.
+- `[x]` **Parchment Pill Navigation**: `src/components/MainMenu.vue` replicating Image 1 (Continue, New Journey, Settings, GitHub Memories, About).
+
+### 2. Dynamic Character Models & Expressions (Image 2) `[x]` — Commit `087a9e9`
+- `[x]` **Character Factory**: `src/game/entities/CharacterFactory.ts` with canvas-drawn anime eye, blush, and mouth textures.
+- `[x]` **Female Archetype**: Red kimono tunic, side ponytail, sakura flower clip, cream skirt, dark sash.
+- `[x]` **Male Archetype**: Open beige collar shirt, spiky hair, sash belt, dark trousers.
+- `[x]` **Player Postures & Animations**: `src/game/entities/Player.ts` runtime swapping, walk bob, idle breathing, and sitting poses.
+
+### 3. Settings HUD, Inventory & Gameplay HUD (Images 3, 10, 5, 6, 7) `[x]` — Commit `e21f741`
+- `[x]` **Parchment Settings Modal**: `src/components/SettingsModal.vue` with Graphics pills, model selector, audio/controls tabs.
+- `[x]` **10-Slot Inventory System**: `src/components/InventoryModal.vue` with 5 categories (All, Resources, Tools, Decor, Other), SVG item icons, detail pane, Drop/Use actions. Hotkey: `Tab` / `I`.
+- `[x]` **Gameplay HUD**: `src/components/GameplayHUD.vue` with anime avatar vitals, sun clock widget, rotating minimap, quest log card, bottom hotbar, and action hints.
+
+### 4. NPC Archetypes & Dialogue System (Images 4, 8) `[x]` — Commit `6d14d16`
+- `[x]` **5 Villager Archetypes**: `src/game/entities/NPC.ts` (`elder-man`, `elder-woman`, `child`, `maiden`, `farmer`) with unique conical hats, hoe, beard, gray bun, and aprons.
+- `[x]` **Parchment Dialogue UI**: `src/components/DialogueBox.vue` with amber speaker badge, smooth typing text, and `[E] Interact` proximity triggering.
+
+### 5. Illustrated World Map & Atmospheric Lighting (Images 9, 5, 6, 7) `[x]` — Commit `0a321ac`
+- `[x]` **Illustrated World Map**: `src/components/WorldMapModal.vue` with SVG rice paddies, winding river, wooden bridges, POI markers, and player pulse indicator. Hotkey: `M`.
+- `[x]` **Ghibli Golden-Hour Lighting**: `src/game/rendering/Lighting.ts` updated with honey-amber sunlight (`0xff9e4a`) and rose-lavender sky ambient (`0xf4ad8e`).
+- `[x]` **Verification**: `bun run typecheck` clean (0 errors), `bun test` 16/16 pass, `bun run build` clean in 6.34s.
