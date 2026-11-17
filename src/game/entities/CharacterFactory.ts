@@ -212,18 +212,18 @@ export function buildFemaleCharacter(): CharacterRig {
   head.position.y = 1.62;
 
   // Base Head
-  const headMesh = new THREE.Mesh(blob(0.23, 1, 8), skinMat);
+  const headMesh = new THREE.Mesh(blob(0.26, 1, 8), skinMat);
   headMesh.castShadow = true;
   head.add(headMesh);
 
   // Front Face Quad with Canvas Face Texture
-  const faceQuadGeo = new THREE.PlaneGeometry(0.3, 0.3);
+  const faceQuadGeo = new THREE.PlaneGeometry(0.34, 0.34);
   const faceQuad = new THREE.Mesh(faceQuadGeo, faceMat);
   faceQuad.position.set(0, 0.02, 0.22);
   head.add(faceQuad);
 
   // Hair Base (crown + back)
-  const hairBase = new THREE.Mesh(blob(0.25, 0.7, 8), hairMat);
+  const hairBase = new THREE.Mesh(blob(0.29, 0.7, 8), hairMat);
   hairBase.position.set(0, 0.1, -0.04);
   head.add(hairBase);
 

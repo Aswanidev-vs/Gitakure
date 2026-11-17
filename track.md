@@ -212,3 +212,10 @@ Complete code-driven programmatic recreation of 10 reference images (Three.js We
 
 - `[x]` **Characters** — `CharacterFactory`, `NPC`, and `Player` materials converted from `MeshStandardMaterial` to `MeshToonMaterial` for cel-shaded Ghibli styling.
 - `[x]` **Verification** — `bun run typecheck` clean, `bun run build` clean, `bun run test` 28/28 pass.
+
+---
+
+## Phase 14: Character Proportion Reinvention `[x]`
+
+- `[x]` **Player/NPC head** — enlarged head and hair volumes, larger face quad for a softer Ghibli silhouette.
+- `[x]` **Verification** — `bun run typecheck` clean, `bun run build` clean, `bun run test` 28/28 pass.
