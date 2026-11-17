@@ -54,10 +54,21 @@ const fragmentShader = /* glsl */ `
     vec3 viewDir = normalize(cameraPosition - vWorldPos);
     float fresnel = pow(1.0 - max(viewDir.y, 0.0), 2.0);
 
-    vec3 base = mix(uShallow, uDeep, ripple * 0.6);
-    vec3 col = mix(base, uSkyColor, fresnel * 0.5);
+    // Glistening sunlight sparkles for Ghibli anime water feel
+    vec3 lightDir = normalize(vec3(0.6, 0.7, 0.4));
+    vec3 normal = normalize(vec3((n1 - 0.5) * 0.2, 1.0, (n2 - 0.5) * 0.2));
+    float specular = pow(max(0.0, dot(reflect(-lightDir, normal), viewDir)), 24.0) * 0.4;
 
-    gl_FragColor = vec4(col, uOpacity + fresnel * 0.2);
+    // Subtle edge foam pulsation near riverbanks
+    float edgeDist = abs(vUv.x - 0.5) * 2.0;
+    float foam = smoothstep(0.85, 0.99, edgeDist + sin(vWorldPos.z * 1.8 + uTime * 2.2) * 0.04);
+    vec3 foamCol = vec3(0.92, 0.97, 1.0);
+
+    vec3 base = mix(uShallow, uDeep, ripple * 0.6);
+    vec3 col = mix(base, uSkyColor, fresnel * 0.5) + specular;
+    col = mix(col, foamCol, foam * 0.45);
+
+    gl_FragColor = vec4(col, uOpacity + fresnel * 0.2 + foam * 0.25);
   }
 `;
 
