@@ -196,3 +196,12 @@ Complete code-driven programmatic recreation of 10 reference images (Three.js We
 - `[x]` **Post-processing** — `Game` now renders through an `EffectComposer` (RenderPass + subtle UnrealBloom + FXAA) instead of a direct renderer pass; composer resized/disposed with the canvas.
 - `[x]` **Assets** — added `createPaddyPlot` and `createRiverBoat` to `src/game/procedural/props.ts`; `VillageGenerator` now places both near the village/bridge.
 - `[x]` **Verification** — `bun run typecheck` clean, `bun run build` clean, `bun run test` 28/28 pass.
+
+---
+
+## Phase 12: Interaction Expansion (fishing, foraging, house entry) `[x]`
+
+- `[x]` **Fishing** — river interaction casts a line and resolves a catch via timed dialogue.
+- `[x]` **Foraging** — campfire-side herb gathering interaction.
+- `[x]` **House entry** — cottage interaction with a warm interior beat.
+- `[x]` **Verification** — `bun run typecheck` clean, `bun run build` clean, `bun run test` 28/28 pass.

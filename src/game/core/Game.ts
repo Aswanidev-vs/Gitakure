@@ -215,11 +215,36 @@ export class Game {
       sit: true,
     });
     this.interactions.add({
-      id: 'bench',
-      label: 'Sit on the bench',
-      position: this.worldManager.benchPosition.clone().add(new THREE.Vector3(0, 0.5, 0)),
+      id: 'fishing',
+      label: 'Fish by the river',
+      position: new THREE.Vector3(0, this.worldManager.heightAt(0, 0) + 0.5, 0),
+      radius: 2.5,
+      onInteract: () => {
+        this.bridge.send({ type: 'dialogue', speaker: 'You', text: 'You cast your line into the quiet water...' });
+        window.setTimeout(() => {
+          this.bridge.send({ type: 'dialogue', speaker: 'You', text: 'A silver fish tugs at the line. You let it go, smiling.' });
+        }, 1800);
+      },
+    });
+
+    this.interactions.add({
+      id: 'house',
+      label: 'Enter the cottage',
+      position: new THREE.Vector3(18, this.worldManager.heightAt(18, -10) + 0.5, -10),
+      radius: 2.5,
+      onInteract: () => {
+        this.bridge.send({ type: 'dialogue', speaker: 'You', text: 'The door is warm. You step inside and rest for a moment.' });
+      },
+    });
+
+    this.interactions.add({
+      id: 'forage',
+      label: 'Gather wild herbs',
+      position: this.worldManager.campfirePosition.clone().add(new THREE.Vector3(3, 0.5, -2)),
       radius: 2,
-      sit: true,
+      onInteract: () => {
+        this.bridge.send({ type: 'dialogue', speaker: 'You', text: 'You gather a handful of fragrant herbs.' });
+      },
     });
 
     // Peaceful NPCs: 5 distinct villager archetypes from Image 4
