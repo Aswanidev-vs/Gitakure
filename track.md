@@ -219,3 +219,12 @@ Complete code-driven programmatic recreation of 10 reference images (Three.js We
 
 - `[x]` **Player/NPC head** — enlarged head and hair volumes, larger face quad for a softer Ghibli silhouette.
 - `[x]` **Verification** — `bun run typecheck` clean, `bun run build` clean, `bun run test` 28/28 pass.
+
+---
+
+## Phase 15: Environment Asset Reinvention `[x]`
+
+- `[x]` **Ghibli tree** — new round-canopy procedural tree generator (`createGhibliTree`).
+- `[x]` **Ghibli cottage** — new thatched-roof cottage generator (`createGhibliCottage`).
+- `[x]` **Integration** — cottage + ghibli trees placed near the village in `VillageGenerator`.
+- `[x]` **Verification** — `bun run typecheck` clean, `bun run build` clean, `bun run test` 28/28 pass.

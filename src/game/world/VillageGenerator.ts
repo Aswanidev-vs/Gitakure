@@ -5,6 +5,8 @@ import { createTorii } from '@/game/procedural/buildings/torii';
 import { createBridge } from '@/game/procedural/buildings/bridge';
 import { createRock } from '@/game/procedural/props';
 import { createPaddyPlot, createRiverBoat } from '@/game/procedural/props';
+import { createGhibliTree } from '@/game/procedural/vegetation/ghibliTree';
+import { createGhibliCottage } from '@/game/procedural/buildings/ghibliCottage';
 
 // Places a small handcrafted-feeling village on the plateau: a few houses,
 // a shrine gate, a bridge over the river, stone paths, and a campfire spot.
@@ -87,6 +89,24 @@ export class VillageGenerator {
     const boat = createRiverBoat({ seed: 3 });
     boat.position.set(bridgeX, bridgeY + 0.2, bridgeZ + 6);
     this.group.add(boat);
+
+    // Ghibli-style cottage and round-canopy trees near the village.
+    const cottage = createGhibliCottage();
+    const cottageX = cx + 14;
+    const cottageZ = cz - 6;
+    const cottageY = this.terrain.heightAt(cottageX, cottageZ);
+    cottage.position.set(cottageX, cottageY, cottageZ);
+    cottage.rotation.y = -0.6;
+    this.group.add(cottage);
+
+    for (let i = 0; i < 3; i++) {
+      const t = createGhibliTree({ seed: 100 + i, height: 2.8 + i * 0.4 });
+      const tx = cottageX - 4 + i * 2.5;
+      const tz = cottageZ + 3 + i * 1.5;
+      const ty = this.terrain.heightAt(tx, tz);
+      t.position.set(tx, ty, tz);
+      this.group.add(t);
+    }
 
     return { group: this.group, campfirePosition: this.campfirePosition, benchPosition: this.benchPosition };
   }
