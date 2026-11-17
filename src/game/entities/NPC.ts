@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { box, taperedCylinder, blob, cone } from '@/game/procedural/geometry';
 import { Rng } from '@/utils/rng';
+import { createAnimeFaceTexture } from './CharacterFactory';
 
 export type NPCRole = 'elder-man' | 'elder-woman' | 'child' | 'maiden' | 'farmer';
 
@@ -84,6 +85,17 @@ export class NPC {
     const headMesh = new THREE.Mesh(blob(0.22, 1, 8), skinMat);
     headMesh.castShadow = true;
     head.add(headMesh);
+
+    // Expressive Anime Face Texture Quad (Image 4 & 8)
+    const isFemaleRole = role === 'elder-woman' || role === 'maiden';
+    const { texture: faceTex } = createAnimeFaceTexture(
+      isFemaleRole ? 'female' : 'male',
+      role === 'maiden' ? 'happy' : 'smile',
+    );
+    const faceMat = new THREE.MeshToonMaterial({ map: faceTex });
+    const faceQuad = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 0.28), faceMat);
+    faceQuad.position.set(0, 0.02, 0.18);
+    head.add(faceQuad);
 
     // Role-specific attire & accessories
     if (role === 'elder-man') {

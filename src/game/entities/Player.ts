@@ -7,7 +7,7 @@ import {
   type CharacterRig,
 } from './CharacterFactory';
 
-export type PlayerAnim = 'idle' | 'walk' | 'sit';
+export type PlayerAnim = 'idle' | 'walk' | 'sit' | 'fish';
 
 /**
  * Stylized Anime Player Entity (Image 2)
@@ -114,6 +114,14 @@ export class Player {
 
       r.torso.position.y = 1.05 - b * 0.38;
       r.head.position.y = 1.62 - b * 0.38;
+    } else if (this.anim === 'fish') {
+      const time = performance.now() * 0.002;
+      r.legL.rotation.x = 0;
+      r.legR.rotation.x = 0;
+      r.armR.rotation.x = -Math.PI * 0.38 + Math.sin(time) * 0.04;
+      r.armL.rotation.x = -Math.PI * 0.15 + Math.sin(time) * 0.02;
+      r.torso.position.y = 1.05 + Math.sin(time * 0.8) * 0.01;
+      r.head.position.y = 1.62;
     }
 
     this.group.rotation.y = this.facing;
