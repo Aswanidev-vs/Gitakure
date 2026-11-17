@@ -13,7 +13,7 @@ export interface CharacterRig {
   legL: THREE.Group;
   legR: THREE.Group;
   hairExtra?: THREE.Object3D;
-  faceMaterial: THREE.MeshStandardMaterial;
+  faceMaterial: THREE.MeshToonMaterial;
   setExpression: (expr: CharacterExpression) => void;
 }
 
@@ -156,17 +156,17 @@ export function buildFemaleCharacter(): CharacterRig {
   root.name = 'character-female';
 
   // Materials
-  const skinMat = new THREE.MeshStandardMaterial({ color: 0xfce4c8, roughness: 0.7, flatShading: false });
-  const redHaori = new THREE.MeshStandardMaterial({ color: 0xb53535, roughness: 0.8, flatShading: true });
-  const darkObi = new THREE.MeshStandardMaterial({ color: 0x2d363b, roughness: 0.85, flatShading: true });
-  const creamSkirt = new THREE.MeshStandardMaterial({ color: 0xf5ede1, roughness: 0.85, flatShading: true });
-  const hairMat = new THREE.MeshStandardMaterial({ color: 0x2e2320, roughness: 0.8, flatShading: true });
-  const sakuraPink = new THREE.MeshStandardMaterial({ color: 0xf472b6, roughness: 0.5 });
-  const goldCenter = new THREE.MeshStandardMaterial({ color: 0xfde047, roughness: 0.4 });
-  const sandalMat = new THREE.MeshStandardMaterial({ color: 0x4a3a2a, roughness: 0.9 });
+  const skinMat = new THREE.MeshToonMaterial({ color: 0xfce4c8 });
+  const redHaori = new THREE.MeshToonMaterial({ color: 0xb53535 });
+  const darkObi = new THREE.MeshToonMaterial({ color: 0x2d363b });
+  const creamSkirt = new THREE.MeshToonMaterial({ color: 0xf5ede1 });
+  const hairMat = new THREE.MeshToonMaterial({ color: 0x2e2320 });
+  const sakuraPink = new THREE.MeshToonMaterial({ color: 0xf472b6 });
+  const goldCenter = new THREE.MeshToonMaterial({ color: 0xfde047 });
+  const sandalMat = new THREE.MeshToonMaterial({ color: 0x4a3a2a });
 
   const { texture: faceTex, updateExpression } = createAnimeFaceTexture('female', 'neutral');
-  const faceMat = new THREE.MeshStandardMaterial({ map: faceTex, roughness: 0.6 });
+  const faceMat = new THREE.MeshToonMaterial({ map: faceTex });
 
   // 1. Torso Group
   const torso = new THREE.Group();
@@ -178,7 +178,7 @@ export function buildFemaleCharacter(): CharacterRig {
   torso.add(haoriMesh);
 
   // White inner collar trim
-  const collarTrim = new THREE.Mesh(box(0.2, 0.28, 0.29), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }));
+  const collarTrim = new THREE.Mesh(box(0.2, 0.28, 0.29), new THREE.MeshToonMaterial({ color: 0xffffff }));
   collarTrim.position.set(0, 0.12, 0.01);
   torso.add(collarTrim);
 
@@ -338,16 +338,16 @@ export function buildMaleCharacter(): CharacterRig {
   const root = new THREE.Group();
   root.name = 'character-male';
 
-  const skinMat = new THREE.MeshStandardMaterial({ color: 0xfce4c8, roughness: 0.7, flatShading: false });
-  const creamShirt = new THREE.MeshStandardMaterial({ color: 0xede0cb, roughness: 0.85, flatShading: true });
-  const darkUndershirt = new THREE.MeshStandardMaterial({ color: 0x282c30, roughness: 0.85, flatShading: true });
-  const waistSash = new THREE.MeshStandardMaterial({ color: 0xd9c2a5, roughness: 0.9, flatShading: true });
-  const brownPants = new THREE.MeshStandardMaterial({ color: 0x47392d, roughness: 0.9, flatShading: true });
-  const hairMat = new THREE.MeshStandardMaterial({ color: 0x201c1c, roughness: 0.75, flatShading: true });
-  const sandalMat = new THREE.MeshStandardMaterial({ color: 0x3d2f23, roughness: 0.9 });
+  const skinMat = new THREE.MeshToonMaterial({ color: 0xfce4c8 });
+  const creamShirt = new THREE.MeshToonMaterial({ color: 0xede0cb });
+  const darkUndershirt = new THREE.MeshToonMaterial({ color: 0x282c30 });
+  const waistSash = new THREE.MeshToonMaterial({ color: 0xd9c2a5 });
+  const brownPants = new THREE.MeshToonMaterial({ color: 0x47392d });
+  const hairMat = new THREE.MeshToonMaterial({ color: 0x201c1c });
+  const sandalMat = new THREE.MeshToonMaterial({ color: 0x3d2f23 });
 
   const { texture: faceTex, updateExpression } = createAnimeFaceTexture('male', 'neutral');
-  const faceMat = new THREE.MeshStandardMaterial({ map: faceTex, roughness: 0.6 });
+  const faceMat = new THREE.MeshToonMaterial({ map: faceTex });
 
   // 1. Torso
   const torso = new THREE.Group();

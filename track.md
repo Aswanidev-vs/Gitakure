@@ -205,3 +205,10 @@ Complete code-driven programmatic recreation of 10 reference images (Three.js We
 - `[x]` **Foraging** — campfire-side herb gathering interaction.
 - `[x]` **House entry** — cottage interaction with a warm interior beat.
 - `[x]` **Verification** — `bun run typecheck` clean, `bun run build` clean, `bun run test` 28/28 pass.
+
+---
+
+## Phase 13: Character Toon Shading `[x]`
+
+- `[x]` **Characters** — `CharacterFactory`, `NPC`, and `Player` materials converted from `MeshStandardMaterial` to `MeshToonMaterial` for cel-shaded Ghibli styling.
+- `[x]` **Verification** — `bun run typecheck` clean, `bun run build` clean, `bun run test` 28/28 pass.

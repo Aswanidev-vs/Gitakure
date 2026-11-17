@@ -46,7 +46,7 @@ export class NPC {
     this.group = new THREE.Group();
     this.group.name = `npc-${params.name}`;
 
-    const skinMat = new THREE.MeshStandardMaterial({ color: 0xfce4c8, roughness: 0.7 });
+    const skinMat = new THREE.MeshToonMaterial({ color: 0xfce4c8 });
 
     // Build specific clothing and hair based on Role from Image 4
     const rig = this.buildRoleRig(params.role, skinMat);
@@ -88,10 +88,10 @@ export class NPC {
     // Role-specific attire & accessories
     if (role === 'elder-man') {
       // 1. Elder Grandfather: tan kimono, blue sash, white beard & hair
-      const tanKimono = new THREE.MeshStandardMaterial({ color: 0x8a6f4d, roughness: 0.9 });
-      const blueObi = new THREE.MeshStandardMaterial({ color: 0x2e6094, roughness: 0.85 });
-      const darkPants = new THREE.MeshStandardMaterial({ color: 0x333130, roughness: 0.9 });
-      const whiteHairMat = new THREE.MeshStandardMaterial({ color: 0xeae6df, roughness: 0.8 });
+      const tanKimono = new THREE.MeshToonMaterial({ color: 0x8a6f4d });
+      const blueObi = new THREE.MeshToonMaterial({ color: 0x2e6094 });
+      const darkPants = new THREE.MeshToonMaterial({ color: 0x333130 });
+      const whiteHairMat = new THREE.MeshToonMaterial({ color: 0xeae6df });
 
       // Torso & Robe
       const torsoMesh = new THREE.Mesh(box(0.5, 0.65, 0.3), tanKimono);
@@ -116,9 +116,9 @@ export class NPC {
 
     } else if (role === 'elder-woman') {
       // 2. Elder Grandmother: plum kimono, lavender skirt, gray bun
-      const plumMat = new THREE.MeshStandardMaterial({ color: 0x6e3852, roughness: 0.85 });
-      const lavenderSkirt = new THREE.MeshStandardMaterial({ color: 0x938294, roughness: 0.85 });
-      const grayHairMat = new THREE.MeshStandardMaterial({ color: 0xb5b0ab, roughness: 0.8 });
+      const plumMat = new THREE.MeshToonMaterial({ color: 0x6e3852 });
+      const lavenderSkirt = new THREE.MeshToonMaterial({ color: 0x938294 });
+      const grayHairMat = new THREE.MeshToonMaterial({ color: 0xb5b0ab });
 
       const torsoMesh = new THREE.Mesh(box(0.48, 0.6, 0.28), plumMat);
       torso.add(torsoMesh);
@@ -141,9 +141,9 @@ export class NPC {
 
     } else if (role === 'child') {
       // 3. Village Boy (Haru): teal green tunic, brown shorts, dark messy hair
-      const tealTunic = new THREE.MeshStandardMaterial({ color: 0x2e8074, roughness: 0.85 });
-      const brownShorts = new THREE.MeshStandardMaterial({ color: 0x634d3a, roughness: 0.9 });
-      const darkHairMat = new THREE.MeshStandardMaterial({ color: 0x241d18, roughness: 0.8 });
+      const tealTunic = new THREE.MeshToonMaterial({ color: 0x2e8074 });
+      const brownShorts = new THREE.MeshToonMaterial({ color: 0x634d3a });
+      const darkHairMat = new THREE.MeshToonMaterial({ color: 0x241d18 });
 
       const torsoMesh = new THREE.Mesh(box(0.44, 0.55, 0.26), tealTunic);
       torso.add(torsoMesh);
@@ -159,10 +159,10 @@ export class NPC {
 
     } else if (role === 'maiden') {
       // 4. Mika: Green vest over white blouse, white & green apron dress, sakura flower
-      const greenVest = new THREE.MeshStandardMaterial({ color: 0x2e6b3b, roughness: 0.8 });
-      const whiteBlouse = new THREE.MeshStandardMaterial({ color: 0xfaf5ec, roughness: 0.85 });
-      const darkHairMat = new THREE.MeshStandardMaterial({ color: 0x261e1b, roughness: 0.8 });
-      const sakuraPink = new THREE.MeshStandardMaterial({ color: 0xf472b6, roughness: 0.5 });
+      const greenVest = new THREE.MeshToonMaterial({ color: 0x2e6b3b });
+      const whiteBlouse = new THREE.MeshToonMaterial({ color: 0xfaf5ec });
+      const darkHairMat = new THREE.MeshToonMaterial({ color: 0x261e1b });
+      const sakuraPink = new THREE.MeshToonMaterial({ color: 0xf472b6 });
 
       const torsoMesh = new THREE.Mesh(box(0.46, 0.52, 0.28), greenVest);
       torso.add(torsoMesh);
@@ -191,10 +191,10 @@ export class NPC {
 
     } else {
       // 5. Farmer Devan: Straw conical hat (kasa), tan work vest, blue trousers, wooden hoe
-      const tanVest = new THREE.MeshStandardMaterial({ color: 0x9c7a4b, roughness: 0.9 });
-      const bluePants = new THREE.MeshStandardMaterial({ color: 0x3d5475, roughness: 0.9 });
-      const strawMat = new THREE.MeshStandardMaterial({ color: 0xd9be8f, roughness: 0.95 });
-      const woodMat = new THREE.MeshStandardMaterial({ color: 0x5a3e26, roughness: 0.9 });
+      const tanVest = new THREE.MeshToonMaterial({ color: 0x9c7a4b });
+      const bluePants = new THREE.MeshToonMaterial({ color: 0x3d5475 });
+      const strawMat = new THREE.MeshToonMaterial({ color: 0xd9be8f });
+      const woodMat = new THREE.MeshToonMaterial({ color: 0x5a3e26 });
 
       const torsoMesh = new THREE.Mesh(box(0.52, 0.62, 0.3), tanVest);
       torso.add(torsoMesh);
@@ -210,7 +210,7 @@ export class NPC {
       hoeHandle.position.set(0.45, 0.45, 0.2);
       hoeHandle.rotation.x = 0.2;
       torso.add(hoeHandle);
-      const hoeBlade = new THREE.Mesh(box(0.14, 0.08, 0.04), new THREE.MeshStandardMaterial({ color: 0x4a4a4a }));
+      const hoeBlade = new THREE.Mesh(box(0.14, 0.08, 0.04), new THREE.MeshToonMaterial({ color: 0x4a4a4a }));
       hoeBlade.position.set(0.45, 1.1, 0.3);
       torso.add(hoeBlade);
 
