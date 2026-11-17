@@ -4,6 +4,7 @@ import { createHouse } from '@/game/procedural/buildings/house';
 import { createTorii } from '@/game/procedural/buildings/torii';
 import { createBridge } from '@/game/procedural/buildings/bridge';
 import { createRock } from '@/game/procedural/props';
+import { createPaddyPlot, createRiverBoat } from '@/game/procedural/props';
 
 // Places a small handcrafted-feeling village on the plateau: a few houses,
 // a shrine gate, a bridge over the river, stone paths, and a campfire spot.
@@ -76,6 +77,16 @@ export class VillageGenerator {
     const benchY = this.terrain.heightAt(benchX, benchZ);
     this.benchPosition.set(benchX, benchY, benchZ);
     this.buildBench(benchX, benchY, benchZ, 0.5);
+
+    // Paddy plot near the village.
+    const paddy = createPaddyPlot({ columns: 2, rows: 2, seed: 7 });
+    paddy.position.set(cx + 12, this.terrain.heightAt(cx + 12, cz + 2), cz + 2);
+    this.group.add(paddy);
+
+    // River boat near the bridge.
+    const boat = createRiverBoat({ seed: 3 });
+    boat.position.set(bridgeX, bridgeY + 0.2, bridgeZ + 6);
+    this.group.add(boat);
 
     return { group: this.group, campfirePosition: this.campfirePosition, benchPosition: this.benchPosition };
   }

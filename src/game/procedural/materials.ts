@@ -1,19 +1,28 @@
 import * as THREE from 'three';
 
-// Reusable stylized low-poly material palette. Shared across procedural
+// Reusable stylized Ghibli-ish toon material palette. Shared across procedural
 // assets to keep draw calls down and the look cohesive (spec §8, §18).
+// MeshToonMaterial gives cel-shaded bands; a shared gradient map keeps the
+// bands consistent across all materials.
 
-const palette: Record<string, THREE.MeshStandardMaterial> = {};
+const gradientMap = (() => {
+  const data = new Uint8Array([0, 0, 0, 255, 96, 96, 96, 255, 192, 192, 192, 255, 255, 255, 255, 255]);
+  const tex = new THREE.DataTexture(data, 4, 1, THREE.RGBAFormat);
+  tex.needsUpdate = true;
+  tex.minFilter = THREE.NearestFilter;
+  tex.magFilter = THREE.NearestFilter;
+  return tex;
+})();
 
-function mat(color: number, opts: { roughness?: number; flat?: boolean; emissive?: number; emissiveIntensity?: number } = {}): THREE.MeshStandardMaterial {
+const palette: Record<string, THREE.MeshToonMaterial> = {};
+
+function mat(color: number, opts: { roughness?: number; flat?: boolean; emissive?: number; emissiveIntensity?: number } = {}): THREE.MeshToonMaterial {
   const key = `${color}-${opts.roughness ?? 0.9}-${opts.flat ?? true}-${opts.emissive ?? 0}-${opts.emissiveIntensity ?? 0}`;
   const existing = palette[key];
   if (existing) return existing;
-  const m = new THREE.MeshStandardMaterial({
+  const m = new THREE.MeshToonMaterial({
     color,
-    roughness: opts.roughness ?? 0.9,
-    metalness: 0,
-    flatShading: opts.flat ?? true,
+    gradientMap,
   });
   if (opts.emissive !== undefined) {
     m.emissive = new THREE.Color(opts.emissive);

@@ -1,14 +1,18 @@
 import * as THREE from 'three';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
 // One main directional (sun) light + hemisphere ambient, per spec §18.
 // Shadows are optional and toggled by graphics quality.
+// IBL from a procedural RoomEnvironment gives soft, painterly reflections
+// that read as Ghibli-esque without loading an external HDRI.
 
 export class Lighting {
   readonly sun: THREE.DirectionalLight;
   readonly hemi: THREE.HemisphereLight;
   private target: THREE.Object3D;
+  private envTarget: THREE.WebGLRenderTarget | null = null;
 
-  constructor(scene: THREE.Scene) {
+  constructor(scene: THREE.Scene, renderer?: THREE.WebGLRenderer) {
     this.hemi = new THREE.HemisphereLight(0xbfd8e0, 0x4a6b3a, 0.9);
     scene.add(this.hemi);
 
@@ -29,6 +33,15 @@ export class Lighting {
     this.sun.shadow.camera.bottom = -s;
     this.sun.shadow.bias = -0.0005;
     scene.add(this.sun);
+
+    if (renderer) {
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      const envScene = new RoomEnvironment();
+      this.envTarget = pmrem.fromScene(envScene, 0.04);
+      scene.environment = this.envTarget.texture;
+      pmrem.dispose();
+      envScene.clear?.();
+    }
   }
 
   setShadows(enabled: boolean): void {
@@ -83,5 +96,6 @@ export class Lighting {
     this.sun.removeFromParent();
     this.hemi.removeFromParent();
     this.target.removeFromParent();
+    this.envTarget?.dispose();
   }
 }
