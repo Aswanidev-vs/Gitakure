@@ -22,7 +22,7 @@ export class WorldManager {
     this.group.add(this.terrain.mesh);
 
     // River water: a wide strip running roughly along Z through the channel.
-    this.water = new WaterSystem(16, 120, -0.6);
+    this.water = new WaterSystem(22, 140, -0.55);
     this.group.add(this.water.mesh);
 
     this.vegetation = new VegetationSystem(this.terrain);

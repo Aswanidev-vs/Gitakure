@@ -8,8 +8,8 @@ export class SceneManager {
 
   constructor() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x9fc7c9);
-    this.fog = new THREE.FogExp2(0x9fc7c9, 0.012);
+    this.scene.background = new THREE.Color(0xcfe7e0);
+    this.fog = new THREE.FogExp2(0xd8e6e2, 0.008);
     this.scene.fog = this.fog;
   }
 

@@ -1,4 +1,9 @@
 import * as THREE from 'three';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
 import { GameLoop } from './GameLoop';
 import { GameBridge, gameBridge, type GameCommand } from './GameBridge';
 import { resolveGraphics } from './GameConfig';
@@ -50,6 +55,7 @@ export class Game {
   private cat: Cat | null = null;
   private lantern: THREE.Group | null = null;
   private isMenuMode = true;
+  private composer: EffectComposer | null = null;
   private lastSaveTime = 0;
 
   private settings: GameSettings;
@@ -85,7 +91,20 @@ export class Game {
         fov: settings.camera.fov,
       },
     );
-    this.lighting = new Lighting(this.sceneManager.scene);
+    this.composer = new EffectComposer(this.renderer.instance);
+    const renderPass = new RenderPass(this.sceneManager.scene, this.camera.camera);
+    this.composer.addPass(renderPass);
+    const bloom = new UnrealBloomPass(
+      new THREE.Vector2(container.clientWidth, container.clientHeight),
+      0.35,
+      0.4,
+      0.85,
+    );
+    this.composer.addPass(bloom);
+    const fxaa = new ShaderPass(FXAAShader);
+    fxaa.uniforms['resolution'].value.set(1 / Math.max(1, container.clientWidth), 1 / Math.max(1, container.clientHeight));
+    this.composer.addPass(fxaa);
+    this.lighting = new Lighting(this.sceneManager.scene, this.renderer.instance);
     this.worldManager = new WorldManager(1);
     this.sceneManager.scene.add(this.worldManager.group);
 
@@ -196,11 +215,36 @@ export class Game {
       sit: true,
     });
     this.interactions.add({
-      id: 'bench',
-      label: 'Sit on the bench',
-      position: this.worldManager.benchPosition.clone().add(new THREE.Vector3(0, 0.5, 0)),
+      id: 'fishing',
+      label: 'Fish by the river',
+      position: new THREE.Vector3(0, this.worldManager.heightAt(0, 0) + 0.5, 0),
+      radius: 2.5,
+      onInteract: () => {
+        this.bridge.send({ type: 'dialogue', speaker: 'You', text: 'You cast your line into the quiet water...' });
+        window.setTimeout(() => {
+          this.bridge.send({ type: 'dialogue', speaker: 'You', text: 'A silver fish tugs at the line. You let it go, smiling.' });
+        }, 1800);
+      },
+    });
+
+    this.interactions.add({
+      id: 'house',
+      label: 'Enter the cottage',
+      position: new THREE.Vector3(18, this.worldManager.heightAt(18, -10) + 0.5, -10),
+      radius: 2.5,
+      onInteract: () => {
+        this.bridge.send({ type: 'dialogue', speaker: 'You', text: 'The door is warm. You step inside and rest for a moment.' });
+      },
+    });
+
+    this.interactions.add({
+      id: 'forage',
+      label: 'Gather wild herbs',
+      position: this.worldManager.campfirePosition.clone().add(new THREE.Vector3(3, 0.5, -2)),
       radius: 2,
-      sit: true,
+      onInteract: () => {
+        this.bridge.send({ type: 'dialogue', speaker: 'You', text: 'You gather a handful of fragrant herbs.' });
+      },
     });
 
     // Peaceful NPCs: 5 distinct villager archetypes from Image 4
@@ -450,7 +494,7 @@ export class Game {
       this.fpsFrames = 0;
     }
 
-    this.renderer.instance.render(this.sceneManager.scene, this.camera.camera);
+    this.composer?.render() ?? this.renderer.instance.render(this.sceneManager.scene, this.camera.camera);
 
     if (this.snapshotTimer >= 0.25) {
       this.snapshotTimer = 0;
@@ -555,6 +599,7 @@ export class Game {
     const h = Math.max(1, this.container.clientHeight);
     this.renderer.setSize(w, h);
     this.camera.setAspect(w / h);
+    this.composer?.setSize(w, h);
   };
 
   dispose(): void {
@@ -578,6 +623,7 @@ export class Game {
     this.audioSystem.dispose();
     this.githubWorld.dispose();
     this.worldManager.dispose();
+    this.composer?.dispose();
     this.renderer.dispose();
     this.sceneManager.dispose();
     this.lighting.dispose();

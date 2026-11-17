@@ -163,3 +163,89 @@ export function createStoneLantern(p: StoneLanternParams = {}): THREE.Group {
 
   return g;
 }
+
+export interface PaddyPlotParams {
+  columns?: number;
+  rows?: number;
+  width?: number;
+  depth?: number;
+  seed?: number;
+}
+
+export function createPaddyPlot(p: Partial<PaddyPlotParams> = {}): THREE.Group {
+  const params: PaddyPlotParams = { columns: 2, rows: 2, width: 4, depth: 4, seed: 1, ...p };
+  const cols = Math.max(1, Math.round(params.columns ?? 2));
+  const rows = Math.max(1, Math.round(params.rows ?? 2));
+  const width = Math.max(0.1, params.width ?? 4);
+  const depth = Math.max(0.1, params.depth ?? 4);
+  const rng = new Rng(params.seed ?? 1);
+  const g = new THREE.Group();
+  g.name = 'paddy-plot';
+
+  const cellW = width / cols;
+  const cellD = depth / rows;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cx = (c - (cols - 1) / 2) * cellW;
+      const cz = (r - (rows - 1) / 2) * cellD;
+      const water = new THREE.Mesh(
+        new THREE.PlaneGeometry(cellW * 0.92, cellD * 0.92),
+        MAT.water(),
+      );
+      water.rotation.x = -Math.PI / 2;
+      water.position.set(cx, 0.02, cz);
+      g.add(water);
+      for (let i = 0; i < 4; i++) {
+        const sx = cx + rng.range(-cellW * 0.35, cellW * 0.35);
+        const sz = cz + rng.range(-cellD * 0.35, cellD * 0.35);
+        const seedling = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.18, 4), MAT.leafLight());
+        seedling.position.set(sx, 0.09, sz);
+        g.add(seedling);
+      }
+    }
+  }
+  for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]] as const) {
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.35, 5), MAT.woodDark());
+    post.position.set(sx * width * 0.52, 0.175, sz * depth * 0.52);
+    g.add(post);
+  }
+  for (let i = 0; i < 2; i++) {
+    const marker = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.08), MAT.stone());
+    marker.position.set((i === 0 ? -1 : 1) * width * 0.55, 0.04, 0);
+    g.add(marker);
+  }
+  return g;
+}
+
+export interface RiverBoatParams {
+  length?: number;
+  width?: number;
+  seed?: number;
+}
+
+export function createRiverBoat(p: Partial<RiverBoatParams> = {}): THREE.Group {
+  const params: RiverBoatParams = { length: 2.4, width: 0.9, seed: 1, ...p };
+  const length = Math.max(0.1, params.length ?? 2.4);
+  const width = Math.max(0.1, params.width ?? 0.9);
+  const g = new THREE.Group();
+  g.name = 'river-boat';
+
+  const hull = new THREE.Mesh(new THREE.BoxGeometry(length, 0.25, width), MAT.woodPlank());
+  hull.position.y = 0.125;
+  g.add(hull);
+
+  const cabin = new THREE.Mesh(new THREE.BoxGeometry(length * 0.35, 0.3, width * 0.7), MAT.woodDark());
+  cabin.position.set(-length * 0.15, 0.3, 0);
+  g.add(cabin);
+
+  const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.2, 5), MAT.woodDark());
+  mast.position.set(0, 0.8, 0);
+  g.add(mast);
+
+  const sail = new THREE.Mesh(new THREE.PlaneGeometry(length * 0.45, 0.9), MAT.flowerWhite());
+  sail.position.set(0, 0.95, 0);
+  sail.rotation.y = Math.PI / 2;
+  g.add(sail);
+
+  return g;
+}

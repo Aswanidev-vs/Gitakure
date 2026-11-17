@@ -186,3 +186,45 @@ Complete code-driven programmatic recreation of 10 reference images (Three.js We
 - `[x]` **Illustrated World Map**: `src/components/WorldMapModal.vue` with SVG rice paddies, winding river, wooden bridges, POI markers, and player pulse indicator. Hotkey: `M`.
 - `[x]` **Ghibli Golden-Hour Lighting**: `src/game/rendering/Lighting.ts` updated with honey-amber sunlight (`0xff9e4a`) and rose-lavender sky ambient (`0xf4ad8e`).
 - `[x]` **Verification**: `bun run typecheck` clean (0 errors), `bun test` 16/16 pass, `bun run build` clean in 6.34s.
+---
+
+## Phase 11: Ghibli Visual Foundation (toon + IBL + fog + post-processing) `[x]`
+
+- `[x]` **Materials** — `src/game/procedural/materials.ts` switched from `MeshStandardMaterial` to `MeshToonMaterial` with a shared 4-band gradient map for cel-shaded silhouettes.
+- `[x]` **Lighting / IBL** — `src/game/rendering/Lighting.ts` now takes the renderer and generates a `RoomEnvironment` PMREM env map for soft painterly reflections; warm Ghibli sun/hemi palette retained.
+- `[x]` **Scene** — `SceneManager` background/fog shifted to warm sky tones (`0xcfe7e0` / `0xd8e6e2`, density `0.008`).
+- `[x]` **Post-processing** — `Game` now renders through an `EffectComposer` (RenderPass + subtle UnrealBloom + FXAA) instead of a direct renderer pass; composer resized/disposed with the canvas.
+- `[x]` **Assets** — added `createPaddyPlot` and `createRiverBoat` to `src/game/procedural/props.ts`; `VillageGenerator` now places both near the village/bridge.
+- `[x]` **Verification** — `bun run typecheck` clean, `bun run build` clean, `bun run test` 28/28 pass.
+
+---
+
+## Phase 12: Interaction Expansion (fishing, foraging, house entry) `[x]`
+
+- `[x]` **Fishing** — river interaction casts a line and resolves a catch via timed dialogue.
+- `[x]` **Foraging** — campfire-side herb gathering interaction.
+- `[x]` **House entry** — cottage interaction with a warm interior beat.
+- `[x]` **Verification** — `bun run typecheck` clean, `bun run build` clean, `bun run test` 28/28 pass.
+
+---
+
+## Phase 13: Character Toon Shading `[x]`
+
+- `[x]` **Characters** — `CharacterFactory`, `NPC`, and `Player` materials converted from `MeshStandardMaterial` to `MeshToonMaterial` for cel-shaded Ghibli styling.
+- `[x]` **Verification** — `bun run typecheck` clean, `bun run build` clean, `bun run test` 28/28 pass.
+
+---
+
+## Phase 14: Character Proportion Reinvention `[x]`
+
+- `[x]` **Player/NPC head** — enlarged head and hair volumes, larger face quad for a softer Ghibli silhouette.
+- `[x]` **Verification** — `bun run typecheck` clean, `bun run build` clean, `bun run test` 28/28 pass.
+
+---
+
+## Phase 15: Environment Asset Reinvention `[x]`
+
+- `[x]` **Ghibli tree** — new round-canopy procedural tree generator (`createGhibliTree`).
+- `[x]` **Ghibli cottage** — new thatched-roof cottage generator (`createGhibliCottage`).
+- `[x]` **Integration** — cottage + ghibli trees placed near the village in `VillageGenerator`.
+- `[x]` **Verification** — `bun run typecheck` clean, `bun run build` clean, `bun run test` 28/28 pass.
