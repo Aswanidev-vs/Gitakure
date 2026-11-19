@@ -6,7 +6,10 @@ import * as THREE from 'three';
 // bands consistent across all materials.
 
 const gradientMap = (() => {
-  const data = new Uint8Array([0, 0, 0, 255, 96, 96, 96, 255, 192, 192, 192, 255, 255, 255, 255, 255]);
+  // Soft three-step toon ramp. The lowest band is lifted well above black so
+  // shadowed sides keep their local color — matching the airy reference art
+  // rather than reading as silhouettes at golden hour.
+  const data = new Uint8Array([80, 80, 80, 255, 144, 144, 144, 255, 202, 202, 202, 255, 242, 242, 242, 255]);
   const tex = new THREE.DataTexture(data, 4, 1, THREE.RGBAFormat);
   tex.needsUpdate = true;
   tex.minFilter = THREE.NearestFilter;
@@ -38,7 +41,9 @@ export const MAT = {
   leafMid: () => mat(0x4f8f4f),
   leafLight: () => mat(0x6fb56a),
   leafAutumn: () => mat(0xd2743a),
-  leafSakura: () => mat(0xf2b6d0),
+  leafSakura: () => mat(0xf0aac6),
+  leafSakuraLight: () => mat(0xf9d0de),
+  leafSakuraDeep: () => mat(0xe094b4),
   palmFrond: () => mat(0x3f8f5a),
   bamboo: () => mat(0x8fb34a),
   bambooNode: () => mat(0x6b8f3a),
@@ -46,19 +51,24 @@ export const MAT = {
   // Wood / bark
   bark: () => mat(0x6b4a2f, { roughness: 1 }),
   barkDark: () => mat(0x4a3320, { roughness: 1 }),
-  woodPlank: () => mat(0x8a6a44, { roughness: 0.85 }),
-  woodDark: () => mat(0x5a4028, { roughness: 0.9 }),
+  woodPlank: () => mat(0x9a7a52, { roughness: 0.85 }),
+  woodDark: () => mat(0x64482e, { roughness: 0.9 }),
 
   // Stone / ground
-  stone: () => mat(0x8a8f94, { roughness: 1 }),
-  stoneDark: () => mat(0x5d6266, { roughness: 1 }),
+  stone: () => mat(0x646c72, { roughness: 1 }),
+  stoneDark: () => mat(0x666b70, { roughness: 1 }),
   groundGrass: () => mat(0x6a8f5b, { roughness: 1 }),
   dirt: () => mat(0x8a6a44, { roughness: 1 }),
   sand: () => mat(0xd9c79a, { roughness: 1 }),
 
+  // Plaster / walls
+  plaster: () => mat(0xdccbaa, { roughness: 0.95 }),
+  plasterWarm: () => mat(0xd8bb92, { roughness: 0.95 }),
+
   // Roof tiles
-  roofDark: () => mat(0x3a3f4a, { roughness: 0.8 }),
-  roofTerracotta: () => mat(0xa85a3a, { roughness: 0.85 }),
+  roofDark: () => mat(0x4a5562, { roughness: 0.8 }),
+  roofTile: () => mat(0x3f4a56, { roughness: 0.75 }),
+  roofTerracotta: () => mat(0xb5643f, { roughness: 0.85 }),
 
   // Water
   water: () => mat(0x3a7fb5, { roughness: 0.15, flat: false }),

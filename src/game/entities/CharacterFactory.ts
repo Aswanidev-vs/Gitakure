@@ -1,28 +1,113 @@
 import * as THREE from 'three';
-import { box, taperedCylinder, blob, cone } from '@/game/procedural/geometry';
+import { box, taperedCylinder, blob } from '@/game/procedural/geometry';
 
 export type CharacterGender = 'female' | 'male';
 export type CharacterExpression = 'neutral' | 'happy' | 'smile' | 'side';
 
 export interface CharacterRig {
   root: THREE.Group;
-  head: THREE.Group;
-  torso: THREE.Group;
-  armL: THREE.Group;
-  armR: THREE.Group;
-  legL: THREE.Group;
-  legR: THREE.Group;
+  head: THREE.Object3D;
+  torso: THREE.Object3D;
+  armL: THREE.Object3D;
+  armR: THREE.Object3D;
+  legL: THREE.Object3D;
+  legR: THREE.Object3D;
   hairExtra?: THREE.Object3D;
-  faceMaterial: THREE.MeshToonMaterial;
+  faceMaterial: THREE.MeshToonMaterial | THREE.MeshBasicMaterial;
   setExpression: (expr: CharacterExpression) => void;
 }
 
+function toon(color: number): THREE.MeshToonMaterial {
+  return new THREE.MeshToonMaterial({ color });
+}
+
+function add(
+  parent: THREE.Object3D,
+  geometry: THREE.BufferGeometry,
+  material: THREE.Material,
+  x = 0,
+  y = 0,
+  z = 0,
+  rx = 0,
+  ry = 0,
+  rz = 0,
+): THREE.Mesh {
+  const m = new THREE.Mesh(geometry, material);
+  m.position.set(x, y, z);
+  m.rotation.set(rx, ry, rz);
+  m.castShadow = true;
+  parent.add(m);
+  return m;
+}
+
+/** A soft collar panel — a thin, slightly tilted slab. */
+function collarPanel(
+  parent: THREE.Object3D,
+  material: THREE.Material,
+  x: number,
+  y: number,
+  z: number,
+  tilt: number,
+  width = 0.085,
+  height = 0.28,
+): void {
+  add(parent, box(width, height, 0.035), material, x, y, z, 0, 0, tilt);
+}
+
+/** Five-petal blossom used as a hairpin. */
+function blossom(parent: THREE.Object3D, pink: THREE.Material, gold: THREE.Material, x: number, y: number, z: number, scale = 1): THREE.Group {
+  const g = new THREE.Group();
+  g.position.set(x, y, z);
+  g.scale.setScalar(scale);
+  for (let i = 0; i < 5; i++) {
+    const a = (i / 5) * Math.PI * 2;
+    const petal = add(g, blob(0.055, 0.55, 7), pink, Math.cos(a) * 0.05, Math.sin(a) * 0.05, 0);
+    petal.rotation.z = a;
+  }
+  add(g, blob(0.028, 1, 6), gold, 0, 0, 0.02);
+  parent.add(g);
+  return g;
+}
+
 /**
- * Creates a dynamic HTML5 Canvas texture for expressive anime faces.
+ * A curved face patch that hugs the head sphere. Flat quads poke out past the
+ * head silhouette from behind; this cap wraps the front and disappears cleanly
+ * under the hair.
+ */
+export function createFaceCap(radius: number): THREE.SphereGeometry {
+  // Wide enough to cover the whole front of the head, so the skin-toned patch
+  // blends into the head instead of reading as a small pale coin.
+  const cap = new THREE.SphereGeometry(radius, 28, 20, Math.PI / 2 - 0.82, 1.64, 0.9, 1.3);
+  const uv = cap.attributes.uv!;
+  let minU = Infinity;
+  let maxU = -Infinity;
+  let minV = Infinity;
+  let maxV = -Infinity;
+  for (let i = 0; i < uv.count; i++) {
+    const u = uv.getX(i);
+    const v = uv.getY(i);
+    if (u < minU) minU = u;
+    if (u > maxU) maxU = u;
+    if (v < minV) minV = v;
+    if (v > maxV) maxV = v;
+  }
+  const spanU = maxU - minU || 1;
+  const spanV = maxV - minV || 1;
+  for (let i = 0; i < uv.count; i++) {
+    uv.setXY(i, (uv.getX(i) - minU) / spanU, (uv.getY(i) - minV) / spanV);
+  }
+  uv.needsUpdate = true;
+  return cap;
+}
+
+/**
+ * Canvas face texture. Transparent corners let the patch sit on the rounded
+ * head without a square edge, and large eyes stay readable at gameplay distance.
  */
 export function createAnimeFaceTexture(
   gender: CharacterGender,
   expression: CharacterExpression = 'neutral',
+  skin = '#f6cba8',
 ): { texture: THREE.CanvasTexture; updateExpression: (expr: CharacterExpression) => void } {
   const canvas = document.createElement('canvas');
   canvas.width = 256;
@@ -31,107 +116,122 @@ export function createAnimeFaceTexture(
 
   function draw(expr: CharacterExpression) {
     ctx.clearRect(0, 0, 256, 256);
-    // Base skin tone
-    ctx.fillStyle = '#fce4c8';
+
+    // The whole patch is skin-toned: it is mapped onto a cap that must merge
+    // seamlessly with the lit head sphere underneath.
+    ctx.fillStyle = skin;
     ctx.fillRect(0, 0, 256, 256);
 
-    // Cheek blush (females have slightly stronger blush)
-    const blushAlpha = gender === 'female' ? 0.45 : 0.25;
-    const blushL = ctx.createRadialGradient(58, 148, 2, 58, 148, 24);
-    blushL.addColorStop(0, `rgba(250, 140, 160, ${blushAlpha})`);
-    blushL.addColorStop(1, 'rgba(250, 140, 160, 0)');
-    ctx.fillStyle = blushL;
-    ctx.fillRect(30, 120, 60, 60);
+    // Soft jaw shading.
+    const jaw = ctx.createLinearGradient(0, 150, 0, 256);
+    jaw.addColorStop(0, 'rgba(150,88,56,0)');
+    jaw.addColorStop(1, 'rgba(150,88,56,0.22)');
+    ctx.fillStyle = jaw;
+    ctx.fillRect(16, 150, 224, 106);
 
-    const blushR = ctx.createRadialGradient(198, 148, 2, 198, 148, 24);
-    blushR.addColorStop(0, `rgba(250, 140, 160, ${blushAlpha})`);
-    blushR.addColorStop(1, 'rgba(250, 140, 160, 0)');
-    ctx.fillStyle = blushR;
-    ctx.fillRect(170, 120, 60, 60);
+    // Cheek blush.
+    const blushAlpha = gender === 'female' ? 0.4 : 0.18;
+    for (const bx of [60, 196]) {
+      const blush = ctx.createRadialGradient(bx, 150, 2, bx, 150, 30);
+      blush.addColorStop(0, `rgba(236,120,136,${blushAlpha})`);
+      blush.addColorStop(1, 'rgba(236,120,136,0)');
+      ctx.fillStyle = blush;
+      ctx.fillRect(bx - 34, 118, 68, 64);
+    }
 
-    // Eyebrows (male slightly thicker)
-    ctx.strokeStyle = '#2b231d';
-    ctx.lineWidth = gender === 'male' ? 5.5 : 4;
+    // Eyebrows — kept soft and slightly arched.
+    ctx.strokeStyle = gender === 'male' ? 'rgba(48,34,26,0.85)' : 'rgba(58,40,32,0.78)';
+    ctx.lineWidth = gender === 'male' ? 5 : 4;
     ctx.lineCap = 'round';
-    ctx.beginPath();
-    if (expr === 'happy') {
-      ctx.arc(68, 86, 22, Math.PI * 1.15, Math.PI * 1.85);
-      ctx.stroke();
+    for (const [cx, flip] of [[80, 1], [176, -1]] as const) {
       ctx.beginPath();
-      ctx.arc(188, 86, 22, Math.PI * 1.15, Math.PI * 1.85);
-      ctx.stroke();
-    } else {
-      ctx.moveTo(50, 92);
-      ctx.quadraticCurveTo(72, 82, 94, 90);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(162, 90);
-      ctx.quadraticCurveTo(184, 82, 206, 92);
+      if (expr === 'happy') {
+        ctx.arc(cx, 92, 21, Math.PI * 1.15, Math.PI * 1.85);
+      } else {
+        ctx.moveTo(cx - 20, 96);
+        ctx.quadraticCurveTo(cx, 86, cx + 20, 96 - flip * 3);
+      }
       ctx.stroke();
     }
 
-    // Eyes
+    // Eyes.
     if (expr === 'happy') {
-      // Joyful closed laughing eyes (^ ^)
-      ctx.strokeStyle = '#231a15';
+      ctx.strokeStyle = '#2a1e18';
       ctx.lineWidth = 6;
-      ctx.beginPath();
-      ctx.arc(72, 128, 24, Math.PI * 1.1, Math.PI * 1.9);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(184, 128, 24, Math.PI * 1.1, Math.PI * 1.9);
-      ctx.stroke();
-    } else {
-      // Open anime eyes
-      const eyeXOffset = expr === 'side' ? 8 : 0;
-      for (const eyeCenterX of [72, 184]) {
-        // Eyelash line
-        ctx.fillStyle = '#231a15';
+      for (const cx of [80, 176]) {
         ctx.beginPath();
-        ctx.arc(eyeCenterX, 118, 24, Math.PI * 1.05, Math.PI * 1.95);
-        ctx.lineWidth = 5;
-        ctx.strokeStyle = '#231a15';
+        ctx.arc(cx, 126, 22, Math.PI * 1.1, Math.PI * 1.9);
+        ctx.stroke();
+      }
+    } else {
+      const shift = expr === 'side' ? 7 : 0;
+      for (const cx of [82, 174]) {
+        // Sclera.
+        ctx.fillStyle = '#fdf7ef';
+        ctx.beginPath();
+        ctx.ellipse(cx, 124, 20, 24, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(58,40,30,0.35)';
+        ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Iris
-        const irisGrad = ctx.createLinearGradient(0, 108, 0, 142);
-        irisGrad.addColorStop(0, '#262228');
-        irisGrad.addColorStop(0.5, '#4a382e');
-        irisGrad.addColorStop(1, '#825f46');
-        ctx.fillStyle = irisGrad;
+        // Upper lash line, thickest at the outer corner.
+        ctx.strokeStyle = '#241a15';
+        ctx.lineWidth = 5.5;
         ctx.beginPath();
-        ctx.ellipse(eyeCenterX + eyeXOffset, 126, 14, 18, 0, 0, Math.PI * 2);
+        ctx.arc(cx, 117, 22.5, Math.PI * 1.05, Math.PI * 1.95);
+        ctx.stroke();
+
+        // Iris.
+        const iris = ctx.createLinearGradient(0, 104, 0, 142);
+        iris.addColorStop(0, '#2c1f1c');
+        iris.addColorStop(0.55, '#6a4632');
+        iris.addColorStop(1, '#b07a4c');
+        ctx.fillStyle = iris;
+        ctx.beginPath();
+        ctx.ellipse(cx + shift, 126, 15, 18, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Pupil
-        ctx.fillStyle = '#141212';
+        // Pupil and sparkle.
+        ctx.fillStyle = '#151011';
         ctx.beginPath();
-        ctx.arc(eyeCenterX + eyeXOffset, 126, 7, 0, Math.PI * 2);
+        ctx.arc(cx + shift, 127, 7.5, 0, Math.PI * 2);
         ctx.fill();
-
-        // Sparkle Highlights
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.arc(eyeCenterX + eyeXOffset - 4, 120, 5, 0, Math.PI * 2);
+        ctx.arc(cx + shift - 4.8, 118, 4.2, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(eyeCenterX + eyeXOffset + 4, 131, 2.5, 0, Math.PI * 2);
+        ctx.arc(cx + shift + 4.8, 134, 2.2, 0, Math.PI * 2);
         ctx.fill();
+
+        // A small shadow under the lash line gives the eye depth.
+        ctx.strokeStyle = 'rgba(90,52,40,0.35)';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.arc(cx, 130, 17, Math.PI * 1.15, Math.PI * 1.85);
+        ctx.stroke();
       }
     }
 
-    // Mouth
-    ctx.strokeStyle = '#b85e58';
-    ctx.lineWidth = 3.5;
+    // Small nose.
+    ctx.fillStyle = 'rgba(158,98,70,0.32)';
+    ctx.beginPath();
+    ctx.ellipse(128, 152, 3.4, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Mouth.
+    ctx.strokeStyle = '#a95850';
+    ctx.lineWidth = 3;
     ctx.beginPath();
     if (expr === 'happy' || expr === 'smile') {
-      ctx.arc(128, 172, 16, 0.1, Math.PI - 0.1);
-      ctx.fillStyle = '#d65b63';
+      ctx.arc(128, 174, 16, 0.16, Math.PI - 0.16);
+      ctx.fillStyle = '#c86067';
       ctx.fill();
       ctx.stroke();
     } else {
-      ctx.moveTo(116, 174);
-      ctx.quadraticCurveTo(128, 178, 140, 174);
+      ctx.moveTo(116, 178);
+      ctx.quadraticCurveTo(128, 182, 140, 178);
       ctx.stroke();
     }
   }
@@ -148,341 +248,237 @@ export function createAnimeFaceTexture(
   return { texture, updateExpression };
 }
 
-/**
- * Builds the complete 3D Female Character Rig (Image 2 - Mika style)
- */
+/** Mika — red kimono, cream floral skirt, tied dark hair with a blossom. */
 export function buildFemaleCharacter(): CharacterRig {
   const root = new THREE.Group();
   root.name = 'character-female';
 
-  // Materials
-  const skinMat = new THREE.MeshToonMaterial({ color: 0xfce4c8 });
-  const redHaori = new THREE.MeshToonMaterial({ color: 0xb53535 });
-  const darkObi = new THREE.MeshToonMaterial({ color: 0x2d363b });
-  const creamSkirt = new THREE.MeshToonMaterial({ color: 0xf5ede1 });
-  const hairMat = new THREE.MeshToonMaterial({ color: 0x2e2320 });
-  const sakuraPink = new THREE.MeshToonMaterial({ color: 0xf472b6 });
-  const goldCenter = new THREE.MeshToonMaterial({ color: 0xfde047 });
-  const sandalMat = new THREE.MeshToonMaterial({ color: 0x4a3a2a });
+  const skin = toon(0xf6cba8);
+  const red = toon(0xa83443);
+  const redDark = toon(0x852631);
+  const cream = toon(0xf4e7d0);
+  const skirtRed = toon(0x9b2d3c);
+  const skirtDark = toon(0x7a2130);
+  const obi = toon(0x3a3634);
+  const hair = toon(0x2b2223);
+  const hairLight = toon(0x3d2e2e);
+  const pink = toon(0xf2a2b8);
+  const gold = toon(0xf2c85a);
+  const sandal = toon(0x5a3f2b);
 
-  const { texture: faceTex, updateExpression } = createAnimeFaceTexture('female', 'neutral');
+  const { texture: faceTex, updateExpression } = createAnimeFaceTexture('female', 'neutral', '#f6cba8');
+  // Lit exactly like the head so the cap merges into the skin with no pale seam.
   const faceMat = new THREE.MeshToonMaterial({ map: faceTex });
 
-  // 1. Torso Group
+  // Torso: tapered kimono body, crossed collar, obi with back bow.
   const torso = new THREE.Group();
-  torso.position.y = 1.05;
+  torso.position.y = 1.16;
+  add(torso, taperedCylinder(0.22, 0.27, 0.46, 10), red, 0, -0.16);
+  add(torso, taperedCylinder(0.235, 0.235, 0.055, 10), redDark, 0, -0.19);
+  collarPanel(torso, cream, -0.052, 0.16, 0.232, 0.62, 0.055, 0.2);
+  collarPanel(torso, cream, 0.052, 0.16, 0.24, -0.62, 0.055, 0.2);
+  add(torso, taperedCylinder(0.245, 0.245, 0.17, 10), obi, 0, -0.2);
+  // A compact obi knot with ribbon loops and short tails, rather than a big
+  // bow that reads as a pair of wings from behind.
+  add(torso, blob(0.055, 0.7, 7), obi, -0.07, -0.115, -0.26);
+  add(torso, blob(0.055, 0.7, 7), obi, 0.07, -0.115, -0.26);
+  add(torso, blob(0.048, 0.9, 7), redDark, 0, -0.14, -0.28);
+  add(torso, box(0.035, 0.14, 0.03), obi, -0.045, -0.25, -0.25, 0, 0, 0.14);
+  add(torso, box(0.035, 0.14, 0.03), obi, 0.045, -0.25, -0.25, 0, 0, -0.14);
 
-  // Upper Kimono / Haori
-  const haoriMesh = new THREE.Mesh(box(0.48, 0.52, 0.28), redHaori);
-  haoriMesh.castShadow = true;
-  torso.add(haoriMesh);
-
-  // White inner collar trim
-  const collarTrim = new THREE.Mesh(box(0.2, 0.28, 0.29), new THREE.MeshToonMaterial({ color: 0xffffff }));
-  collarTrim.position.set(0, 0.12, 0.01);
-  torso.add(collarTrim);
-
-  // Obi sash belt
-  const obiMesh = new THREE.Mesh(box(0.5, 0.18, 0.3), darkObi);
-  obiMesh.position.y = -0.16;
-  obiMesh.castShadow = true;
-  torso.add(obiMesh);
-
-  // Obi bow knot at back
-  const obiKnot = new THREE.Mesh(box(0.22, 0.14, 0.1), darkObi);
-  obiKnot.position.set(0, -0.16, -0.18);
-  torso.add(obiKnot);
-
-  // Skirt (Long Hakama A-line)
-  const skirtGeo = taperedCylinder(0.35, 0.25, 0.68, 8);
-  const skirtMesh = new THREE.Mesh(skirtGeo, creamSkirt);
-  skirtMesh.position.y = -0.48;
-  skirtMesh.castShadow = true;
-  torso.add(skirtMesh);
-
-  // Subtle pink sakura trim at skirt bottom
-  const skirtTrim = new THREE.Mesh(box(0.44, 0.1, 0.34), redHaori);
-  skirtTrim.position.y = -0.76;
-  torso.add(skirtTrim);
-
+  // Pleated A-line skirt in the same crimson as the kimono top.
+  add(torso, taperedCylinder(0.41, 0.22, 0.68, 12), skirtRed, 0, -0.8);
+  add(torso, taperedCylinder(0.415, 0.415, 0.07, 12), skirtDark, 0, -0.8);
+  for (const px of [-0.24, -0.12, 0.12, 0.24]) {
+    add(torso, box(0.02, 0.42, 0.02), skirtDark, px, -0.78, 0.3);
+  }
   root.add(torso);
 
-  // 2. Head Group
+  // Neck bridges the shoulders and the (now smaller, more reference-accurate)
+  // head so the silhouette stays natural. Upper-body parts live under `torso`
+  // so sitting/bobbing moves the whole body coherently.
+  add(torso, taperedCylinder(0.085, 0.095, 0.34, 8), skin, 0, 0.06);
+
+  // Head: rounded, soft fringe, face-framing locks and a low ponytail.
   const head = new THREE.Group();
-  head.position.y = 1.62;
+  head.position.y = 0.56;
+  head.scale.setScalar(0.7);
+  add(head, blob(0.285, 1, 12), skin);
+  const face = new THREE.Mesh(createFaceCap(0.291), faceMat);
+  face.name = 'face';
+  head.add(face);
 
-  // Base Head
-  const headMesh = new THREE.Mesh(blob(0.26, 1, 8), skinMat);
-  headMesh.castShadow = true;
-  head.add(headMesh);
-
-  // Front Face Quad with Canvas Face Texture
-  const faceQuadGeo = new THREE.PlaneGeometry(0.34, 0.34);
-  const faceQuad = new THREE.Mesh(faceQuadGeo, faceMat);
-  faceQuad.position.set(0, 0.02, 0.22);
-  head.add(faceQuad);
-
-  // Hair Base (crown + back)
-  const hairBase = new THREE.Mesh(blob(0.29, 0.7, 8), hairMat);
-  hairBase.position.set(0, 0.1, -0.04);
-  head.add(hairBase);
-
-  // Front Bangs
-  for (let i = -2; i <= 2; i++) {
-    const bang = new THREE.Mesh(cone(0.04, 0.16, 4), hairMat);
-    bang.rotation.z = Math.PI + i * 0.18;
-    bang.position.set(i * 0.05, 0.12, 0.19);
-    head.add(bang);
+  // Crown and back volume: full coverage so no scalp shows through.
+  add(head, blob(0.305, 0.74, 12), hair, 0, 0.1, -0.04);
+  add(head, blob(0.26, 0.95, 10), hair, 0, 0.0, -0.11);
+  add(head, blob(0.17, 0.9, 9), hair, 0, -0.16, -0.16);
+  // Nape coverage down to the collar so no skin patch shows through.
+  add(head, blob(0.16, 0.9, 9), hair, 0, -0.21, -0.15);
+  // Side volume sits behind the cheeks, not on top of them.
+  for (const sx of [-1, 1]) {
+    add(head, blob(0.1, 1, 8), hair, sx * 0.235, -0.03, -0.02);
   }
 
-  // Side hair strands
-  for (const sx of [-0.2, 0.2]) {
-    const sideLock = new THREE.Mesh(taperedCylinder(0.04, 0.02, 0.32, 4), hairMat);
-    sideLock.position.set(sx, -0.04, 0.12);
-    head.add(sideLock);
+  // Fringe: staggered rounded strands with a soft side-swept edge.
+  const bangs = [
+    { x: -0.19, y: 0.165, rz: 0.3, r: 0.064 },
+    { x: -0.1, y: 0.205, rz: 0.16, r: 0.072 },
+    { x: 0.0, y: 0.22, rz: 0, r: 0.075 },
+    { x: 0.1, y: 0.205, rz: -0.16, r: 0.072 },
+    { x: 0.19, y: 0.165, rz: -0.3, r: 0.064 },
+  ];
+  for (const b of bangs) {
+    const strand = add(head, blob(b.r, 0.52, 7), b.r > 0.07 ? hair : hairLight, b.x, b.y, 0.2);
+    strand.rotation.z = b.rz;
+  }
+  // Longer face-framing strands down past the jaw, tucked into the side mass.
+  for (const sx of [-0.235, 0.235]) {
+    const lock = add(head, taperedCylinder(0.062, 0.028, 0.4, 7), hair, sx, -0.3, 0.12, 0, 0, sx > 0 ? -0.06 : 0.06);
+    lock.castShadow = true;
   }
 
-  // Side Ponytail (Female hairstyle)
+  // Low side ponytail with a red tie, draped over the right shoulder.
   const ponytail = new THREE.Group();
-  ponytail.position.set(0.22, 0.12, -0.1);
-
-  const ponytailBun = new THREE.Mesh(blob(0.12, 0.8, 6), hairMat);
-  ponytail.add(ponytailBun);
-
-  const ponytailTail = new THREE.Mesh(taperedCylinder(0.08, 0.03, 0.45, 5), hairMat);
-  ponytailTail.position.set(0.06, -0.22, 0);
-  ponytailTail.rotation.z = -0.25;
-  ponytail.add(ponytailTail);
-
-  // Sakura Blossom Hairpin on Ponytail
-  const sakuraClip = new THREE.Group();
-  sakuraClip.position.set(-0.06, 0.06, 0.08);
-  for (let i = 0; i < 5; i++) {
-    const petal = new THREE.Mesh(blob(0.045, 0.6, 5), sakuraPink);
-    const a = (i / 5) * Math.PI * 2;
-    petal.position.set(Math.cos(a) * 0.04, Math.sin(a) * 0.04, 0);
-    sakuraClip.add(petal);
-  }
-  const flowerCenter = new THREE.Mesh(blob(0.025, 1, 5), goldCenter);
-  flowerCenter.position.z = 0.01;
-  sakuraClip.add(flowerCenter);
-  ponytail.add(sakuraClip);
-
+  ponytail.position.set(0.14, -0.02, -0.25);
+  add(ponytail, blob(0.105, 0.9, 9), hair, 0, 0.0, -0.02);
+  add(ponytail, taperedCylinder(0.075, 0.028, 0.3, 7), hair, 0.02, -0.29, 0.01, 0.14, 0, -0.1);
+  add(ponytail, blob(0.075, 0.7, 7), hairLight, 0.03, -0.2, 0.035);
+  add(ponytail, blob(0.05, 0.75, 6), redDark, -0.06, 0.015, 0.035);
+  add(ponytail, blob(0.05, 0.75, 6), redDark, 0.03, 0.015, 0.035);
+  add(ponytail, taperedCylinder(0.028, 0.012, 0.13, 5), redDark, 0.04, -0.02, 0.05, 0.25, 0, -0.55);
+  blossom(ponytail, pink, gold, 0.09, 0.13, 0.01, 0.95);
   head.add(ponytail);
-  root.add(head);
+  const hairExtra: THREE.Object3D = ponytail;
+  torso.add(head);
 
-  // 3. Arms
+  // Rounded shoulders soften the kimono silhouette.
+  for (const sx of [-0.245, 0.245]) {
+    add(torso, blob(0.11, 1, 8), red, sx, 0.19, 0);
+  }
+
+  // Arms: gently flared kimono sleeves with visible hands.
   const armL = new THREE.Group();
-  armL.position.set(-0.31, 1.34, 0);
-  const sleeveL = new THREE.Mesh(box(0.16, 0.38, 0.22), redHaori);
-  sleeveL.position.y = -0.18;
-  sleeveL.castShadow = true;
-  armL.add(sleeveL);
-  const handL = new THREE.Mesh(blob(0.05, 0.8, 5), skinMat);
-  handL.position.y = -0.42;
-  armL.add(handL);
-  root.add(armL);
+  armL.position.set(-0.285, 0.22, 0);
+  add(armL, taperedCylinder(0.115, 0.075, 0.32, 8), red, 0, -0.32);
+  add(armL, taperedCylinder(0.118, 0.09, 0.03, 8), redDark, 0, -0.32);
+  add(armL, blob(0.055, 1, 7), skin, 0, -0.36);
+  torso.add(armL);
 
   const armR = new THREE.Group();
-  armR.position.set(0.31, 1.34, 0);
-  const sleeveR = new THREE.Mesh(box(0.16, 0.38, 0.22), redHaori);
-  sleeveR.position.y = -0.18;
-  sleeveR.castShadow = true;
-  armR.add(sleeveR);
-  const handR = new THREE.Mesh(blob(0.05, 0.8, 5), skinMat);
-  handR.position.y = -0.42;
-  armR.add(handR);
-  root.add(armR);
+  armR.position.set(0.285, 0.22, 0);
+  add(armR, taperedCylinder(0.115, 0.075, 0.32, 8), red, 0, -0.32);
+  add(armR, taperedCylinder(0.118, 0.09, 0.03, 8), redDark, 0, -0.32);
+  add(armR, blob(0.055, 1, 7), skin, 0, -0.36);
+  torso.add(armR);
 
-  // 4. Legs & Sandals
+  // Legs with strapped sandals.
   const legL = new THREE.Group();
-  legL.position.set(-0.13, 0.45, 0);
-  const lowerLegL = new THREE.Mesh(taperedCylinder(0.07, 0.05, 0.45, 5), skinMat);
-  lowerLegL.position.y = -0.22;
-  lowerLegL.castShadow = true;
-  legL.add(lowerLegL);
-  const sandalL = new THREE.Mesh(box(0.1, 0.04, 0.18), sandalMat);
-  sandalL.position.set(0, -0.44, 0.04);
-  legL.add(sandalL);
+  legL.position.set(-0.13, 0.6, 0);
+  add(legL, taperedCylinder(0.075, 0.055, 0.56, 7), skin, 0, -0.56);
+  add(legL, box(0.12, 0.035, 0.22), sandal, 0, -0.58, 0.04);
+  add(legL, box(0.125, 0.018, 0.05), sandal, 0, -0.54, 0.09);
   root.add(legL);
 
   const legR = new THREE.Group();
-  legR.position.set(0.13, 0.45, 0);
-  const lowerLegR = new THREE.Mesh(taperedCylinder(0.07, 0.05, 0.45, 5), skinMat);
-  lowerLegR.position.y = -0.22;
-  lowerLegR.castShadow = true;
-  legR.add(lowerLegR);
-  const sandalR = new THREE.Mesh(box(0.1, 0.04, 0.18), sandalMat);
-  sandalR.position.set(0, -0.44, 0.04);
-  legR.add(sandalR);
+  legR.position.set(0.13, 0.6, 0);
+  add(legR, taperedCylinder(0.075, 0.055, 0.56, 7), skin, 0, -0.56);
+  add(legR, box(0.12, 0.035, 0.22), sandal, 0, -0.58, 0.04);
+  add(legR, box(0.125, 0.018, 0.05), sandal, 0, -0.54, 0.09);
   root.add(legR);
 
-  return {
-    root,
-    head,
-    torso,
-    armL,
-    armR,
-    legL,
-    legR,
-    hairExtra: ponytailTail,
-    faceMaterial: faceMat,
-    setExpression: updateExpression,
-  };
+  return { root, head, torso, armL, armR, legL, legR, hairExtra, faceMaterial: faceMat, setExpression: updateExpression };
 }
 
-/**
- * Builds the complete 3D Male Character Rig (Image 2 - Traveler style)
- */
+/** Traveler — cream tunic, brown sash, cropped trousers, short wavy hair. */
 export function buildMaleCharacter(): CharacterRig {
   const root = new THREE.Group();
   root.name = 'character-male';
 
-  const skinMat = new THREE.MeshToonMaterial({ color: 0xfce4c8 });
-  const creamShirt = new THREE.MeshToonMaterial({ color: 0xede0cb });
-  const darkUndershirt = new THREE.MeshToonMaterial({ color: 0x282c30 });
-  const waistSash = new THREE.MeshToonMaterial({ color: 0xd9c2a5 });
-  const brownPants = new THREE.MeshToonMaterial({ color: 0x47392d });
-  const hairMat = new THREE.MeshToonMaterial({ color: 0x201c1c });
-  const sandalMat = new THREE.MeshToonMaterial({ color: 0x3d2f23 });
+  const skin = toon(0xf2c4a0);
+  const cream = toon(0xe8d6b2);
+  const creamShade = toon(0xd4bd96);
+  const inner = toon(0x38332f);
+  const sash = toon(0xc9985f);
+  const pants = toon(0x4d3d30);
+  const hair = toon(0x2a2321);
+  const hairLight = toon(0x3e312c);
+  const sandal = toon(0x4a3829);
 
-  const { texture: faceTex, updateExpression } = createAnimeFaceTexture('male', 'neutral');
+  const { texture: faceTex, updateExpression } = createAnimeFaceTexture('male', 'neutral', '#f2c4a0');
   const faceMat = new THREE.MeshToonMaterial({ map: faceTex });
 
-  // 1. Torso
+  // Tunic body with a dark V-neck and folded collar.
   const torso = new THREE.Group();
-  torso.position.y = 1.08;
-
-  // Cream open shirt
-  const shirtMesh = new THREE.Mesh(box(0.52, 0.58, 0.3), creamShirt);
-  shirtMesh.castShadow = true;
-  torso.add(shirtMesh);
-
-  // Dark undershirt visible down center
-  const innerShirt = new THREE.Mesh(box(0.18, 0.52, 0.31), darkUndershirt);
-  innerShirt.position.set(0, 0.02, 0.01);
-  torso.add(innerShirt);
-
-  // Folded collar
-  const collarL = new THREE.Mesh(box(0.12, 0.22, 0.32), creamShirt);
-  collarL.position.set(-0.12, 0.24, 0.02);
-  collarL.rotation.z = -0.2;
-  torso.add(collarL);
-
-  const collarR = new THREE.Mesh(box(0.12, 0.22, 0.32), creamShirt);
-  collarR.position.set(0.12, 0.24, 0.02);
-  collarR.rotation.z = 0.2;
-  torso.add(collarR);
-
-  // Waist cloth sash wrap
-  const sashWrap = new THREE.Mesh(box(0.54, 0.16, 0.32), waistSash);
-  sashWrap.position.y = -0.22;
-  sashWrap.castShadow = true;
-  torso.add(sashWrap);
-
-  // Sash hanging knot end
-  const sashTails = new THREE.Mesh(box(0.14, 0.32, 0.06), waistSash);
-  sashTails.position.set(-0.16, -0.36, 0.16);
-  torso.add(sashTails);
-
+  torso.position.y = 1.2;
+  add(torso, taperedCylinder(0.24, 0.28, 0.5, 10), cream, 0, -0.18);
+  add(torso, box(0.2, 0.44, 0.03), inner, 0, 0.02, 0.25);
+  collarPanel(torso, cream, -0.08, 0.14, 0.27, 0.5, 0.07, 0.3);
+  collarPanel(torso, cream, 0.08, 0.14, 0.28, -0.5, 0.07, 0.3);
+  add(torso, taperedCylinder(0.255, 0.255, 0.16, 10), sash, 0, -0.22);
+  add(torso, box(0.15, 0.3, 0.05), sash, -0.16, -0.36, 0.2, 0, 0, 0.08);
+  add(torso, box(0.13, 0.26, 0.05), creamShade, 0, -0.03, 0.27);
   root.add(torso);
 
-  // 2. Head
+  // Neck.
+  add(torso, taperedCylinder(0.095, 0.105, 0.44, 8), skin, 0, 0.05);
+
+  // Head with soft, wavy layered locks rather than sharp spikes.
   const head = new THREE.Group();
-  head.position.y = 1.66;
-
-  const headMesh = new THREE.Mesh(blob(0.24, 1, 8), skinMat);
-  headMesh.castShadow = true;
-  head.add(headMesh);
-
-  const faceQuad = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.3), faceMat);
-  faceQuad.position.set(0, 0.02, 0.23);
-  head.add(faceQuad);
-
-  // Spiky Anime Hair
-  const hairCrown = new THREE.Mesh(blob(0.26, 0.8, 8), hairMat);
-  hairCrown.position.set(0, 0.1, -0.02);
-  head.add(hairCrown);
-
-  // Spiky locks
-  const spikePositions = [
-    { x: -0.14, y: 0.24, z: 0.1, rz: 0.4 },
-    { x: -0.04, y: 0.28, z: 0.08, rz: 0.1 },
-    { x: 0.08, y: 0.27, z: 0.09, rz: -0.25 },
-    { x: 0.18, y: 0.22, z: 0.06, rz: -0.5 },
-    { x: -0.2, y: 0.12, z: 0.15, rz: 0.6 },
-    { x: 0.2, y: 0.12, z: 0.15, rz: -0.6 },
+  head.position.y = 0.62;
+  head.scale.setScalar(0.7);
+  add(head, blob(0.275, 1, 12), skin);
+  const face = new THREE.Mesh(createFaceCap(0.281), faceMat);
+  face.name = 'face';
+  head.add(face);
+  add(head, blob(0.29, 0.78, 12), hair, 0, 0.11, -0.04);
+  // Nape coverage.
+  add(head, blob(0.2, 0.9, 10), hair, 0, -0.02, -0.14);
+  const waveSpots = [
+    { x: -0.19, y: 0.18, z: 0.18, rz: 0.55 },
+    { x: -0.1, y: 0.23, z: 0.21, rz: 0.28 },
+    { x: 0.0, y: 0.26, z: 0.22, rz: 0 },
+    { x: 0.1, y: 0.23, z: 0.21, rz: -0.28 },
+    { x: 0.19, y: 0.18, z: 0.18, rz: -0.55 },
   ];
-  for (const sp of spikePositions) {
-    const spike = new THREE.Mesh(cone(0.06, 0.18, 4), hairMat);
-    spike.position.set(sp.x, sp.y, sp.z);
-    spike.rotation.z = sp.rz;
-    head.add(spike);
+  for (const w of waveSpots) {
+    const lock = add(head, blob(0.085, 0.72, 7), w.x < 0 ? hair : hairLight, w.x, w.y, w.z);
+    lock.rotation.z = w.rz;
   }
+  add(head, taperedCylinder(0.06, 0.03, 0.24, 6), hair, -0.24, -0.24, 0.11, 0, 0, 0.1);
+  add(head, taperedCylinder(0.06, 0.03, 0.24, 6), hair, 0.24, -0.24, 0.11, 0, 0, -0.1);
+  torso.add(head);
 
-  root.add(head);
-
-  // 3. Arms
+  // Arms: short sleeves, bare forearms, hands.
   const armL = new THREE.Group();
-  armL.position.set(-0.34, 1.38, 0);
-  const sleeveL = new THREE.Mesh(box(0.14, 0.34, 0.18), creamShirt);
-  sleeveL.position.y = -0.16;
-  sleeveL.castShadow = true;
-  armL.add(sleeveL);
-  const bareForearmL = new THREE.Mesh(taperedCylinder(0.07, 0.06, 0.28, 5), skinMat);
-  bareForearmL.position.y = -0.38;
-  armL.add(bareForearmL);
-  root.add(armL);
+  armL.position.set(-0.32, 0.27, 0);
+  add(armL, taperedCylinder(0.145, 0.115, 0.26, 8), cream, 0, -0.26);
+  add(armL, taperedCylinder(0.075, 0.06, 0.3, 7), skin, 0, -0.52);
+  add(armL, blob(0.06, 1, 7), skin, 0, -0.58);
+  torso.add(armL);
 
   const armR = new THREE.Group();
-  armR.position.set(0.34, 1.38, 0);
-  const sleeveR = new THREE.Mesh(box(0.14, 0.34, 0.18), creamShirt);
-  sleeveR.position.y = -0.16;
-  sleeveR.castShadow = true;
-  armR.add(sleeveR);
-  const bareForearmR = new THREE.Mesh(taperedCylinder(0.07, 0.06, 0.28, 5), skinMat);
-  bareForearmR.position.y = -0.38;
-  armR.add(bareForearmR);
-  root.add(armR);
+  armR.position.set(0.32, 0.27, 0);
+  add(armR, taperedCylinder(0.145, 0.115, 0.26, 8), cream, 0, -0.26);
+  add(armR, taperedCylinder(0.075, 0.06, 0.3, 7), skin, 0, -0.52);
+  add(armR, blob(0.06, 1, 7), skin, 0, -0.58);
+  torso.add(armR);
 
-  // 4. Legs (Cropped Brown Baggy Trousers + Sandals)
+  // Cropped trousers, calves and sandals.
   const legL = new THREE.Group();
-  legL.position.set(-0.16, 0.65, 0);
-  const pantL = new THREE.Mesh(taperedCylinder(0.14, 0.11, 0.48, 6), brownPants);
-  pantL.position.y = -0.22;
-  pantL.castShadow = true;
-  legL.add(pantL);
-  const calfL = new THREE.Mesh(taperedCylinder(0.07, 0.05, 0.28, 5), skinMat);
-  calfL.position.y = -0.52;
-  legL.add(calfL);
-  const sandalL = new THREE.Mesh(box(0.11, 0.04, 0.2), sandalMat);
-  sandalL.position.set(0, -0.66, 0.04);
-  legL.add(sandalL);
+  legL.position.set(-0.15, 0.82, 0);
+  add(legL, taperedCylinder(0.17, 0.13, 0.5, 8), pants, 0, -0.5);
+  add(legL, taperedCylinder(0.075, 0.055, 0.34, 7), skin, 0, -0.84);
+  add(legL, box(0.13, 0.035, 0.23), sandal, 0, -0.86, 0.04);
+  add(legL, box(0.135, 0.018, 0.05), sandal, 0, -0.82, 0.09);
   root.add(legL);
 
   const legR = new THREE.Group();
-  legR.position.set(0.16, 0.65, 0);
-  const pantR = new THREE.Mesh(taperedCylinder(0.14, 0.11, 0.48, 6), brownPants);
-  pantR.position.y = -0.22;
-  pantR.castShadow = true;
-  legR.add(pantR);
-  const calfR = new THREE.Mesh(taperedCylinder(0.07, 0.05, 0.28, 5), skinMat);
-  calfR.position.y = -0.52;
-  legR.add(calfR);
-  const sandalR = new THREE.Mesh(box(0.11, 0.04, 0.2), sandalMat);
-  sandalR.position.set(0, -0.66, 0.04);
-  legR.add(sandalR);
+  legR.position.set(0.15, 0.82, 0);
+  add(legR, taperedCylinder(0.17, 0.13, 0.5, 8), pants, 0, -0.5);
+  add(legR, taperedCylinder(0.075, 0.055, 0.34, 7), skin, 0, -0.84);
+  add(legR, box(0.13, 0.035, 0.23), sandal, 0, -0.86, 0.04);
+  add(legR, box(0.135, 0.018, 0.05), sandal, 0, -0.82, 0.09);
   root.add(legR);
 
-  return {
-    root,
-    head,
-    torso,
-    armL,
-    armR,
-    legL,
-    legR,
-    faceMaterial: faceMat,
-    setExpression: updateExpression,
-  };
+  return { root, head, torso, armL, armR, legL, legR, faceMaterial: faceMat, setExpression: updateExpression };
 }

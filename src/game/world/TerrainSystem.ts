@@ -160,15 +160,16 @@ export class TerrainSystem {
     const colors = new Float32Array(pos.count * 3);
 
     // Studio Ghibli lush color palette
-    const grassSun = new THREE.Color(0x82c24f);   // vibrant sunlit warm green
-    const grassMid = new THREE.Color(0x619e42);   // balanced meadow green
-    const grassShade = new THREE.Color(0x406d33); // deep emerald shadow
-    const pathDirt = new THREE.Color(0xbfa071);   // warm packed village road earth
-    const pathPebble = new THREE.Color(0x9a8563); // darker road rut / stone edge
-    const paddyShoot = new THREE.Color(0x8bd453); // bright rice paddy sprout green
-    const paddyMud = new THREE.Color(0x54402a);   // dark terraced clay bund
-    const sand = new THREE.Color(0xe6dab8);       // golden river sand
-    const rock = new THREE.Color(0x767d84);       // cliff slate rock
+    const grassSun = new THREE.Color(0x6cae44);   // vibrant sunlit warm green
+    const grassMid = new THREE.Color(0x4f8b38);   // balanced meadow green
+    const grassShade = new THREE.Color(0x386b2c); // deep emerald shadow
+    const pathDirt = new THREE.Color(0x8a6842);   // warm packed village road earth
+    const pathPebble = new THREE.Color(0x6b563c); // darker road rut / stone edge
+    const paddyShoot = new THREE.Color(0x79bc49); // bright rice paddy sprout green
+    const paddyMud = new THREE.Color(0x513d2b);   // dark terraced clay bund
+    const sand = new THREE.Color(0xd2bc91);       // golden river sand
+    const rock = new THREE.Color(0x81878e);       // cliff slate rock
+    const clearing = new THREE.Color(0x93714a);   // campfire / bench packed earth
     const tmp = new THREE.Color();
 
     for (let i = 0; i < pos.count; i++) {
@@ -177,16 +178,26 @@ export class TerrainSystem {
       const h = pos.getY(i);
       const slope = this.slopeAt(x, z);
       const roadDist = this.villageRoadDistance(x, z);
+      const bankDist = Math.abs(x - Math.sin(z * 0.045) * 7.5);
+      const clearingDist = Math.min(
+        Math.hypot(x - 6, z + 2),   // campfire clearing
+        Math.hypot(x - 8.5, z + 1), // bench overlook
+      );
 
-      if (h < -0.6) {
+      if (h < -0.55) {
         // Submerged riverbed
         tmp.copy(sand).lerp(pathPebble, 0.3);
       } else if (slope > 0.72) {
         // Steep rocky bluffs
         tmp.copy(rock);
-      } else if (roadDist < 2.0) {
+      } else if (clearingDist < 2.1) {
+        // Warm packed-earth clearing around the campfire and bench.
+        const edge = clearingDist / 2.1;
+        tmp.copy(clearing).lerp(pathDirt, (Math.sin(x * 2.4 + z * 1.7) + 1) * 0.18);
+        if (edge > 0.7) tmp.lerp(grassMid, (edge - 0.7) / 0.3);
+      } else if (roadDist < 1.7) {
         // Village dirt road with soft blend at edges
-        const edge = roadDist / 2.0;
+        const edge = roadDist / 1.7;
         tmp.copy(pathDirt).lerp(pathPebble, (Math.sin(x * 2 + z * 2) + 1) * 0.2);
         if (edge > 0.6) {
           tmp.lerp(grassMid, (edge - 0.6) / 0.4);
@@ -199,12 +210,12 @@ export class TerrainSystem {
         } else {
           tmp.copy(paddyShoot);
         }
-      } else if (h < 0.35) {
-        // Shoreline sandy beach
+      } else if (bankDist < this.opts.riverHalfWidth + 0.25 && h < 0.05) {
+        // Narrow golden shoreline right at the water's edge.
         tmp.copy(sand);
-      } else if (this.nearRiver(x, z, 7)) {
-        // Riverbank loam
-        tmp.copy(grassMid).lerp(pathDirt, 0.35);
+      } else if (bankDist < this.opts.riverHalfWidth + 1.2) {
+        // Riverbank loam just behind the sand.
+        tmp.copy(grassMid).lerp(pathDirt, 0.18);
       } else {
         // Rolling grassy meadows with subtle noise modulation
         const n = fbm2(x * 0.08, z * 0.08, 2, this.opts.seed);
@@ -230,7 +241,7 @@ export class TerrainSystem {
   private createMountainBackdrop(): THREE.Mesh {
     const segments = 64;
     const radius = 150;
-    const geo = new THREE.CylinderGeometry(radius, radius + 20, 50, segments, 4, true);
+    const geo = new THREE.CylinderGeometry(radius, radius + 20, 34, segments, 4, true);
     const pos = geo.attributes.position;
     const colors = new Float32Array(pos.count * 3);
 
@@ -245,7 +256,7 @@ export class TerrainSystem {
       const angle = Math.atan2(z, x);
 
       // Multi-frequency jagged mountain peaks
-      const peakNoise = Math.sin(angle * 5) * 12 + Math.sin(angle * 13) * 6 + Math.cos(angle * 3) * 16;
+      const peakNoise = Math.sin(angle * 5) * 8 + Math.sin(angle * 13) * 4 + Math.cos(angle * 3) * 10;
       if (y > 0) {
         pos.setY(i, y + peakNoise);
         tmp.copy(mountainTop);
@@ -267,7 +278,7 @@ export class TerrainSystem {
       side: THREE.BackSide,
     });
     const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.y = 8;
+    mesh.position.y = 3;
     mesh.name = 'mountain-backdrop';
     return mesh;
   }

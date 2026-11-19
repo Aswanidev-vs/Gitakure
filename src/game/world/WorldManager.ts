@@ -21,8 +21,8 @@ export class WorldManager {
     this.terrain = new TerrainSystem({ seed });
     this.group.add(this.terrain.mesh);
 
-    // River water: a wide strip running roughly along Z through the channel.
-    this.water = new WaterSystem(22, 140, -0.55);
+    // River water follows the meandering channel carved by the terrain.
+    this.water = new WaterSystem(16, 140, -0.55);
     this.group.add(this.water.mesh);
 
     this.vegetation = new VegetationSystem(this.terrain);

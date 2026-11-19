@@ -6,6 +6,8 @@ import {
   type CharacterExpression,
   type CharacterRig,
 } from './CharacterFactory';
+import { createContactShadow } from './contactShadow';
+import { loadRiggedCharacter, peekRiggedCharacter } from './RiggedCharacter';
 
 export type PlayerAnim = 'idle' | 'walk' | 'sit' | 'fish';
 
@@ -22,14 +24,48 @@ export class Player {
   private walkPhase = 0;
   private sitBlend = 0;
   private facing = 0;
+  private torsoBaseY = 1.05;
+  private headBaseY = 1.62;
 
   constructor(gender: CharacterGender = 'female') {
     this.gender = gender;
     this.group = new THREE.Group();
     this.group.name = 'player';
 
+    // Soft contact shadow: grounds the character even when the low sun throws
+    // his/her cast shadow far behind the body.
+    this.group.add(createContactShadow(1.15, 0.55));
+
     this.currentRig = gender === 'female' ? buildFemaleCharacter() : buildMaleCharacter();
+    this.captureBaselines();
     this.group.add(this.currentRig.root);
+
+    // The detailed reference models load asynchronously; swap in as soon as
+    // they are ready, keeping the procedural rig as the instant fallback.
+    void this.useRiggedModel(gender);
+  }
+
+  /** Replace the active rig (and re-read its animation baselines). */
+  private swapRig(rig: CharacterRig): void {
+    this.group.remove(this.currentRig.root);
+    this.currentRig = rig;
+    this.captureBaselines();
+    this.group.add(rig.root);
+  }
+
+  /** Load and activate the skinned GLB for a gender. */
+  private async useRiggedModel(gender: CharacterGender): Promise<void> {
+    try {
+      const rig = await loadRiggedCharacter(gender);
+      if (this.gender !== gender) return; // model changed while loading
+      this.swapRig(rig);
+    } catch (e) {
+      console.warn('Rigged character failed to load; keeping procedural model.', e);
+    }
+  }
+  private captureBaselines(): void {
+    this.torsoBaseY = this.currentRig.torso.position.y;
+    this.headBaseY = this.currentRig.head.position.y;
   }
 
   get modelGender(): CharacterGender {
@@ -39,10 +75,14 @@ export class Player {
   setModel(gender: CharacterGender): void {
     if (this.gender === gender) return;
     this.gender = gender;
-    this.group.remove(this.currentRig.root);
 
-    this.currentRig = gender === 'female' ? buildFemaleCharacter() : buildMaleCharacter();
-    this.group.add(this.currentRig.root);
+    const cached = peekRiggedCharacter(gender);
+    if (cached) {
+      this.swapRig(cached);
+    } else {
+      this.swapRig(gender === 'female' ? buildFemaleCharacter() : buildMaleCharacter());
+      void this.useRiggedModel(gender);
+    }
   }
 
   setExpression(expr: CharacterExpression): void {
@@ -80,8 +120,8 @@ export class Player {
 
       // Natural torso and head bob
       const bob = Math.abs(Math.sin(this.walkPhase)) * 0.04;
-      r.torso.position.y = 1.05 + bob;
-      r.head.position.y = 1.62 + bob * 0.6;
+      r.torso.position.y = this.torsoBaseY + bob;
+      r.head.position.y = this.headBaseY + bob * 0.25;
 
       // Gentle ponytail physics sway
       if (r.hairExtra) {
@@ -96,8 +136,8 @@ export class Player {
       r.legR.rotation.x = 0;
       r.armL.rotation.x = Math.sin(time * 0.8) * 0.03;
       r.armR.rotation.x = -Math.sin(time * 0.8) * 0.03;
-      r.torso.position.y = 1.05 + breathe;
-      r.head.position.y = 1.62 + breathe * 0.7;
+      r.torso.position.y = this.torsoBaseY + breathe;
+      r.head.position.y = this.headBaseY + breathe * 0.3;
 
       if (r.hairExtra) {
         r.hairExtra.rotation.x = Math.sin(time * 0.5) * 0.06;
@@ -112,16 +152,16 @@ export class Player {
       r.armL.rotation.x = b * 0.25;
       r.armR.rotation.x = b * 0.25;
 
-      r.torso.position.y = 1.05 - b * 0.38;
-      r.head.position.y = 1.62 - b * 0.38;
+      r.torso.position.y = this.torsoBaseY - b * 0.12;
+      r.head.position.y = this.headBaseY;
     } else if (this.anim === 'fish') {
       const time = performance.now() * 0.002;
       r.legL.rotation.x = 0;
       r.legR.rotation.x = 0;
       r.armR.rotation.x = -Math.PI * 0.38 + Math.sin(time) * 0.04;
       r.armL.rotation.x = -Math.PI * 0.15 + Math.sin(time) * 0.02;
-      r.torso.position.y = 1.05 + Math.sin(time * 0.8) * 0.01;
-      r.head.position.y = 1.62;
+      r.torso.position.y = this.torsoBaseY + Math.sin(time * 0.8) * 0.01;
+      r.head.position.y = this.headBaseY;
     }
 
     this.group.rotation.y = this.facing;

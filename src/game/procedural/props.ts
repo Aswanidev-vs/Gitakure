@@ -135,7 +135,7 @@ export function createStoneLantern(p: StoneLanternParams = {}): THREE.Group {
   const glowMat = new THREE.MeshStandardMaterial({
     color: 0xffdf78,
     emissive: 0xffaa22,
-    emissiveIntensity: 0.8,
+    emissiveIntensity: 0.55,
     roughness: 0.2,
   });
   const chamber = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.32, 0.34), glowMat);
@@ -156,7 +156,7 @@ export function createStoneLantern(p: StoneLanternParams = {}): THREE.Group {
   g.add(finial);
 
   if (p.withLight !== false) {
-    const light = new THREE.PointLight(0xffa834, 1.4, 7);
+    const light = new THREE.PointLight(0xffa834, 0.7, 5);
     light.position.set(0, 1.13, 0);
     g.add(light);
   }

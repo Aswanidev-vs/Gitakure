@@ -33,32 +33,35 @@ export class VegetationSystem {
   async build(): Promise<VegetationResult> {
     const rng = new Rng(this.terrain.opts.seed + 999);
 
-    // 1. DENSE INSTANCED MEADOW GRASS (600 instances, 1 draw call)
-    this.buildInstancedGrass(rng, 650);
+    // 1. DENSE INSTANCED MEADOW GRASS (1 draw call)
+    this.buildInstancedGrass(rng, 4200);
 
-    // 2. DENSE INSTANCED WILDFLOWERS (240 instances, 1 draw call)
-    this.buildInstancedFlowers(rng, 240);
+    // 2. DENSE INSTANCED WILDFLOWERS (1 draw call)
+    this.buildInstancedFlowers(rng, 640);
 
     // 3. HERO SAKURA BLOSSOMS (Japanese village & riverside vista)
-    // Iconic large riverside sakura (Image 1 vista landmark)
-    const heroSakura = createSakura({ height: 6.8, canopyRadius: 1.4, canopyClusters: 10, seed: 101 });
-    const hsX = 8;
-    const hsZ = 12;
+    // Iconic large riverside sakura framing the village street.
+    const heroSakura = createSakura({ height: 7.2, canopyRadius: 1.7, canopyClusters: 14, seed: 101 });
+    const hsX = -13;
+    const hsZ = -4;
     heroSakura.position.set(hsX, this.terrain.heightAt(hsX, hsZ), hsZ);
     this.group.add(heroSakura);
-    this.buildSakuraPetalCarpet(rng, hsX, hsZ, 35);
+    this.buildSakuraPetalCarpet(rng, hsX, hsZ, 45);
 
     // Village entrance sakura grove
     const villageSakuras = [
-      { x: 16, z: 12, s: 0.95 },
-      { x: 25, z: 8, s: 1.1 },
-      { x: 12, z: -18, s: 0.85 },
+      { x: 7, z: -14, s: 1.05 },
+      { x: 23, z: 5, s: 1.1 },
+      { x: 14, z: 13, s: 0.9 },
+      { x: 3, z: -16, s: 0.9 },
+      { x: -9, z: 6, s: 1.0 },
+      { x: 19, z: 2, s: 0.95 },
     ];
     for (const spot of villageSakuras) {
       const s = createSakura({ height: 5.4 * spot.s, seed: (spot.x * 19 + spot.z) | 0 });
       s.position.set(spot.x, this.terrain.heightAt(spot.x, spot.z), spot.z);
       this.group.add(s);
-      this.buildSakuraPetalCarpet(rng, spot.x, spot.z, 20);
+      this.buildSakuraPetalCarpet(rng, spot.x, spot.z, 18);
     }
 
     // 4. LUSH GHIBLI BROADLEAF TREES (fluffy round green canopies)
@@ -80,18 +83,20 @@ export class VegetationSystem {
     // 5. KERALA TROPICAL PALMS (along the winding riverbanks)
     const palmPts = this.terrain.scatter(rng, 14, 10, 52);
     for (const p of palmPts) {
-      // Favor riverside planting
-      if (Math.abs(p.x - Math.sin(p.z * 0.045) * 7.5) < 18) {
-        const palm = createCoconutPalm({ seed: (p.x * 7) | 0, curvature: rng.range(0.15, 0.45) });
-        palm.position.set(p.x, p.y, p.z);
-        palm.scale.setScalar(0.85 + rng.next() * 0.35);
-        this.group.add(palm);
-      }
+      const curvature = rng.range(0.15, 0.45);
+      const scale = 0.85 + rng.next() * 0.35;
+      // Favor riverside planting, but keep the bench vista clear of trunks.
+      if (Math.abs(p.x - Math.sin(p.z * 0.045) * 7.5) >= 18) continue;
+      if (p.x > -6 && p.x < 14 && p.z > -18 && p.z < 9) continue;
+      const palm = createCoconutPalm({ seed: (p.x * 7) | 0, curvature });
+      palm.position.set(p.x, p.y, p.z);
+      palm.scale.setScalar(scale);
+      this.group.add(palm);
     }
 
     // 6. BAMBOO GROVES (dense clumping near village margins)
     const bambooClusterCenters = [
-      { cx: 8, cz: -16 },
+      { cx: -14, cz: -12 },
       { cx: 22, cz: 16 },
       { cx: -8, cz: -24 },
     ];
@@ -118,21 +123,25 @@ export class VegetationSystem {
     // 8. ROCKS & RIVERBANK BOULDERS
     const rockPts = this.terrain.scatter(rng, 22, 4, 48, false);
     for (const p of rockPts) {
-      const r = createRock({ seed: (p.x * 13 + p.z) | 0, radius: 0.25 + rng.next() * 0.65 });
+      // Keep the menu vista (bench + campfire clearing) free of large boulders
+      // that would block the seated character and the view down the valley.
+      if (Math.hypot(p.x - 8.5, p.z + 1) < 4.2) continue;
+      if (Math.hypot(p.x - 6, p.z + 2) < 3.2) continue;
+      const r = createRock({ seed: (p.x * 13 + p.z) | 0, radius: 0.25 + rng.next() * 0.5 });
       r.position.set(p.x, p.y + 0.08, p.z);
       r.rotation.y = rng.range(0, Math.PI * 2);
       this.group.add(r);
     }
 
     // 9. LUSH FLOWERING BUSHES
-    const bushPts = this.terrain.scatter(rng, 16, 5, 35);
+    const bushPts = this.terrain.scatter(rng, 30, 5, 35);
     for (const p of bushPts) {
       const b = createBush({ seed: (p.z * 17 + p.x) | 0 });
       b.position.set(p.x, p.y, p.z);
       this.group.add(b);
     }
 
-    this.loaded = this.group.children.length + 650 + 240;
+    this.loaded = this.group.children.length + 4200 + 640;
     return { group: this.group, instanceCount: this.loaded };
   }
 
@@ -144,8 +153,8 @@ export class VegetationSystem {
     for (let i = 0; i < 5; i++) {
       const a = (i / 5) * Math.PI * 2 + rng.range(-0.2, 0.2);
       const r = 0.08 + rng.next() * 0.08;
-      const h = 0.35 + rng.next() * 0.25;
-      const blade = cone(0.035, h, 3);
+      const h = 0.17 + rng.next() * 0.18;
+      const blade = cone(0.026, h, 3);
       transform(blade, { rotZ: rng.range(-0.35, 0.35), x: Math.cos(a) * r, z: Math.sin(a) * r });
       parts.push({ geometry: blade, color: colors[i % colors.length]! });
     }
@@ -161,7 +170,7 @@ export class VegetationSystem {
       const p = points[i]!;
       dummy.position.set(p.x, p.y, p.z);
       dummy.rotation.y = rng.range(0, Math.PI * 2);
-      const s = 0.75 + rng.next() * 0.6;
+      const s = 0.65 + rng.next() * 0.45;
       dummy.scale.set(s, s * (0.8 + rng.next() * 0.4), s);
       dummy.updateMatrix();
       instancedGrass.setMatrixAt(i, dummy.matrix);
@@ -180,29 +189,62 @@ export class VegetationSystem {
 
     for (let i = 0; i < 3; i++) {
       const a = (i / 3) * Math.PI * 2;
-      const r = 0.12;
-      const h = 0.28 + (i * 0.05);
-      const stem = cone(0.02, h, 3);
+      const r = 0.1;
+      const h = 0.16 + (i * 0.035);
+      const stem = cone(0.016, h, 3);
       transform(stem, { x: Math.cos(a) * r, z: Math.sin(a) * r });
       parts.push({ geometry: stem, color: stemColor });
 
-      const flowerHead = blob(0.065, 0.6, 5);
+      const flowerHead = blob(0.048, 0.6, 5);
       transform(flowerHead, { x: Math.cos(a) * r, y: h, z: Math.sin(a) * r });
       parts.push({ geometry: flowerHead, color: petalColors[i]! });
     }
     const flowerGeo = mergeColored(parts);
     const mat = vertexColorMaterial();
-    const instancedFlowers = new THREE.InstancedMesh(flowerGeo, mat, count);
+
+    // Scatter across the meadows, then reinforce the village clearings and
+    // doorstep borders so the streets feel planted rather than empty.
+    const points = this.terrain.scatter(rng, Math.round(count * 0.55), 4, 50, true);
+    const patches = [
+      { x: 8.5, z: -1 },
+      { x: 13, z: -6 },
+      { x: 19, z: -1 },
+      { x: 23.5, z: -10 },
+      { x: 12, z: -16 },
+      { x: 18, z: 6 },
+      // Roadside beds along the bridge -> village thoroughfare.
+      { x: 3.5, z: 3.6 },
+      { x: 6.5, z: 5.6 },
+      { x: 9.5, z: 8.2 },
+      { x: 13, z: 8.0 },
+      { x: 16, z: 4.4 },
+      { x: 16.5, z: -1 },
+      { x: 16, z: -6.5 },
+      { x: 11.5, z: -12 },
+      { x: 10.5, z: 2.5 },
+      { x: 5.5, z: -4 },
+    ];
+    const perPatch = Math.round((count * 0.45) / patches.length);
+    for (const patch of patches) {
+      for (let i = 0; i < perPatch; i++) {
+        const a = rng.range(0, Math.PI * 2);
+        const r = rng.range(0.6, 2.6);
+        const px = patch.x + Math.cos(a) * r;
+        const pz = patch.z + Math.sin(a) * r;
+        points.push({ x: px, y: this.terrain.heightAt(px, pz), z: pz });
+      }
+    }
+
+    const instancedFlowers = new THREE.InstancedMesh(flowerGeo, mat, points.length);
     instancedFlowers.name = 'instanced-flowers';
     instancedFlowers.receiveShadow = true;
 
     const dummy = new THREE.Object3D();
-    const points = this.terrain.scatter(rng, count, 4, 46, true);
     for (let i = 0; i < points.length; i++) {
       const p = points[i]!;
       dummy.position.set(p.x, p.y, p.z);
       dummy.rotation.y = rng.range(0, Math.PI * 2);
-      const s = 0.8 + rng.next() * 0.5;
+      const s = 0.7 + rng.next() * 0.35;
       dummy.scale.set(s, s, s);
       dummy.updateMatrix();
       instancedFlowers.setMatrixAt(i, dummy.matrix);

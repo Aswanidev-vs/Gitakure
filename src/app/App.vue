@@ -22,7 +22,8 @@ const game = ref<Game | null>(null);
 const cameraMode = ref<CameraMode>(settings.camera.mode);
 const fps = ref(0);
 const drawCalls = ref(0);
-const timeOfDay = ref(0.78);
+const timeOfDay = ref(0.74);
+const day = ref(1);
 const season = ref('spring');
 const weather = ref('clear');
 const characterGender = ref<'female' | 'male'>('female');
@@ -43,6 +44,7 @@ const offSnapshot = gameBridge.on('snapshot', (e) => {
   fps.value = e.snapshot.fps;
   drawCalls.value = e.snapshot.drawCalls;
   timeOfDay.value = e.snapshot.time;
+  day.value = e.snapshot.day;
   season.value = e.snapshot.season;
   weather.value = e.snapshot.weather;
 });
@@ -74,7 +76,7 @@ function onSettingsChange(next: GameSettings) {
 async function startGame(fresh: boolean) {
   if (fresh) {
     try {
-      await gameStateRepo.save({ position: [0, 0, 0], rotation: 0 }, { time: 0.35, day: 1, season: 'spring', weather: 'clear' });
+      await gameStateRepo.save({ position: [0, 0, 0], rotation: 0 }, { time: 0.725, day: 1, season: 'spring', weather: 'clear' });
     } catch {
       // ignore
     }
@@ -89,7 +91,7 @@ function returnToMenu() {
 }
 
 function onKey(e: KeyboardEvent) {
-  if (dialogueOpen.value && (e.code === 'KeyE' || e.code === 'Space' || e.code === 'Escape')) {
+  if (dialogueOpen.value && (e.code === 'KeyF' || e.code === 'KeyE' || e.code === 'Space' || e.code === 'Escape')) {
     dialogueOpen.value = false;
     return;
   }
@@ -182,6 +184,7 @@ onBeforeUnmount(() => {
       :fps="fps"
       :draw-calls="drawCalls"
       :time-of-day="timeOfDay"
+      :day="day"
       :season="season"
       :weather="weather"
       :camera-mode="cameraMode"
@@ -217,6 +220,7 @@ onBeforeUnmount(() => {
       :open="showSettings"
       @close="showSettings = false"
       @change="onSettingsChange"
+      @character-model="characterGender = $event"
     />
   </div>
 </template>

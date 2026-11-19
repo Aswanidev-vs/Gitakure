@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { CameraController } from '@/game/rendering/CameraController';
 
 const FOLLOW = 6;
-const FOCUS = 1.4;
+const FOCUS = 1.3; // CameraController's default focusHeight
 
 function make() {
   return new CameraController(1, { mode: 'thirdPerson', followDistance: FOLLOW, fov: 50 });
@@ -16,7 +16,8 @@ describe('CameraController third-person', () => {
     const p = cam.camera.position;
     expect(p.x).toBeCloseTo(0, 5);
     expect(p.z).toBeGreaterThan(0); // camera sits on the +Z side (behind)
-    expect(p.y).toBeCloseTo(FOCUS + FOLLOW * 0.55 + 1.5, 5);
+    // Low third-person framing: focus height plus a modest camera-side lift.
+    expect(p.y).toBeCloseTo(FOCUS + FOLLOW * 0.18 + 0.9, 5);
   });
 
   it('orbits the camera off the default axis when dragged', () => {

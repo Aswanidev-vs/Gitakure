@@ -15,21 +15,24 @@ const showAbout = ref(false);
     <div class="menu-sidebar">
       <!-- Brand Header -->
       <div class="brand-block">
-        <svg class="brand-symbol" viewBox="0 0 160 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <!-- Mountain outline -->
-          <path d="M12 48 L46 16 L76 44 L98 28 L124 50" stroke="#f6eee3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M46 16 L54 26 L64 24" stroke="#f6eee3" stroke-width="2.2" stroke-linecap="round"/>
-          <!-- Stylized bonsai tree on hill -->
-          <path d="M110 48 Q125 36 142 48" stroke="#f6eee3" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M126 44 V34" stroke="#f6eee3" stroke-width="3.5" stroke-linecap="round"/>
-          <path d="M126 34 Q116 26 122 22 Q130 18 136 24 Q144 20 148 26 Q146 32 136 34 Z" fill="#f6eee3"/>
+        <svg class="brand-symbol" viewBox="0 0 176 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <!-- low sun -->
+          <circle cx="126" cy="22" r="11" fill="#f0b85c"/>
+          <!-- drifting cloud -->
+          <path d="M146 30 Q150 22 158 25 Q163 18 170 24 Q176 24 175 31 Z" fill="#f7eee2" opacity="0.92"/>
+          <!-- mountain range -->
+          <path d="M6 52 L40 18 L64 40 L88 20 L116 52 Z" fill="#5d7f67" opacity="0.55"/>
+          <path d="M40 18 L47 27 L56 24" stroke="#f7eee2" stroke-width="2" stroke-linecap="round"/>
+          <path d="M6 52 L40 18 L64 40 L88 20 L116 52" stroke="#f7eee2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- foreground hill -->
+          <path d="M0 53 Q28 44 54 52 Q82 44 110 52 Q140 44 176 52" stroke="#f7eee2" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>
         </svg>
 
         <h1 class="game-title">Gitakure</h1>
-        <p class="game-tagline">A little world, shaped by your journey.</p>
+        <p class="game-tagline">A life away, shaped by your journey</p>
       </div>
 
-      <!-- Navigation Pills -->
+      <!-- Field-note menu index -->
       <nav class="menu-nav" aria-label="Main menu">
         <button
           v-if="hasSave"
@@ -37,7 +40,7 @@ const showAbout = ref(false);
           type="button"
           @click="emit('continue')"
         >
-          <span class="pill-icon play-icon">▶</span>
+          <span class="menu-marker" aria-hidden="true"></span>
           <span class="pill-label">Continue</span>
         </button>
 
@@ -46,41 +49,29 @@ const showAbout = ref(false);
           type="button"
           @click="emit('newJourney')"
         >
-          <svg class="pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
-            <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
-          </svg>
+          <span class="menu-marker" aria-hidden="true"></span>
           <span class="pill-label">New Journey</span>
         </button>
 
         <button class="menu-pill" type="button" @click="emit('settings')">
-          <svg class="pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-            <circle cx="12" cy="12" r="3"/>
-          </svg>
+          <span class="menu-marker" aria-hidden="true"></span>
           <span class="pill-label">Settings</span>
         </button>
 
         <button class="menu-pill" type="button" @click="showGithub = true">
-          <svg class="pill-icon" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
-          </svg>
-          <span class="pill-label">GitHub Memories</span>
+          <span class="menu-marker" aria-hidden="true"></span>
+          <span class="pill-label">Winter Memories</span>
         </button>
 
         <button class="menu-pill" type="button" @click="showAbout = true">
-          <svg class="pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 16v-4"/>
-            <path d="M12 8h.01"/>
-          </svg>
+          <span class="menu-marker" aria-hidden="true"></span>
           <span class="pill-label">About</span>
         </button>
       </nav>
 
       <!-- Version & Hints -->
       <div class="menu-footer">
-        <span class="version-label">v0.1.0</span>
+        <span class="version-label">v1.4</span>
       </div>
     </div>
 
@@ -105,7 +96,6 @@ const showAbout = ref(false);
 </template>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 .main-menu-overlay {
   position: fixed;
@@ -114,21 +104,21 @@ const showAbout = ref(false);
   display: flex;
   pointer-events: none; /* Allows click-through to 3D canvas where needed */
   user-select: none;
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-  color: #f7eee2;
+  font-family: 'Zen Kaku Gothic New', system-ui, sans-serif;
+  color: #faf3e4;
 }
 
-/* Left Sidebar framing */
+/* Left Sidebar framing — warm field-note scrim over the live sunset */
 .menu-sidebar {
   pointer-events: auto;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   width: 100%;
-  max-width: 440px;
+  max-width: 460px;
   height: 100%;
-  padding: 42px 48px;
-  background: linear-gradient(90deg, rgba(16, 24, 22, 0.72) 0%, rgba(16, 24, 22, 0.45) 60%, rgba(16, 24, 22, 0) 100%);
+  padding: 40px 48px;
+  background: linear-gradient(90deg, rgba(28, 22, 19, 0.82) 0%, rgba(38, 28, 22, 0.58) 55%, rgba(38, 28, 22, 0) 100%);
   animation: fadeIn 0.8s ease-out;
 }
 
@@ -150,86 +140,97 @@ const showAbout = ref(false);
 }
 
 .game-title {
-  font-family: 'Caveat', cursive, sans-serif;
-  font-size: clamp(52px, 6vw, 68px);
-  font-weight: 700;
-  color: #ffffff;
-  line-height: 0.95;
-  margin: 0;
-  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.5);
-  letter-spacing: -0.5px;
+  font-family: Georgia, 'Shippori Mincho', serif;
+  font-size: clamp(54px, 6vw, 72px);
+  font-weight: 600;
+  color: #fbf3e3;
+  line-height: 1;
+  margin: 4px 0 0;
+  text-shadow: 0 3px 16px rgba(20, 12, 8, 0.55);
+  letter-spacing: 0.5px;
 }
 
 .game-tagline {
-  font-family: 'Caveat', cursive, sans-serif;
-  font-size: 21px;
-  color: #f4ebde;
-  margin: 6px 0 0;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+  font-family: Georgia, 'Shippori Mincho', serif;
+  font-size: 17px;
+  font-style: italic;
+  color: #f0dcc2;
+  margin: 10px 0 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
 
-/* Navigation List */
+/* Navigation Index */
 .menu-nav {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 4px;
   margin-top: auto;
   margin-bottom: auto;
-  padding: 18px 0;
-  max-width: 290px;
+  padding: 16px 0;
+  max-width: 300px;
 }
 
-/* Individual Pill Button */
+/* Field-note menu row */
 .menu-pill {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   width: 100%;
-  padding: 11px 20px;
-  border-radius: 9999px;
-  border: 1px solid rgba(247, 238, 226, 0.24);
-  background: rgba(22, 33, 29, 0.45);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: #f7eee2;
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-  font-size: 15.5px;
-  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #efe2ce;
+  font-family: 'Zen Kaku Gothic New', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
   text-align: left;
 }
 
 .menu-pill:hover {
-  background: rgba(38, 54, 48, 0.7);
-  border-color: rgba(247, 238, 226, 0.5);
+  background: rgba(255, 246, 226, 0.1);
   transform: translateX(4px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
 }
 
-/* Active Highlight Pill (e.g. Continue in Image 1) */
+.menu-marker {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(239, 226, 206, 0.7);
+  border-radius: 50%;
+}
+
+/* Amber brush-stroke selection */
 .menu-pill.active-pill {
-  background: #f7eee2;
-  border-color: #f7eee2;
-  color: #1e2824;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.38), 0 2px 8px rgba(247, 238, 226, 0.4);
+  background: rgba(214, 146, 62, 0.94);
+  color: #2b1d12;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+}
+
+.menu-pill.active-pill::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  width: 4px;
+  height: 22px;
+  border-radius: 2px;
+  background: #f0b85c;
+  transform: translateY(-50%);
+}
+
+.menu-pill.active-pill .menu-marker {
+  border-color: #3a2717;
+  background: #3a2717;
 }
 
 .menu-pill.active-pill:hover {
-  background: #ffffff;
-  transform: translateX(4px) scale(1.02);
-}
-
-.pill-icon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-}
-
-.play-icon {
-  font-size: 14px;
-  line-height: 1;
+  background: rgba(227, 160, 74, 0.98);
+  transform: translateX(4px);
 }
 
 .pill-label {
@@ -242,9 +243,10 @@ const showAbout = ref(false);
 }
 
 .version-label {
-  font-size: 13px;
-  color: rgba(247, 238, 226, 0.65);
+  font-size: 12px;
+  color: rgba(247, 238, 226, 0.6);
   font-weight: 500;
+  letter-spacing: 0.4px;
 }
 
 /* About Modal (Parchment Paper Aesthetic) */
@@ -271,9 +273,9 @@ const showAbout = ref(false);
 }
 
 .modal-title {
-  font-family: 'Caveat', cursive, sans-serif;
-  font-size: 34px;
-  font-weight: 700;
+  font-family: Georgia, 'Shippori Mincho', serif;
+  font-size: 28px;
+  font-weight: 600;
   margin: 0 0 14px;
   color: #1c1612;
 }

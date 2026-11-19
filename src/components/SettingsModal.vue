@@ -4,7 +4,7 @@ import { gameBridge } from '@/game/core/GameBridge';
 import { plainSettings, type GameSettings, type GraphicsQuality } from '@/types';
 
 const props = defineProps<{ settings: GameSettings; open: boolean }>();
-const emit = defineEmits<{ close: []; change: [settings: GameSettings] }>();
+const emit = defineEmits<{ close: []; change: [settings: GameSettings]; characterModel: [model: 'female' | 'male'] }>();
 
 const activeTab = ref<'graphics' | 'audio' | 'controls' | 'accessibility' | 'github'>('graphics');
 
@@ -28,6 +28,7 @@ function setQuality(q: GraphicsQuality) {
 
 function setCharacter(model: 'female' | 'male') {
   selectedCharacterModel.value = model;
+  emit('characterModel', model);
   gameBridge.emit({ type: 'setCharacterModel', model });
 }
 
@@ -128,7 +129,7 @@ function apply() {
               <path d="M4.24 14.5a5 5 0 0 0 6.88 6"/>
               <path d="M13.76 17.5a5 5 0 0 0-4-7.6"/>
             </svg>
-            <span>Accessibility</span>
+            <span>Gameplay</span>
           </button>
 
           <button
@@ -378,8 +379,6 @@ function apply() {
 </template>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap');
-
 .settings-backdrop {
   position: fixed;
   inset: 0;
@@ -391,7 +390,7 @@ function apply() {
   justify-content: center;
   z-index: 450;
   padding: 16px;
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-family: 'Zen Kaku Gothic New', system-ui, sans-serif;
   user-select: none;
 }
 
@@ -436,7 +435,7 @@ function apply() {
 }
 
 .header-title {
-  font-family: 'Caveat', cursive, sans-serif;
+  font-family: Georgia, 'Shippori Mincho', serif;
   font-size: 32px;
   font-weight: 700;
   color: #2b221a;
@@ -484,7 +483,7 @@ function apply() {
   border-radius: 12px;
   background: transparent;
   color: #554435;
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-family: 'Zen Kaku Gothic New', system-ui, sans-serif;
   font-size: 14.5px;
   font-weight: 600;
   cursor: pointer;
@@ -539,14 +538,14 @@ function apply() {
   gap: 6px;
   background: #ebdcc8;
   padding: 3px;
-  border-radius: 9999px;
+  border-radius: 8px;
   border: 1px solid #dac7ad;
 }
 
 .option-pill {
   padding: 5px 14px;
   border: none;
-  border-radius: 9999px;
+  border-radius: 8px;
   background: transparent;
   color: #5d4d3d;
   font-size: 13px;
@@ -645,7 +644,7 @@ input:checked + .switch-slider:before {
   border: 1px solid #d2be9f;
   background: #eadecd;
   color: #4b3d30;
-  border-radius: 9999px;
+  border-radius: 8px;
   font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
@@ -661,7 +660,7 @@ input:checked + .switch-slider:before {
   border: none;
   background: #5d8b58;
   color: #ffffff;
-  border-radius: 9999px;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
@@ -711,7 +710,7 @@ input:checked + .switch-slider:before {
 }
 
 .github-title {
-  font-family: 'Caveat', cursive, sans-serif;
+  font-family: Georgia, 'Shippori Mincho', serif;
   font-size: 26px;
   margin-bottom: 8px;
 }
