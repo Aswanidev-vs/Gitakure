@@ -45,7 +45,7 @@ export class CameraController {
   constructor(aspect: number, opts: CameraControllerOptions) {
     this.mode = opts.mode;
     this.followDistance = opts.followDistance;
-    this.focusHeight = opts.focusHeight ?? 1.4;
+    this.focusHeight = opts.focusHeight ?? 1.3;
     this.camera = new THREE.PerspectiveCamera(opts.fov, aspect, 0.1, 500);
     this.camera.position.copy(this.currentPos);
     this.camera.lookAt(this.currentTarget);
@@ -65,7 +65,7 @@ export class CameraController {
   }
 
   setFollowDistance(d: number): void {
-    this.followDistance = clamp(d, 2, 14);
+    this.followDistance = clamp(d, 2.4, 14);
   }
 
   setFov(fov: number): void {
@@ -95,13 +95,14 @@ export class CameraController {
 
   /** Mouse wheel (deltaY): zoom the follow distance in/out. */
   zoom(deltaY: number): void {
-    this.followDistance = clamp(this.followDistance + deltaY * 0.01, 2, 14);
+    this.followDistance = clamp(this.followDistance + deltaY * 0.01, 2.4, 14);
   }
 
   /** Third-person camera offset from the focus for the current yaw/zoom. */
   private thirdPersonOffset(): THREE.Vector3 {
     const behind = this.followDistance;
-    const height = this.followDistance * 0.55 + 1.5;
+    // Lower, closer to a human shoulder height than a top-down tactical view.
+    const height = this.followDistance * 0.18 + 0.9;
     const dist = Math.hypot(behind, height);
     const pitch = Math.atan2(height, behind) + this.pitchOffset;
     const cp = Math.cos(pitch);
@@ -125,22 +126,21 @@ export class CameraController {
     const focus = this.desiredTarget.set(target.x, target.y + this.focusHeight, target.z);
 
     if (this.mode === 'menu') {
-      // Cinematic menu vista: behind and to the left of the bench,
-      // framing the seated character & cat on the right while leaving
-      // the left open for the menu UI, looking toward the village bridge & sunset.
+      // Cinematic menu vista: close behind the seated character, with the
+      // village street, bridge and sunset layered beyond.
       const time = performance.now() * 0.0003;
-      const breatheX = Math.sin(time) * 0.25;
-      const breatheY = Math.cos(time * 0.7) * 0.12;
+      const breatheX = Math.sin(time) * 0.18;
+      const breatheY = Math.cos(time * 0.7) * 0.08;
 
       const menuCamPos = new THREE.Vector3(
-        target.x - 2.8 + breatheX,
-        target.y + 1.35 + breatheY,
-        target.z + 4.2,
+        target.x + 0.6 + breatheX,
+        target.y + 2.35 + breatheY,
+        target.z + 6.4,
       );
       const menuLookTarget = new THREE.Vector3(
-        target.x + 3.5,
-        target.y + 1.2,
-        target.z - 7.0,
+        target.x - 0.6,
+        target.y + 0.6,
+        target.z - 13.5,
       );
 
       this.currentPos.x = damp(this.currentPos.x, menuCamPos.x, 4, dt);
@@ -209,8 +209,8 @@ export class CameraController {
   snap(target: THREE.Vector3): void {
     const focus = this.desiredTarget.set(target.x, target.y + this.focusHeight, target.z);
     if (this.mode === 'menu') {
-      this.currentPos.set(target.x - 2.8, target.y + 1.35, target.z + 4.2);
-      this.currentTarget.set(target.x + 3.5, target.y + 1.2, target.z - 7.0);
+      this.currentPos.set(target.x + 0.6, target.y + 2.35, target.z + 6.4);
+      this.currentTarget.set(target.x - 0.6, target.y + 0.6, target.z - 13.5);
     } else if (this.mode === 'firstPerson') {
       this.currentPos.set(target.x, target.y + this.focusHeight + 0.4, target.z);
       this.currentTarget.set(

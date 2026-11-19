@@ -21,7 +21,7 @@ export class Renderer {
     });
     this.instance.setPixelRatio(Math.min(window.devicePixelRatio, settings.pixelRatioCap));
     this.instance.toneMapping = THREE.ACESFilmicToneMapping;
-    this.instance.toneMappingExposure = 1.05;
+    this.instance.toneMappingExposure = 0.94;
     this.instance.shadowMap.enabled = settings.shadows;
     this.instance.shadowMap.type = THREE.PCFSoftShadowMap;
 

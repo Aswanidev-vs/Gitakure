@@ -18,7 +18,7 @@ export function timeOfDayFromFraction(t: number): TimeOfDay {
 }
 
 export class TimeSystem {
-  time = 0.35; // start mid-morning
+  time = 0.725; // start at golden hour
   day = 1;
   private listener: ((time: number, day: number, phase: TimeOfDay) => void) | null = null;
 

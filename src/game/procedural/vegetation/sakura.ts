@@ -14,7 +14,7 @@ export interface SakuraParams {
 export const DEFAULT_SAKURA: SakuraParams = {
   height: 5.5,
   trunkThickness: 0.4,
-  canopyClusters: 8,
+  canopyClusters: 10,
   canopyRadius: 1.1,
   seed: 3,
 };
@@ -32,18 +32,25 @@ export function createSakura(p: Partial<SakuraParams> = {}): THREE.Group {
   const trunk = taperedCylinder(params.trunkThickness, params.trunkThickness * 0.7, params.height, 6);
   tree.add(new THREE.Mesh(trunk, MAT.barkDark()));
 
-  // Branches + canopy blobs clustered near the top
+  // Branches + canopy blobs clustered near the top. Layered pinks (deep
+  // underneath, pale on top) give the canopy volume instead of a flat blob.
   const crownY = params.height * 0.9;
+  const crown = blob(params.canopyRadius * 1.15, 0.72, 8);
+  transform(crown, { y: crownY + 0.35 });
+  tree.add(new THREE.Mesh(crown, MAT.leafSakura()));
+
   for (let i = 0; i < params.canopyClusters; i++) {
     const a = rng.range(0, Math.PI * 2);
     const r = rng.range(0.2, 1.4) * params.canopyRadius;
+    const dy = rng.range(-0.6, 1.2);
     const b = blob(params.canopyRadius * rng.range(0.6, 1.1), 0.7, 7);
     transform(b, {
       x: Math.cos(a) * r,
-      y: crownY + rng.range(-0.6, 1.2),
+      y: crownY + dy,
       z: Math.sin(a) * r,
     });
-    tree.add(new THREE.Mesh(b, MAT.leafSakura()));
+    const material = dy > 0.35 ? MAT.leafSakuraLight() : dy < -0.15 ? MAT.leafSakuraDeep() : MAT.leafSakura();
+    tree.add(new THREE.Mesh(b, material));
   }
 
   // A couple of visible branches

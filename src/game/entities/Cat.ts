@@ -1,13 +1,14 @@
 import * as THREE from 'three';
-import { box, blob, cone } from '@/game/procedural/geometry';
+import { blob, cone, taperedCylinder } from '@/game/procedural/geometry';
 
 /**
- * Companion Cat — a peaceful low-poly orange tabby cat that rests
- * beside the character on the bench or near the campfire.
+ * Companion Cat — a chubby low-poly orange tabby that rests beside the
+ * character on the bench. Built from rounded blobs so the silhouette reads as
+ * a cat from every angle instead of a stack of boxes.
  */
 export class Cat {
   readonly group: THREE.Group;
-  private tail: THREE.Mesh;
+  private tail: THREE.Group;
   private head: THREE.Group;
   private animTimer = 0;
 
@@ -15,108 +16,91 @@ export class Cat {
     this.group = new THREE.Group();
     this.group.name = 'companion-cat';
 
-    const orangeTabby = new THREE.MeshStandardMaterial({
-      color: 0xd97529,
-      roughness: 0.85,
-      flatShading: true,
-    });
-    const whiteFur = new THREE.MeshStandardMaterial({
-      color: 0xf5eedc,
-      roughness: 0.85,
-      flatShading: true,
-    });
-    const pinkEar = new THREE.MeshStandardMaterial({
-      color: 0xf49db0,
-      roughness: 0.85,
-      flatShading: true,
-    });
-    const darkEye = new THREE.MeshBasicMaterial({ color: 0x221a14 });
+    const orange = new THREE.MeshToonMaterial({ color: 0xe08b3c });
+    const orangeDark = new THREE.MeshToonMaterial({ color: 0xc46f28 });
+    const whiteFur = new THREE.MeshToonMaterial({ color: 0xf7efdd });
+    const pink = new THREE.MeshToonMaterial({ color: 0xf2a0ac });
+    const darkEye = new THREE.MeshBasicMaterial({ color: 0x241a14 });
 
-    // Torso / body (sitting upright posture)
-    const body = new THREE.Mesh(box(0.24, 0.32, 0.28), orangeTabby);
-    body.position.y = 0.22;
-    body.castShadow = true;
-    this.group.add(body);
+    const mesh = (g: THREE.BufferGeometry, m: THREE.Material, x = 0, y = 0, z = 0): THREE.Mesh => {
+      const out = new THREE.Mesh(g, m);
+      out.position.set(x, y, z);
+      out.castShadow = true;
+      return out;
+    };
 
-    // White chest bib
-    const chest = new THREE.Mesh(box(0.16, 0.22, 0.05), whiteFur);
-    chest.position.set(0, 0.2, 0.13);
-    this.group.add(chest);
+    // Folded haunches and upright chest.
+    const haunch = mesh(blob(0.16, 0.92, 10), orange, 0, 0.14, -0.02);
+    haunch.scale.set(1.1, 1, 1.25);
+    this.group.add(haunch);
+    this.group.add(mesh(blob(0.125, 1, 9), orange, 0, 0.29, 0.02));
+    this.group.add(mesh(blob(0.08, 0.9, 8), whiteFur, 0, 0.28, 0.1));
+    // Back stripes.
+    for (const y of [0.17, 0.25]) {
+      const stripe = mesh(blob(0.13, 0.3, 8), orangeDark, 0, y, -0.03);
+      stripe.scale.set(1.05, 0.5, 1.1);
+      this.group.add(stripe);
+    }
 
-    // Front paws (sitting)
+    // Front legs and white paws.
     for (const sx of [-0.07, 0.07]) {
-      const paw = new THREE.Mesh(box(0.06, 0.08, 0.12), whiteFur);
-      paw.position.set(sx, 0.04, 0.11);
-      paw.castShadow = true;
-      this.group.add(paw);
+      this.group.add(mesh(taperedCylinder(0.042, 0.035, 0.2, 7), orange, sx, 0.02, 0.1));
+      this.group.add(mesh(blob(0.042, 0.6, 7), whiteFur, sx, 0.04, 0.13));
     }
 
-    // Hind haunches (folded)
-    for (const sx of [-0.12, 0.12]) {
-      const haunch = new THREE.Mesh(box(0.08, 0.16, 0.18), orangeTabby);
-      haunch.position.set(sx, 0.1, -0.02);
-      this.group.add(haunch);
-    }
-
-    // Head Group
+    // Head.
     this.head = new THREE.Group();
-    this.head.position.set(0, 0.42, 0.04);
-
-    const headMesh = new THREE.Mesh(blob(0.12, 1, 7), orangeTabby);
-    headMesh.castShadow = true;
-    this.head.add(headMesh);
-
-    // White muzzle
-    const muzzle = new THREE.Mesh(box(0.09, 0.06, 0.06), whiteFur);
-    muzzle.position.set(0, -0.03, 0.1);
+    this.head.position.set(0, 0.43, 0.05);
+    this.head.add(mesh(blob(0.125, 0.95, 10), orange));
+    const muzzle = mesh(blob(0.062, 0.72, 8), whiteFur, 0, -0.035, 0.09);
+    muzzle.scale.set(1.15, 0.85, 0.9);
     this.head.add(muzzle);
-
-    // Eyes
-    for (const sx of [-0.05, 0.05]) {
-      const eye = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.02, 0.01), darkEye);
-      eye.position.set(sx, 0.02, 0.115);
+    this.head.add(mesh(blob(0.018, 0.8, 5), pink, 0, -0.015, 0.15));
+    for (const sx of [-0.045, 0.045]) {
+      const eye = mesh(blob(0.016, 0.9, 6), darkEye, sx, 0.02, 0.106);
       this.head.add(eye);
     }
-
-    // Ears
-    for (const sx of [-0.07, 0.07]) {
-      const earOuter = new THREE.Mesh(cone(0.05, 0.08, 3), orangeTabby);
-      earOuter.position.set(sx, 0.11, 0.01);
-      earOuter.rotation.z = sx > 0 ? -0.2 : 0.2;
-      this.head.add(earOuter);
-
-      const earInner = new THREE.Mesh(cone(0.03, 0.05, 3), pinkEar);
-      earInner.position.set(sx, 0.1, 0.025);
-      earInner.rotation.z = sx > 0 ? -0.2 : 0.2;
-      this.head.add(earInner);
+    // Ears: outer cone plus a pink inner cone.
+    for (const sx of [-1, 1]) {
+      const ear = mesh(cone(0.05, 0.085, 5), orange, sx * 0.078, 0.085, 0.0);
+      ear.rotation.z = sx * 0.28;
+      this.head.add(ear);
+      const inner = mesh(cone(0.028, 0.05, 5), pink, sx * 0.078, 0.093, 0.015);
+      inner.rotation.z = sx * 0.28;
+      this.head.add(inner);
     }
-
+    // Forehead stripes.
+    for (const sx of [-0.03, 0, 0.03]) {
+      const stripe = mesh(blob(0.012, 1, 4), orangeDark, sx, 0.1, 0.08);
+      stripe.scale.set(1, 1.6, 0.4);
+      this.head.add(stripe);
+    }
     this.group.add(this.head);
 
-    // Tail (slender curved box chain or single cylinder)
-    const tailGeo = box(0.04, 0.26, 0.04);
-    this.tail = new THREE.Mesh(tailGeo, orangeTabby);
-    this.tail.position.set(0, 0.15, -0.16);
-    this.tail.rotation.x = -0.5;
+    // Tail: a curled chain that sways.
+    this.tail = new THREE.Group();
+    this.tail.position.set(0.04, 0.16, -0.16);
+    const tailA = mesh(taperedCylinder(0.038, 0.034, 0.16, 6), orange, 0, 0, 0);
+    tailA.rotation.x = -0.5;
+    this.tail.add(tailA);
+    const tailB = mesh(taperedCylinder(0.034, 0.026, 0.15, 6), orange, 0, 0.02, -0.13);
+    tailB.rotation.x = -1.1;
+    this.tail.add(tailB);
+    const tip = mesh(blob(0.032, 1, 6), whiteFur, 0, 0.0, -0.27);
+    this.tail.add(tip);
     this.group.add(this.tail);
-
-    // White tail tip
-    const tailTip = new THREE.Mesh(box(0.042, 0.06, 0.042), whiteFur);
-    tailTip.position.y = 0.12;
-    this.tail.add(tailTip);
   }
 
   update(dt: number): void {
     this.animTimer += dt;
-    // Breathing bob
-    const breathe = Math.sin(this.animTimer * 2) * 0.008;
-    this.head.position.y = 0.42 + breathe;
+    const breathe = Math.sin(this.animTimer * 2) * 0.006;
+    this.head.position.y = 0.43 + breathe;
 
-    // Gentle tail twitch
-    const twitch = Math.sin(this.animTimer * 1.5) * 0.15 + Math.sin(this.animTimer * 4.5) * 0.08;
+    const twitch = Math.sin(this.animTimer * 1.3) * 0.22 + Math.sin(this.animTimer * 4.2) * 0.06;
     this.tail.rotation.z = twitch;
+    this.tail.rotation.x = Math.sin(this.animTimer * 0.7) * 0.05;
 
-    // Head occasional slow look
-    this.head.rotation.y = Math.sin(this.animTimer * 0.4) * 0.12;
+    this.head.rotation.y = Math.sin(this.animTimer * 0.35) * 0.16;
+    this.head.rotation.z = Math.sin(this.animTimer * 0.5) * 0.03;
   }
 }

@@ -15,6 +15,8 @@ const vertexShader = /* glsl */ `
     pos.y += sin(pos.x * 0.15 + uTime * 0.8) * 0.06
            + sin(pos.z * 0.2 + uTime * 1.1) * 0.05;
     vec4 world = modelMatrix * vec4(pos, 1.0);
+    // Follow the same winding channel the terrain carves (TerrainSystem.ts).
+    world.x += sin(world.z * 0.045) * 7.5;
     vWorldPos = world.xyz;
     gl_Position = projectionMatrix * viewMatrix * world;
   }
@@ -77,7 +79,7 @@ export class WaterSystem {
   private material: THREE.ShaderMaterial;
 
   constructor(width: number, length: number, y = -0.6) {
-    const geo = new THREE.PlaneGeometry(width, length, 1, 1);
+    const geo = new THREE.PlaneGeometry(width, length, 1, 96);
     geo.rotateX(-Math.PI / 2);
 
     this.material = new THREE.ShaderMaterial({

@@ -1,16 +1,19 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed } from 'vue'
+import CharacterPortrait from './CharacterPortrait.vue'
+import ItemGlyph, { type InventoryIcon } from './ItemGlyph.vue'
 
 const props = defineProps<{
   fps: number;
   drawCalls: number;
   timeOfDay: number;
+  day: number;
   season: string;
   weather: string;
   cameraMode: string;
   prompt: string | null;
   characterGender: 'female' | 'male';
-}>();
+}>()
 
 const emit = defineEmits<{
   toggleCamera: [];
@@ -19,243 +22,184 @@ const emit = defineEmits<{
   openInventory: [];
   openMap: [];
   returnToMenu: [];
-}>();
+}>()
 
-// Formats 0..1 day fraction to 12-hour clock (e.g. 5:42 PM)
 const formattedTime = computed(() => {
-  const totalMinutes = Math.floor(props.timeOfDay * 24 * 60);
-  let hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12;
-  if (hours === 0) hours = 12;
-  const padMin = minutes < 10 ? `0${minutes}` : `${minutes}`;
-  return `${hours}:${padMin} ${ampm}`;
-});
+  const totalMinutes = Math.floor(props.timeOfDay * 24 * 60)
+  let hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  const ampm = hours >= 12 ? 'PM' : 'AM'
+  hours = hours % 12
+  if (hours === 0) hours = 12
+  return `${hours}:${minutes < 10 ? `0${minutes}` : minutes} ${ampm}`
+})
 
-const timeIcon = computed(() => {
-  const t = props.timeOfDay;
-  if (t >= 0.25 && t < 0.7) return '☀️';
-  if (t >= 0.7 && t < 0.82) return '🌅';
-  return '🌙';
-});
+const isDay = computed(() => props.timeOfDay >= 0.25 && props.timeOfDay < 0.7)
+const isDusk = computed(() => props.timeOfDay >= 0.7 && props.timeOfDay < 0.82)
 
-const seasonLabel = computed(() => {
-  const s = props.season;
-  return s.charAt(0).toUpperCase() + s.slice(1);
-});
+const seasonLabel = computed(() => props.season.charAt(0).toUpperCase() + props.season.slice(1))
 
 const weatherLabel = computed(() => {
-  const w = props.weather;
-  if (w === 'clear') return 'Clear';
-  if (w === 'lightRain' || w === 'heavyRain') return 'Rain';
-  if (w === 'mist') return 'Mist';
-  return 'Cloudy';
-});
+  const w = props.weather
+  if (w === 'clear') return 'Sunny Day'
+  if (w === 'lightRain' || w === 'heavyRain') return 'Rainy Day'
+  if (w === 'mist') return 'Misty'
+  return 'Cloudy'
+})
+
+const hotbar: { kind: InventoryIcon; label: string }[] = [
+  { kind: 'wood', label: 'Firewood' },
+  { kind: 'lantern', label: 'Lantern' },
+  { kind: 'flower', label: 'Blossom' },
+  { kind: 'pickaxe', label: 'Pickaxe' },
+]
 </script>
 
 <template>
   <div class="gameplay-hud-root">
-    <!-- ── 1. Top Left: Player Status Portrait & Vitals ───── -->
+    <!-- 1. Top left: portrait + vitals -->
     <div class="player-status-card">
-      <!-- Circular Avatar Frame -->
       <div class="avatar-circle">
-        <!-- SVG Character Portrait matching Image 5 & 6 -->
-        <svg v-if="characterGender === 'female'" class="avatar-art" viewBox="0 0 80 80" fill="none">
-          <circle cx="40" cy="40" r="38" fill="#fce4c8"/>
-          <!-- Hair & Ponytail -->
-          <circle cx="40" cy="38" r="28" fill="#2e2320"/>
-          <ellipse cx="60" cy="32" rx="12" ry="16" fill="#2e2320"/>
-          <!-- Face -->
-          <circle cx="38" cy="42" r="20" fill="#fce4c8"/>
-          <!-- Cheeks -->
-          <circle cx="30" cy="48" r="4" fill="#f87171" opacity="0.4"/>
-          <circle cx="46" cy="48" r="4" fill="#f87171" opacity="0.4"/>
-          <!-- Eyes -->
-          <circle cx="32" cy="42" r="3" fill="#271f1b"/>
-          <circle cx="44" cy="42" r="3" fill="#271f1b"/>
-          <!-- Smile -->
-          <path d="M36 50 Q38 53 40 50" stroke="#b91c1c" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-          <!-- Sakura Clip -->
-          <circle cx="54" cy="24" r="5" fill="#f472b6"/>
-          <circle cx="54" cy="24" r="2" fill="#fde047"/>
-        </svg>
-
-        <svg v-else class="avatar-art" viewBox="0 0 80 80" fill="none">
-          <circle cx="40" cy="40" r="38" fill="#fce4c8"/>
-          <!-- Spiky Hair -->
-          <circle cx="40" cy="36" r="28" fill="#201c1c"/>
-          <polygon points="20,24 30,12 36,26" fill="#201c1c"/>
-          <polygon points="36,12 44,8 48,22" fill="#201c1c"/>
-          <polygon points="46,12 56,16 54,28" fill="#201c1c"/>
-          <!-- Face -->
-          <circle cx="40" cy="44" r="21" fill="#fce4c8"/>
-          <!-- Eyes -->
-          <circle cx="34" cy="43" r="3.2" fill="#201c1c"/>
-          <circle cx="46" cy="43" r="3.2" fill="#201c1c"/>
-          <!-- Smile -->
-          <path d="M37 51 Q40 54 43 51" stroke="#372f2a" stroke-width="2" fill="none" stroke-linecap="round"/>
-        </svg>
-
+        <CharacterPortrait :kind="characterGender === 'female' ? 'mika' : 'traveler'" class="avatar-art" />
         <div class="level-badge">Lv. 1</div>
       </div>
-
-      <!-- Health & Stamina Bars (Image 5 & 6) -->
       <div class="vitals-column">
-        <!-- Health Bar -->
-        <div class="vital-bar-track hp-track">
-          <div class="vital-bar-fill hp-fill" style="width: 100%;"></div>
+        <div class="vital-row">
+          <span class="vital-mark hp-mark" aria-hidden="true"></span>
+          <div class="vital-bar-track"><div class="vital-bar-fill hp-fill" style="width: 100%;"></div></div>
         </div>
-        <!-- Stamina Bar -->
-        <div class="vital-bar-track sp-track">
-          <div class="vital-bar-fill sp-fill" style="width: 85%;"></div>
+        <div class="vital-row">
+          <span class="vital-mark sp-mark" aria-hidden="true"></span>
+          <div class="vital-bar-track"><div class="vital-bar-fill sp-fill" style="width: 85%;"></div></div>
         </div>
       </div>
     </div>
 
-    <!-- ── 2. Top Right: Time, Season & Circular Minimap ─── -->
+    <!-- 2. Top right: clock, weather, compass -->
     <div class="top-right-group">
-      <!-- Time & Weather Widget (Image 6 & 7) -->
       <div class="time-weather-box">
-        <span class="time-sun-icon">{{ timeIcon }}</span>
+        <svg v-if="isDay" class="time-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.2" fill="#f2c25c" />
+          <g stroke="#f2c25c" stroke-width="1.6" stroke-linecap="round">
+            <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8" />
+          </g>
+        </svg>
+        <svg v-else-if="isDusk" class="time-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 17h18" stroke="#e9a45a" stroke-width="1.8" stroke-linecap="round" />
+          <path d="M6 17a6 6 0 0 1 12 0" fill="#e9a45a" opacity="0.8" />
+          <path d="M12 4v2M4.5 8l1.6 1.4M19.5 8l-1.6 1.4" stroke="#e9a45a" stroke-width="1.5" stroke-linecap="round" />
+        </svg>
+        <svg v-else class="time-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M20 14.5A8 8 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5Z" fill="#cfd8e8" />
+        </svg>
         <div class="time-details">
           <span class="clock-text">{{ formattedTime }}</span>
-          <span class="season-text">🌸 {{ seasonLabel }} • {{ weatherLabel }}</span>
+          <span class="weather-text">{{ weatherLabel }} · {{ seasonLabel }}</span>
+          <span class="day-text">Day {{ day }}</span>
         </div>
       </div>
 
-      <!-- Circular Minimap (Image 5, 6, 7) -->
-      <div class="circular-minimap" @click="emit('openMap')">
-        <!-- Minimap Compass N -->
-        <span class="compass-n">N</span>
+      <!-- Circular compass minimap -->
+      <div class="circular-minimap" title="Open world map" @click="emit('openMap')">
+        <span class="compass compass-n">N</span>
+        <span class="compass compass-e">E</span>
+        <span class="compass compass-s">S</span>
+        <span class="compass compass-w">W</span>
         <svg class="minimap-svg" viewBox="0 0 100 100">
-          <!-- Green meadow terrain -->
-          <circle cx="50" cy="50" r="48" fill="#7ba368"/>
-          <!-- Winding River -->
-          <path d="M 0 35 Q 30 55 50 48 T 100 65" stroke="#5b92b6" stroke-width="14" fill="none"/>
-          <!-- Paths -->
-          <path d="M 50 10 L 50 90" stroke="#d5be9b" stroke-width="5" stroke-dasharray="3 3"/>
-          <path d="M 10 50 L 90 50" stroke="#d5be9b" stroke-width="5" stroke-dasharray="3 3"/>
-          <!-- Trees -->
-          <circle cx="28" cy="24" r="5" fill="#3b6933"/>
-          <circle cx="72" cy="28" r="6" fill="#f472b6" opacity="0.9"/>
-          <circle cx="25" cy="74" r="6" fill="#2d5828"/>
-          <!-- Village cottage dots -->
-          <rect x="62" y="60" width="10" height="9" rx="2" fill="#5c4431"/>
-          <!-- Bridge icon -->
-          <rect x="44" y="44" width="12" height="6" fill="#8c6442"/>
-          <!-- Player center pin -->
-          <circle cx="50" cy="50" r="5" fill="#ffffff" stroke="#e11d48" stroke-width="2.5"/>
-          <polygon points="50,40 46,47 54,47" fill="#e11d48"/>
+          <circle cx="50" cy="50" r="48" fill="#8aa870" />
+          <path d="M0 34 Q30 54 50 47 T100 64" stroke="#6b9fb8" stroke-width="13" fill="none" />
+          <path d="M50 8 L50 92" stroke="#dcc6a2" stroke-width="4" stroke-dasharray="3 3" />
+          <path d="M12 50 L88 50" stroke="#dcc6a2" stroke-width="4" stroke-dasharray="3 3" />
+          <circle cx="28" cy="24" r="5" fill="#4a7a42" />
+          <circle cx="72" cy="27" r="6" fill="#f2aac4" />
+          <circle cx="24" cy="74" r="6" fill="#3d6c36" />
+          <rect x="61" y="60" width="10" height="9" rx="2" fill="#6b4c34" />
+          <rect x="44" y="44" width="12" height="6" fill="#9a724c" />
+          <circle cx="50" cy="50" r="5" fill="#fffaf0" stroke="#b75e4b" stroke-width="2.5" />
+          <polygon points="50,40 46,47 54,47" fill="#b75e4b" />
         </svg>
-      </div>
-
-      <!-- Objective Card (Image 6) -->
-      <div class="objective-card">
-        <span class="objective-title">🌸 A Peaceful Day</span>
-        <span class="objective-desc">✦ Just enjoy the world...</span>
       </div>
     </div>
 
-    <!-- ── 3. Bottom Center: Interaction Prompt ──────────── -->
+    <!-- 3. Bottom left: interaction prompt -->
     <div v-if="prompt" class="interaction-bubble">
-      <kbd class="key-badge">E</kbd>
+      <kbd class="key-badge">F</kbd>
       <span class="prompt-text">{{ prompt }}</span>
     </div>
 
-    <!-- ── 4. Bottom Right: Quick Item Hotbar & Navigation Buttons ── -->
-    <div class="bottom-right-container">
-      <!-- Hotbar (Image 5) -->
-      <div class="hotbar-tray">
-        <div class="hotbar-slot active">
-          <span class="hotbar-icon">🪵</span>
-          <span class="slot-num">1</span>
-        </div>
-        <div class="hotbar-slot">
-          <span class="hotbar-icon">🏮</span>
-          <span class="slot-num">2</span>
-        </div>
-        <div class="hotbar-slot">
-          <span class="hotbar-icon">🌸</span>
-          <span class="slot-num">3</span>
-        </div>
-        <div class="hotbar-slot">
-          <span class="hotbar-icon">⛏️</span>
-          <span class="slot-num">4</span>
-        </div>
-      </div>
-
-      <!-- Quick Action Pills (Backpack / Map / Menu) -->
-      <div class="quick-action-pills">
-        <button class="circle-btn" type="button" title="Inventory (Tab)" @click="emit('openInventory')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
-            <path d="M3 6h18"/>
-            <path d="M16 10a4 4 0 0 1-8 0"/>
-          </svg>
-        </button>
-
-        <button class="circle-btn" type="button" title="World Map (M)" @click="emit('openMap')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
-            <line x1="9" x2="9" y1="3" y2="18"/>
-            <line x1="15" x2="15" y1="6" y2="21"/>
-          </svg>
-        </button>
-
-        <button class="circle-btn" type="button" title="Settings (Esc)" @click="emit('openSettings')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="4" x2="20" y1="12" y2="12"/>
-            <line x1="4" x2="20" y1="6" y2="6"/>
-            <line x1="4" x2="20" y1="18" y2="18"/>
-          </svg>
-        </button>
+    <!-- 4. Bottom center: hotbar -->
+    <div class="hotbar-tray">
+      <div
+        v-for="(slot, index) in hotbar"
+        :key="slot.kind"
+        :class="['hotbar-slot', { active: index === 0 }]"
+        :title="slot.label"
+      >
+        <ItemGlyph :kind="slot.kind" class="hotbar-icon" />
+        <span class="slot-num">{{ index + 1 }}</span>
       </div>
     </div>
 
-    <!-- ── 5. Bottom Left: Control Hints ─────────────────── -->
-    <div class="bottom-control-hints">
-      <div class="hint-chip"><kbd>Drag</kbd> Look</div>
-      <div class="hint-chip"><kbd>Scroll</kbd> Zoom</div>
-      <div class="hint-chip"><kbd>E</kbd> Interact</div>
-      <div class="hint-chip" @click="emit('openInventory')"><kbd>Tab</kbd> Inventory</div>
-      <div class="hint-chip" @click="emit('openMap')"><kbd>M</kbd> Map</div>
-      <div class="hint-chip" @click="emit('toggleCamera')"><kbd>V</kbd> Camera</div>
-      <div class="hint-chip" @click="emit('returnToMenu')"><kbd>Esc</kbd> Menu</div>
+    <!-- 5. Bottom right: navigation actions -->
+    <div class="quick-actions">
+      <button class="action-btn" type="button" title="World Map (M)" @click="emit('openMap')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9" />
+          <path d="m15 9-2 4-4 2 2-4 4-2Z" />
+        </svg>
+        <span>Journal</span>
+      </button>
+      <button class="action-btn" type="button" title="Inventory (Tab)" @click="emit('openInventory')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 8h14l-1 12H6L5 8Z" />
+          <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+        </svg>
+        <span>Inventory</span>
+      </button>
+      <button class="action-btn" type="button" title="Settings (Esc)" @click="emit('openSettings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+        <span>Menu</span>
+      </button>
     </div>
   </div>
 </template>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap');
-
 .gameplay-hud-root {
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 50;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 20px 24px;
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-family: 'Zen Kaku Gothic New', system-ui, sans-serif;
+  color: #f8edda;
   user-select: none;
 }
 
-/* 1. Player Status Portrait & Vitals */
+/* Shared warm, contrast-safe chip */
+.player-status-card,
+.time-weather-box,
+.interaction-bubble,
+.hotbar-tray,
+.action-btn {
+  background: rgba(32, 24, 19, 0.78);
+  border: 1px solid rgba(246, 232, 208, 0.26);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 244, 222, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
 .player-status-card {
   pointer-events: auto;
+  position: absolute;
+  top: 20px;
+  left: 24px;
   display: flex;
   align-items: center;
-  gap: 14px;
-  background: rgba(22, 33, 29, 0.65);
-  border: 1.5px solid rgba(255, 255, 255, 0.2);
-  border-radius: 9999px;
-  padding: 6px 18px 6px 6px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  width: fit-content;
+  gap: 12px;
+  border-radius: 12px;
+  padding: 7px 16px 7px 7px;
 }
 
 .avatar-circle {
@@ -264,58 +208,66 @@ const weatherLabel = computed(() => {
   height: 52px;
   border-radius: 50%;
   border: 2px solid #ecdcc8;
-  overflow: visible;
+  overflow: hidden;
+  background: #efd9bb;
+  flex-shrink: 0;
 }
 
 .avatar-art {
   width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  display: block;
-  background: #fce4c8;
+  height: 148%;
+  transform: translateY(-16%);
 }
 
 .level-badge {
   position: absolute;
-  bottom: -4px;
-  right: -4px;
-  background: #2e3b34;
-  border: 1.5px solid #ecdcc8;
-  color: #ffffff;
-  font-size: 10.5px;
+  bottom: 0;
+  right: -2px;
+  background: #3b2c20;
+  border: 1px solid #ecdcc8;
+  color: #fbf1df;
+  font-size: 10px;
   font-weight: 700;
-  border-radius: 9999px;
-  padding: 1px 6px;
+  border-radius: 6px;
+  padding: 1px 5px;
 }
 
 .vitals-column {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  width: 110px;
+  gap: 7px;
+  width: 116px;
 }
+
+.vital-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.vital-mark {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.hp-mark { background: #7baa70; }
+.sp-mark { background: #d6923e; }
 
 .vital-bar-track {
-  height: 9px;
-  background: rgba(0, 0, 0, 0.45);
-  border-radius: 6px;
+  flex: 1;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 5px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-.hp-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #4ade80, #22c55e);
-  box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
-}
+.hp-fill, .sp-fill { height: 100%; }
+.hp-fill { background: #6f9a6a; }
+.sp-fill { background: #d6923e; }
 
-.sp-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #60a5fa, #3b82f6);
-  box-shadow: 0 0 8px rgba(96, 165, 250, 0.6);
-}
-
-/* 2. Top Right: Time, Minimap, Quest */
 .top-right-group {
   position: absolute;
   top: 20px;
@@ -331,265 +283,176 @@ const weatherLabel = computed(() => {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(22, 33, 29, 0.72);
-  border: 1.5px solid rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  padding: 8px 16px;
-  backdrop-filter: blur(10px);
-  color: #ffffff;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  padding: 8px 14px;
 }
 
-.time-sun-icon {
-  font-size: 24px;
-  line-height: 1;
+.time-icon {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
 }
 
-.time-details {
-  display: flex;
-  flex-direction: column;
-}
+.time-details { display: flex; flex-direction: column; }
 
 .clock-text {
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
   letter-spacing: 0.3px;
 }
 
-.season-text {
-  font-size: 11.5px;
-  color: #d1fae5;
-  font-weight: 500;
+.weather-text {
+  font-size: 11px;
+  color: #d7c3a2;
+  margin-top: 2px;
 }
 
-/* Minimap */
+.day-text {
+  font-size: 10.5px;
+  color: #d6923e;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin-top: 1px;
+}
+
 .circular-minimap {
   position: relative;
-  width: 90px;
-  height: 90px;
+  width: 92px;
+  height: 92px;
   border-radius: 50%;
-  border: 3px solid #f6eee3;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  border: 3px solid #f2e7d2;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
   cursor: pointer;
   overflow: hidden;
   transition: transform 0.2s ease;
 }
 
-.circular-minimap:hover {
-  transform: scale(1.06);
-}
+.circular-minimap:hover { transform: scale(1.05); }
 
-.compass-n {
+.compass {
   position: absolute;
-  top: 4px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 10.5px;
-  font-weight: 800;
-  color: #ffffff;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
   z-index: 2;
-}
-
-.minimap-svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-/* Objective Card (Image 6) */
-.objective-card {
-  background: rgba(22, 33, 29, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 12px;
-  padding: 8px 14px;
-  backdrop-filter: blur(8px);
-  display: flex;
-  flex-direction: column;
-  text-align: right;
-  color: #ffffff;
-}
-
-.objective-title {
-  font-size: 13px;
+  font-size: 9px;
   font-weight: 700;
-  color: #fce7f3;
+  color: #fffaf0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
 }
 
-.objective-desc {
-  font-size: 11.5px;
-  color: #d1d5db;
-  font-style: italic;
-}
+.compass-n { top: 3px; left: 50%; transform: translateX(-50%); }
+.compass-s { bottom: 3px; left: 50%; transform: translateX(-50%); }
+.compass-e { right: 4px; top: 50%; transform: translateY(-50%); }
+.compass-w { left: 4px; top: 50%; transform: translateY(-50%); }
 
-/* 3. Interaction Prompt */
+.minimap-svg { width: 100%; height: 100%; display: block; }
+
 .interaction-bubble {
+  pointer-events: auto;
   position: absolute;
-  left: 50%;
-  bottom: 32px;
-  transform: translateX(-50%);
-  background: rgba(18, 28, 25, 0.85);
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
-  border-radius: 9999px;
-  padding: 8px 20px;
+  left: 24px;
+  bottom: 24px;
   display: flex;
   align-items: center;
   gap: 10px;
-  backdrop-filter: blur(10px);
-  color: #ffffff;
-  font-size: 14.5px;
-  font-weight: 600;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  animation: pulseBubble 2s infinite ease-in-out;
-}
-
-@keyframes pulseBubble {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
-  50% { transform: translateX(-50%) translateY(-3px); }
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .key-badge {
   background: #f7eee2;
-  color: #172328;
-  font-weight: 800;
+  color: #2b211a;
+  font-weight: 700;
   font-size: 12px;
-  border-radius: 6px;
+  border-radius: 5px;
   padding: 2px 7px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-}
-
-/* 4. Bottom Right Hotbar & Quick Actions */
-.bottom-right-container {
-  position: absolute;
-  right: 24px;
-  bottom: 24px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  pointer-events: auto;
+  font-family: inherit;
 }
 
 .hotbar-tray {
+  pointer-events: auto;
+  position: absolute;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
   display: flex;
   gap: 8px;
-  background: rgba(22, 33, 29, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 16px;
-  padding: 6px 8px;
-  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  padding: 6px;
 }
 
 .hotbar-slot {
   position: relative;
   width: 44px;
   height: 44px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 248, 232, 0.08);
+  border: 1px solid rgba(246, 232, 208, 0.22);
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
+  color: #f0dcbb;
+  transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
 }
 
-.hotbar-slot:hover, .hotbar-slot.active {
-  background: rgba(255, 255, 255, 0.22);
-  border-color: #f7eee2;
+.hotbar-slot:hover,
+.hotbar-slot.active {
+  background: rgba(214, 146, 62, 0.32);
+  border-color: #d6923e;
   transform: translateY(-2px);
+  color: #fff2d9;
 }
 
-.hotbar-icon {
-  font-size: 20px;
-}
+.hotbar-icon { width: 24px; height: 24px; }
 
 .slot-num {
   position: absolute;
-  bottom: 2px;
+  bottom: 1px;
   right: 4px;
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(248, 237, 218, 0.7);
+  font-variant-numeric: tabular-nums;
 }
 
-.quick-action-pills {
-  display: flex;
-  gap: 8px;
-}
-
-.circle-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: rgba(22, 33, 29, 0.75);
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
-  color: #f7eee2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
-  transition: all 0.2s;
-}
-
-.circle-btn:hover {
-  background: rgba(38, 54, 48, 0.9);
-  border-color: #ffffff;
-  transform: translateY(-2px);
-}
-
-.circle-btn svg {
-  width: 20px;
-  height: 20px;
-}
-
-/* 5. Bottom Left Control Hints */
-.bottom-control-hints {
-  position: absolute;
-  left: 24px;
-  bottom: 24px;
-  display: flex;
-  gap: 8px;
+.quick-actions {
   pointer-events: auto;
-  flex-wrap: wrap;
+  position: absolute;
+  right: 24px;
+  bottom: 20px;
+  display: flex;
+  gap: 8px;
 }
 
-.hint-chip {
+.action-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(22, 33, 29, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 8px;
-  padding: 4px 10px;
+  padding: 9px 11px;
+  color: #f4e7d2;
+  font-family: inherit;
   font-size: 12px;
-  color: #e5e7eb;
+  font-weight: 500;
   cursor: pointer;
-  backdrop-filter: blur(6px);
-  transition: background 0.2s;
+  transition: background-color 0.18s ease, color 0.18s ease;
 }
 
-.hint-chip:hover {
-  background: rgba(38, 54, 48, 0.85);
+.action-btn:hover {
+  background: rgba(60, 44, 33, 0.92);
+  color: #fff6e6;
 }
 
-.hint-chip kbd {
-  background: #ffffff;
-  color: #172328;
-  font-weight: 700;
-  font-size: 10px;
-  border-radius: 4px;
-  padding: 1px 5px;
-}
+.action-btn svg { width: 16px; height: 16px; }
 
 @media (max-width: 768px) {
-  .top-right-group {
-    scale: 0.85;
-    transform-origin: top right;
-  }
-  .hotbar-tray {
-    display: none;
-  }
+  .player-status-card { top: 12px; left: 12px; }
+  .top-right-group { top: 12px; right: 12px; transform: scale(0.86); transform-origin: top right; }
+  .hotbar-tray { bottom: 12px; padding: 4px; }
+  .hotbar-slot { width: 38px; height: 38px; }
+  .quick-actions { right: 12px; bottom: 12px; }
+  .action-btn span { display: none; }
+  .action-btn { padding: 10px; }
 }
 </style>

@@ -3,6 +3,22 @@
   --gk-bg: #0f1a17;
   --gk-fg: #e8f0ea;
   --gk-accent: #8fb3a0;
+
+  /* Storybook field-note palette (DESIGN.md §3) */
+  --n-950: #1b211d;
+  --n-800: #30382f;
+  --n-600: #5e665a;
+  --n-400: #959689;
+  --n-200: #d8d2bd;
+  --n-100: #eee7d2;
+  --n-50: #faf6e9;
+  --accent-primary: #d6923e;
+  --accent-secondary: #5d7f67;
+  --parchment: #f6eee2;
+  --parchment-border: #dfcfb8;
+  --ink: #2b211a;
+  --font-display: Georgia, 'Shippori Mincho', serif;
+  --font-body: 'Zen Kaku Gothic New', 'Noto Sans', system-ui, sans-serif;
 }
 
 * {

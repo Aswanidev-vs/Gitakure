@@ -1,7 +1,29 @@
 import * as THREE from 'three';
 import { box, taperedCylinder, blob, cone } from '@/game/procedural/geometry';
 import { Rng } from '@/utils/rng';
-import { createAnimeFaceTexture } from './CharacterFactory';
+import { createAnimeFaceTexture, createFaceCap } from './CharacterFactory';
+import { createContactShadow } from './contactShadow';
+
+const toon = (color: number) => new THREE.MeshToonMaterial({ color });
+
+function part(
+  parent: THREE.Object3D,
+  geometry: THREE.BufferGeometry,
+  material: THREE.Material,
+  x = 0,
+  y = 0,
+  z = 0,
+  rx = 0,
+  ry = 0,
+  rz = 0,
+): THREE.Mesh {
+  const m = new THREE.Mesh(geometry, material);
+  m.position.set(x, y, z);
+  m.rotation.set(rx, ry, rz);
+  m.castShadow = true;
+  parent.add(m);
+  return m;
+}
 
 export type NPCRole = 'elder-man' | 'elder-woman' | 'child' | 'maiden' | 'farmer';
 
@@ -46,6 +68,7 @@ export class NPC {
     this.rng = new Rng(params.seed);
     this.group = new THREE.Group();
     this.group.name = `npc-${params.name}`;
+    this.group.add(createContactShadow(0.95, 0.42));
 
     const skinMat = new THREE.MeshToonMaterial({ color: 0xfce4c8 });
 
@@ -65,180 +88,146 @@ export class NPC {
   private buildRoleRig(role: NPCRole, skinMat: THREE.Material) {
     const torso = new THREE.Group();
     torso.position.y = 1.0;
-
     const head = new THREE.Group();
     head.position.y = 1.55;
-
     const armL = new THREE.Group();
-    armL.position.set(-0.3, 1.35, 0);
-
+    armL.position.set(-0.3, 1.34, 0);
     const armR = new THREE.Group();
-    armR.position.set(0.3, 1.35, 0);
-
+    armR.position.set(0.3, 1.34, 0);
     const legL = new THREE.Group();
-    legL.position.set(-0.14, 0.65, 0);
-
+    legL.position.set(-0.14, 0.66, 0);
     const legR = new THREE.Group();
-    legR.position.set(0.14, 0.65, 0);
+    legR.position.set(0.14, 0.66, 0);
 
-    // Common head base
-    const headMesh = new THREE.Mesh(blob(0.22, 1, 8), skinMat);
-    headMesh.castShadow = true;
-    head.add(headMesh);
-
-    // Expressive Anime Face Texture Quad (Image 4 & 8)
+    // Rounded head with a curved face patch that wraps the front (never seen
+    // floating off the head from behind like a billboard).
+    part(head, blob(0.26, 1, 12), skinMat);
     const isFemaleRole = role === 'elder-woman' || role === 'maiden';
     const { texture: faceTex } = createAnimeFaceTexture(
       isFemaleRole ? 'female' : 'male',
       role === 'maiden' ? 'happy' : 'smile',
+      '#fce4c8',
     );
-    const faceMat = new THREE.MeshToonMaterial({ map: faceTex });
-    const faceQuad = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 0.28), faceMat);
-    faceQuad.position.set(0, 0.02, 0.18);
-    head.add(faceQuad);
+    const face = new THREE.Mesh(createFaceCap(0.266), new THREE.MeshToonMaterial({ map: faceTex }));
+    face.castShadow = true;
+    head.add(face);
 
-    // Role-specific attire & accessories
+    const hairDark = toon(0x2a2220);
+    const sandal = toon(0x55402d);
+    const feet = (groupL: THREE.Group, groupR: THREE.Group, y = -0.64) => {
+      for (const g of [groupL, groupR]) {
+        part(g, box(0.11, 0.035, 0.2), sandal, 0, y, 0.04);
+        part(g, box(0.115, 0.018, 0.05), sandal, 0, y + 0.04, 0.09);
+      }
+    };
+
     if (role === 'elder-man') {
-      // 1. Elder Grandfather: tan kimono, blue sash, white beard & hair
-      const tanKimono = new THREE.MeshToonMaterial({ color: 0x8a6f4d });
-      const blueObi = new THREE.MeshToonMaterial({ color: 0x2e6094 });
-      const darkPants = new THREE.MeshToonMaterial({ color: 0x333130 });
-      const whiteHairMat = new THREE.MeshToonMaterial({ color: 0xeae6df });
-
-      // Torso & Robe
-      const torsoMesh = new THREE.Mesh(box(0.5, 0.65, 0.3), tanKimono);
-      torso.add(torsoMesh);
-      const obiMesh = new THREE.Mesh(box(0.52, 0.16, 0.32), blueObi);
-      obiMesh.position.y = -0.15;
-      torso.add(obiMesh);
-
-      // White hair + Beard
-      const hair = new THREE.Mesh(blob(0.23, 0.6, 7), whiteHairMat);
-      hair.position.set(0, 0.1, -0.02);
-      head.add(hair);
-      const beard = new THREE.Mesh(blob(0.14, 0.8, 6), whiteHairMat);
-      beard.position.set(0, -0.12, 0.14);
-      head.add(beard);
-
-      // Sleeves & legs
-      armL.add(new THREE.Mesh(taperedCylinder(0.1, 0.08, 0.55, 5), tanKimono));
-      armR.add(new THREE.Mesh(taperedCylinder(0.1, 0.08, 0.55, 5), tanKimono));
-      legL.add(new THREE.Mesh(taperedCylinder(0.11, 0.08, 0.7, 5), darkPants));
-      legR.add(new THREE.Mesh(taperedCylinder(0.11, 0.08, 0.7, 5), darkPants));
-
+      // Dark tan kimono, indigo obi, white hair and long beard.
+      const kimono = toon(0x7d6447);
+      const obi = toon(0x335f8a);
+      const pants = toon(0x34302c);
+      const white = toon(0xe8e4dc);
+      part(torso, taperedCylinder(0.23, 0.27, 0.5, 10), kimono, 0, -0.18);
+      part(torso, taperedCylinder(0.245, 0.245, 0.16, 10), obi, 0, -0.2);
+      part(torso, box(0.09, 0.26, 0.035), white, -0.07, 0.13, 0.235, 0, 0, -0.5);
+      part(torso, box(0.09, 0.26, 0.035), white, 0.07, 0.13, 0.245, 0, 0, 0.5);
+      part(head, blob(0.27, 0.7, 10), white, 0, 0.11, -0.04);
+      part(head, blob(0.17, 0.85, 9), white, 0, -0.06, -0.11);
+      part(head, blob(0.15, 0.9, 8), white, 0, -0.16, 0.16);
+      for (const a of [-0.3, 0, 0.3]) part(head, blob(0.06, 0.7, 6), white, a, 0.2, 0.2);
+      for (const a of [armL, armR]) {
+        part(a, taperedCylinder(0.15, 0.1, 0.4, 8), kimono, 0, -0.4);
+        part(a, blob(0.055, 1, 6), skinMat, 0, -0.46);
+      }
+      for (const l of [legL, legR]) part(l, taperedCylinder(0.12, 0.09, 0.62, 7), pants, 0, -0.62);
+      feet(legL, legR, -0.64);
     } else if (role === 'elder-woman') {
-      // 2. Elder Grandmother: plum kimono, lavender skirt, gray bun
-      const plumMat = new THREE.MeshToonMaterial({ color: 0x6e3852 });
-      const lavenderSkirt = new THREE.MeshToonMaterial({ color: 0x938294 });
-      const grayHairMat = new THREE.MeshToonMaterial({ color: 0xb5b0ab });
-
-      const torsoMesh = new THREE.Mesh(box(0.48, 0.6, 0.28), plumMat);
-      torso.add(torsoMesh);
-      const skirtMesh = new THREE.Mesh(taperedCylinder(0.32, 0.24, 0.65, 7), lavenderSkirt);
-      skirtMesh.position.y = -0.42;
-      torso.add(skirtMesh);
-
-      // Gray Hair with Bun
-      const hair = new THREE.Mesh(blob(0.23, 0.6, 7), grayHairMat);
-      hair.position.y = 0.08;
-      head.add(hair);
-      const bun = new THREE.Mesh(blob(0.12, 0.9, 6), grayHairMat);
-      bun.position.set(0, 0.12, -0.18);
-      head.add(bun);
-
-      armL.add(new THREE.Mesh(taperedCylinder(0.09, 0.07, 0.52, 5), plumMat));
-      armR.add(new THREE.Mesh(taperedCylinder(0.09, 0.07, 0.52, 5), plumMat));
-      legL.add(new THREE.Mesh(taperedCylinder(0.09, 0.07, 0.5, 5), skinMat));
-      legR.add(new THREE.Mesh(taperedCylinder(0.09, 0.07, 0.5, 5), skinMat));
-
+      // Plum kimono, lavender skirt, silver hair in a bun.
+      const plum = toon(0x6b3a58);
+      const lavender = toon(0x98869a);
+      const silver = toon(0x4f565c);
+      part(torso, taperedCylinder(0.22, 0.26, 0.48, 10), plum, 0, -0.16);
+      part(torso, taperedCylinder(0.37, 0.22, 0.62, 10), lavender, 0, -0.78);
+      part(torso, taperedCylinder(0.375, 0.375, 0.05, 10), plum, 0, -0.78);
+      part(torso, box(0.09, 0.25, 0.035), toon(0xe8d9cc), -0.07, 0.12, 0.235, 0, 0, -0.5);
+      part(torso, box(0.09, 0.25, 0.035), toon(0xe8d9cc), 0.07, 0.12, 0.245, 0, 0, 0.5);
+      part(head, blob(0.27, 0.72, 10), silver, 0, 0.1, -0.04);
+      part(head, blob(0.17, 0.85, 9), silver, 0, -0.05, -0.11);
+      part(head, blob(0.13, 0.9, 8), silver, 0, 0.14, -0.26);
+      part(head, blob(0.075, 1, 7), silver, -0.21, -0.02, -0.02);
+      part(head, blob(0.075, 1, 7), silver, 0.21, -0.02, -0.02);
+      for (const a of [armL, armR]) {
+        part(a, taperedCylinder(0.15, 0.1, 0.4, 8), plum, 0, -0.4);
+        part(a, blob(0.055, 1, 6), skinMat, 0, -0.46);
+      }
+      for (const l of [legL, legR]) part(l, taperedCylinder(0.08, 0.06, 0.5, 6), skinMat, 0, -0.5);
+      feet(legL, legR, -0.52);
     } else if (role === 'child') {
-      // 3. Village Boy (Haru): teal green tunic, brown shorts, dark messy hair
-      const tealTunic = new THREE.MeshToonMaterial({ color: 0x2e8074 });
-      const brownShorts = new THREE.MeshToonMaterial({ color: 0x634d3a });
-      const darkHairMat = new THREE.MeshToonMaterial({ color: 0x241d18 });
-
-      const torsoMesh = new THREE.Mesh(box(0.44, 0.55, 0.26), tealTunic);
-      torso.add(torsoMesh);
-
-      const hair = new THREE.Mesh(blob(0.24, 0.6, 7), darkHairMat);
-      hair.position.y = 0.09;
-      head.add(hair);
-
-      armL.add(new THREE.Mesh(taperedCylinder(0.07, 0.06, 0.48, 5), tealTunic));
-      armR.add(new THREE.Mesh(taperedCylinder(0.07, 0.06, 0.48, 5), tealTunic));
-      legL.add(new THREE.Mesh(taperedCylinder(0.09, 0.07, 0.58, 5), brownShorts));
-      legR.add(new THREE.Mesh(taperedCylinder(0.09, 0.07, 0.58, 5), brownShorts));
-
+      // Haru: teal tunic, brown shorts, playfully messy hair.
+      const teal = toon(0x368e80);
+      const shorts = toon(0x6a513c);
+      part(torso, taperedCylinder(0.21, 0.24, 0.44, 9), teal, 0, -0.15);
+      part(torso, taperedCylinder(0.23, 0.23, 0.1, 9), shorts, 0, -0.2);
+      part(head, blob(0.27, 0.74, 10), hairDark, 0, 0.11, -0.04);
+      part(head, blob(0.16, 0.85, 9), hairDark, 0, -0.05, -0.11);
+      const tufts = [
+        { x: -0.17, y: 0.23, rz: 0.5 }, { x: -0.06, y: 0.27, rz: 0.2 },
+        { x: 0.06, y: 0.27, rz: -0.2 }, { x: 0.17, y: 0.23, rz: -0.5 },
+      ];
+      for (const t of tufts) part(head, blob(0.08, 0.7, 6), hairDark, t.x, t.y, 0.18, 0, 0, t.rz);
+      for (const a of [armL, armR]) {
+        part(a, taperedCylinder(0.12, 0.09, 0.38, 7), teal, 0, -0.38);
+        part(a, blob(0.05, 1, 6), skinMat, 0, -0.44);
+      }
+      for (const l of [legL, legR]) part(l, taperedCylinder(0.1, 0.075, 0.6, 7), shorts, 0, -0.6);
+      feet(legL, legR, -0.62);
     } else if (role === 'maiden') {
-      // 4. Mika: Green vest over white blouse, white & green apron dress, sakura flower
-      const greenVest = new THREE.MeshToonMaterial({ color: 0x2e6b3b });
-      const whiteBlouse = new THREE.MeshToonMaterial({ color: 0xfaf5ec });
-      const darkHairMat = new THREE.MeshToonMaterial({ color: 0x261e1b });
-      const sakuraPink = new THREE.MeshToonMaterial({ color: 0xf472b6 });
-
-      const torsoMesh = new THREE.Mesh(box(0.46, 0.52, 0.28), greenVest);
-      torso.add(torsoMesh);
-      const apron = new THREE.Mesh(taperedCylinder(0.34, 0.24, 0.65, 8), whiteBlouse);
-      apron.position.y = -0.45;
-      torso.add(apron);
-      const apronHem = new THREE.Mesh(box(0.42, 0.12, 0.32), greenVest);
-      apronHem.position.y = -0.74;
-      torso.add(apronHem);
-
-      // Dark hair + side ponytail + sakura flower
-      const hair = new THREE.Mesh(blob(0.24, 0.6, 8), darkHairMat);
-      hair.position.y = 0.08;
-      head.add(hair);
-      const ponytail = new THREE.Mesh(blob(0.12, 0.9, 6), darkHairMat);
-      ponytail.position.set(0.18, 0.06, -0.12);
-      head.add(ponytail);
-      const flower = new THREE.Mesh(blob(0.05, 0.8, 5), sakuraPink);
-      flower.position.set(0.16, 0.12, 0.08);
-      head.add(flower);
-
-      armL.add(new THREE.Mesh(taperedCylinder(0.08, 0.07, 0.52, 5), whiteBlouse));
-      armR.add(new THREE.Mesh(taperedCylinder(0.08, 0.07, 0.52, 5), whiteBlouse));
-      legL.add(new THREE.Mesh(taperedCylinder(0.08, 0.06, 0.5, 5), skinMat));
-      legR.add(new THREE.Mesh(taperedCylinder(0.08, 0.06, 0.5, 5), skinMat));
-
+      // Mika in the village: white blouse, green vest, apron dress and flower.
+      const white = toon(0xf7efe1);
+      const green = toon(0x3b7746);
+      const pink = toon(0xf2a2b8);
+      part(torso, taperedCylinder(0.22, 0.26, 0.46, 10), white, 0, -0.16);
+      part(torso, taperedCylinder(0.375, 0.22, 0.66, 10), white, 0, -0.8);
+      part(torso, taperedCylinder(0.38, 0.38, 0.05, 10), green, 0, -0.8);
+      // Vest panels leave the white blouse showing down the front.
+      part(torso, box(0.13, 0.42, 0.06), green, -0.16, -0.02, 0.235, 0, 0, -0.08);
+      part(torso, box(0.13, 0.42, 0.06), green, 0.16, -0.02, 0.245, 0, 0, 0.08);
+      part(torso, box(0.44, 0.42, 0.05), green, 0, -0.02, -0.25);
+      part(head, blob(0.27, 0.74, 10), hairDark, 0, 0.1, -0.04);
+      part(head, blob(0.16, 0.85, 9), hairDark, 0, -0.05, -0.11);
+      for (let i = -2; i <= 2; i++) part(head, blob(0.075, 0.6, 6), hairDark, i * 0.085, 0.2, 0.2, 0, 0, i * 0.12);
+      part(head, blob(0.13, 0.9, 8), hairDark, 0.22, 0.04, -0.14);
+      part(head, taperedCylinder(0.045, 0.022, 0.3, 6), hairDark, -0.225, -0.32, 0.12, 0, 0, 0.06);
+      part(head, taperedCylinder(0.045, 0.022, 0.3, 6), hairDark, 0.225, -0.32, 0.12, 0, 0, -0.06);
+      part(head, blob(0.05, 0.6, 7), pink, 0.19, 0.14, 0.12);
+      for (const a of [armL, armR]) {
+        part(a, taperedCylinder(0.13, 0.1, 0.38, 8), white, 0, -0.38);
+        part(a, blob(0.055, 1, 6), skinMat, 0, -0.44);
+      }
+      for (const l of [legL, legR]) part(l, taperedCylinder(0.08, 0.06, 0.5, 6), skinMat, 0, -0.5);
+      feet(legL, legR, -0.52);
     } else {
-      // 5. Farmer Devan: Straw conical hat (kasa), tan work vest, blue trousers, wooden hoe
-      const tanVest = new THREE.MeshToonMaterial({ color: 0x9c7a4b });
-      const bluePants = new THREE.MeshToonMaterial({ color: 0x3d5475 });
-      const strawMat = new THREE.MeshToonMaterial({ color: 0xd9be8f });
-      const woodMat = new THREE.MeshToonMaterial({ color: 0x5a3e26 });
-
-      const torsoMesh = new THREE.Mesh(box(0.52, 0.62, 0.3), tanVest);
-      torso.add(torsoMesh);
-
-      // Straw Conical Hat (Kasa)
-      const hatGeo = cone(0.44, 0.18, 8);
-      const hat = new THREE.Mesh(hatGeo, strawMat);
-      hat.position.set(0, 0.24, 0);
-      head.add(hat);
-
-      // Wooden Gardening Hoe in hand
-      const hoeHandle = new THREE.Mesh(taperedCylinder(0.03, 0.03, 1.4, 4), woodMat);
-      hoeHandle.position.set(0.45, 0.45, 0.2);
-      hoeHandle.rotation.x = 0.2;
-      torso.add(hoeHandle);
-      const hoeBlade = new THREE.Mesh(box(0.14, 0.08, 0.04), new THREE.MeshToonMaterial({ color: 0x4a4a4a }));
-      hoeBlade.position.set(0.45, 1.1, 0.3);
-      torso.add(hoeBlade);
-
-      armL.add(new THREE.Mesh(taperedCylinder(0.09, 0.07, 0.55, 5), tanVest));
-      armR.add(new THREE.Mesh(taperedCylinder(0.09, 0.07, 0.55, 5), tanVest));
-      legL.add(new THREE.Mesh(taperedCylinder(0.12, 0.09, 0.72, 5), bluePants));
-      legR.add(new THREE.Mesh(taperedCylinder(0.12, 0.09, 0.72, 5), bluePants));
+      // Devan the farmer: straw kasa, work vest, indigo trousers and a hoe.
+      const vest = toon(0x9d7b4d);
+      const trousers = toon(0x3f5573);
+      const straw = toon(0xddc491);
+      const wood = toon(0x5a3e28);
+      part(torso, taperedCylinder(0.24, 0.27, 0.5, 10), vest, 0, -0.18);
+      part(torso, taperedCylinder(0.255, 0.255, 0.08, 10), wood, 0, -0.22);
+      part(head, blob(0.27, 0.74, 10), hairDark, 0, 0.08, -0.04);
+      part(head, cone(0.46, 0.22, 10), straw, 0, 0.24);
+      part(head, taperedCylinder(0.44, 0.3, 0.05, 10), straw, 0, 0.235);
+      part(torso, taperedCylinder(0.028, 0.028, 1.35, 6), wood, 0.42, -0.2, 0.22, 0.12, 0, -0.06);
+      part(torso, box(0.16, 0.09, 0.04), toon(0x565a5c), 0.5, 1.12, 0.3);
+      for (const a of [armL, armR]) {
+        part(a, taperedCylinder(0.14, 0.1, 0.4, 8), vest, 0, -0.4);
+        part(a, blob(0.058, 1, 6), skinMat, 0, -0.46);
+      }
+      for (const l of [legL, legR]) part(l, taperedCylinder(0.13, 0.1, 0.62, 7), trousers, 0, -0.62);
+      feet(legL, legR, -0.64);
     }
 
-    this.group.add(torso);
-    this.group.add(head);
-    this.group.add(armL);
-    this.group.add(armR);
-    this.group.add(legL);
-    this.group.add(legR);
-
+    this.group.add(torso, head, armL, armR, legL, legR);
     return { armL, armR, legL, legR, torso, head };
   }
 

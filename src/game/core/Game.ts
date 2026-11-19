@@ -11,6 +11,8 @@ import { Renderer } from '@/game/rendering/Renderer';
 import { SceneManager } from '@/game/rendering/SceneManager';
 import { CameraController } from '@/game/rendering/CameraController';
 import { Lighting } from '@/game/rendering/Lighting';
+import { SkySystem } from '@/game/rendering/SkySystem';
+import { CloudSystem } from '@/game/rendering/CloudSystem';
 import { WorldManager } from '@/game/world/WorldManager';
 import { Player } from '@/game/entities/Player';
 import { Campfire } from '@/game/entities/Campfire';
@@ -41,6 +43,8 @@ export class Game {
   private readonly sceneManager: SceneManager;
   private readonly camera: CameraController;
   private readonly lighting: Lighting;
+  private readonly sky: SkySystem;
+  private readonly clouds: CloudSystem;
   private readonly worldManager: WorldManager;
   private player: Player | null = null;
   private campfire: Campfire | null = null;
@@ -55,6 +59,8 @@ export class Game {
   private cat: Cat | null = null;
   private lantern: THREE.Group | null = null;
   private isMenuMode = true;
+  private resumeTime = 0.725;
+  private resumeDay = 1;
   private composer: EffectComposer | null = null;
   private lastSaveTime = 0;
 
@@ -96,15 +102,17 @@ export class Game {
     this.composer.addPass(renderPass);
     const bloom = new UnrealBloomPass(
       new THREE.Vector2(container.clientWidth, container.clientHeight),
-      0.35,
+      0.08,
       0.4,
-      0.85,
+      1.05,
     );
     this.composer.addPass(bloom);
     const fxaa = new ShaderPass(FXAAShader);
     fxaa.uniforms['resolution'].value.set(1 / Math.max(1, container.clientWidth), 1 / Math.max(1, container.clientHeight));
     this.composer.addPass(fxaa);
     this.lighting = new Lighting(this.sceneManager.scene, this.renderer.instance);
+    this.sky = new SkySystem(this.sceneManager.scene, this.camera.camera);
+    this.clouds = new CloudSystem(this.sceneManager.scene);
     this.worldManager = new WorldManager(1);
     this.sceneManager.scene.add(this.worldManager.group);
 
@@ -125,7 +133,7 @@ export class Game {
     this.weatherSystem.setReducedMotion(settings.reducedMotion);
 
     this.playerState = { position: [0, 0, 0], rotation: 0 };
-    this.world = { time: 0.35, day: 1, season: 'spring', weather: 'clear' };
+    this.world = { time: 0.725, day: 1, season: 'spring', weather: 'clear' };
 
     this.loop.onRender(() => this.render(this.dtSeconds()));
     this.loop.onTick((dt) => this.update(dt));
@@ -152,6 +160,8 @@ export class Game {
         this.playerState = savedState.player;
         this.world = savedState.world;
         this.timeSystem.setTime(savedState.world.time);
+        this.resumeTime = savedState.world.time;
+        this.resumeDay = savedState.world.day;
       }
     } catch {
       // Dexie unavailable — start fresh.
@@ -291,8 +301,8 @@ export class Game {
     // Companion Cat on the bench
     this.cat = new Cat();
     const benchPos = this.worldManager.benchPosition;
-    this.cat.group.position.set(benchPos.x + 0.35, benchPos.y + 0.5, benchPos.z - 0.05);
-    this.cat.group.rotation.y = Math.PI * 0.9;
+    this.cat.group.position.set(benchPos.x + 0.54, benchPos.y + 0.57, benchPos.z - 0.3);
+    this.cat.group.rotation.y = Math.PI + 0.5;
     scene.add(this.cat.group);
 
     // Stone Lantern near bench on riverbank
@@ -305,17 +315,28 @@ export class Game {
   }
 
   setMenuMode(isMenu: boolean): void {
+    const wasMenu = this.isMenuMode;
     this.isMenuMode = isMenu;
     const benchPos = this.worldManager.benchPosition;
     if (isMenu) {
+      if (!wasMenu) {
+        // Remember the player's time of day so gameplay resumes where it left
+        // off instead of staying at the menu's golden-hour setting.
+        this.resumeTime = this.world.time;
+        this.resumeDay = this.world.day;
+      }
       this.movement?.disable();
       if (this.player) {
-        this.player.group.position.set(benchPos.x - 0.25, benchPos.y + 0.5, benchPos.z - 0.05);
-        this.player.setFacing(Math.PI * 0.9);
+        this.player.group.position.set(benchPos.x, benchPos.y + 0.03, benchPos.z);
+        this.player.setFacing(Math.PI + 0.5);
         this.player.setAnim('sit');
       }
-      this.timeSystem.setTime(0.78);
-      this.lighting.setTimeOfDay(0.78);
+      // Golden hour: the sun sits just above the horizon behind the village.
+      this.timeSystem.day = this.resumeDay;
+      this.timeSystem.setTime(0.74);
+      this.lighting.setTimeOfDay(0.74);
+      this.sky.setTimeOfDay(0.74);
+      this.clouds.setTimeOfDay(0.74);
       this.camera.setMode('menu');
       this.camera.snap(benchPos);
     } else {
@@ -326,6 +347,14 @@ export class Game {
         this.playerState.position = [this.player.group.position.x, this.player.group.position.y, this.player.group.position.z];
       }
       this.movement?.enable();
+      // Restore gameplay time and apply it immediately (the per-frame update
+      // otherwise keeps the menu's golden hour).
+      this.timeSystem.day = this.resumeDay;
+      this.timeSystem.setTime(this.resumeTime);
+      this.world.time = this.resumeTime;
+      this.lighting.setTimeOfDay(this.resumeTime);
+      this.sky.setTimeOfDay(this.resumeTime);
+      this.clouds.setTimeOfDay(this.resumeTime);
       this.camera.setMode(this.settings.camera.mode);
       const p = new THREE.Vector3(...this.playerState.position);
       this.camera.snap(p);
@@ -333,7 +362,8 @@ export class Game {
   }
 
   private onInteractKey = (e: KeyboardEvent): void => {
-    if (e.code === 'KeyE' && !e.repeat) {
+    // F is the primary interact key; E is kept as a legacy alias.
+    if ((e.code === 'KeyF' || e.code === 'KeyE') && !e.repeat) {
       this.interactions?.interact();
     }
   };
@@ -389,6 +419,8 @@ export class Game {
     // Time of day (drives lighting + audio + snapshot).
     this.timeSystem.update(dt);
     this.lighting.setTimeOfDay(this.timeSystem.time);
+    this.sky.setTimeOfDay(this.timeSystem.time);
+    this.clouds.setTimeOfDay(this.timeSystem.time);
     this.world.time = this.timeSystem.time;
     this.world.day = this.timeSystem.day;
     this.world.season = this.seasonSystem.season;
@@ -414,11 +446,15 @@ export class Game {
         this.camera.cameraMode === 'firstPerson'
           ? lookYaw + Math.PI
           : this.movement.facingYaw;
-      this.player.setFacing(this.playerState.rotation);
+      if (!this.isMenuMode) {
+        this.player.setFacing(this.playerState.rotation);
+      }
 
       // Animation state.
       const speed = this.movement.speed;
-      if (this.movement.isSitting) {
+      if (this.isMenuMode) {
+        this.player.setAnim('sit');
+      } else if (this.movement.isSitting) {
         this.player.setAnim('sit');
       } else if (speed > 0.1) {
         this.player.setAnim('walk');
@@ -494,6 +530,7 @@ export class Game {
       this.fpsFrames = 0;
     }
 
+    this.sky.update();
     this.composer?.render() ?? this.renderer.instance.render(this.sceneManager.scene, this.camera.camera);
 
     if (this.snapshotTimer >= 0.25) {
@@ -590,7 +627,7 @@ export class Game {
     const villageCenter = this.worldManager.village.group.position;
     const placement = this.githubWorld.spawnNext(villageCenter);
     if (placement) {
-      this.lastInteraction = `[E] ${placement.milestone.label}`;
+      this.lastInteraction = `[F] ${placement.milestone.label}`;
     }
   }
 
@@ -627,6 +664,8 @@ export class Game {
     this.renderer.dispose();
     this.sceneManager.dispose();
     this.lighting.dispose();
+    this.sky.dispose();
+    this.clouds.dispose();
     this.bridge.onCommand(() => {});
   }
 }

@@ -84,11 +84,12 @@ export class VillageGenerator {
     const benchZ = fireZ + 1;
     const benchY = this.terrain.heightAt(benchX, benchZ);
     this.benchPosition.set(benchX, benchY, benchZ);
-    this.buildBench(benchX, benchY, benchZ, 0.5);
+    this.buildBench(benchX, benchY, benchZ, Math.PI + 0.5);
 
     // Iconic stone lantern beside the riverside bench (Image 1 signature)
     const lantern = createStoneLantern({ withLight: true });
     lantern.position.set(benchX + 1.6, benchY, benchZ + 0.5);
+    lantern.scale.setScalar(0.86);
     this.group.add(lantern);
 
     // Riverside wooden dock / pier
@@ -214,21 +215,23 @@ export class VillageGenerator {
 
   private buildBench(x: number, y: number, z: number, rotY: number): void {
     const bench = new THREE.Group();
-    const wood = new THREE.MeshStandardMaterial({ color: 0x8a6a44, roughness: 0.9, flatShading: true });
-    const seat = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.12, 0.5), wood);
+    // Chunky plank seat: low so the seated character reads from behind.
+    const wood = new THREE.MeshStandardMaterial({ color: 0x4e3320, roughness: 1, flatShading: true });
+    const woodDark = new THREE.MeshStandardMaterial({ color: 0x3a2415, roughness: 1, flatShading: true });
+    const seat = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.14, 0.56), wood);
     seat.position.y = 0.5;
     seat.castShadow = true;
+    seat.receiveShadow = true;
     bench.add(seat);
-    const back = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.5, 0.1), wood);
-    back.position.set(0, 0.85, -0.2);
-    back.castShadow = true;
-    bench.add(back);
-    for (const sx of [-1, 1]) {
-      const leg = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.5, 0.4), wood);
-      leg.position.set(sx * 0.7, 0.25, 0);
+    for (const sx of [-0.85, 0.85]) {
+      const leg = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.5, 0.48), woodDark);
+      leg.position.set(sx * 0.82, 0.25, 0);
       leg.castShadow = true;
       bench.add(leg);
     }
+    const brace = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.08, 0.08), woodDark);
+    brace.position.set(0, 0.22, 0);
+    bench.add(brace);
     bench.position.set(x, y, z);
     bench.rotation.y = rotY;
     bench.name = 'bench';

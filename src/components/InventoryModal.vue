@@ -1,31 +1,32 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import ItemGlyph, { type InventoryIcon } from './ItemGlyph.vue';
 
 export interface InventoryItem {
   id: string;
   name: string;
-  category: 'resources' | 'tools' | 'decor' | 'other';
+  category: 'food' | 'tools' | 'materials';
   count: number;
-  icon: string;
+  icon: InventoryIcon;
   description: string;
 }
 
 const props = defineProps<{ open: boolean }>();
 const emit = defineEmits<{ close: []; useItem: [item: InventoryItem] }>();
 
-const activeCategory = ref<'all' | 'resources' | 'tools' | 'decor' | 'other'>('all');
+const activeCategory = ref<'all' | 'food' | 'tools' | 'materials'>('all');
 
 const items = ref<InventoryItem[]>([
-  { id: 'wood', name: 'Wood Log', category: 'resources', count: 12, icon: '🪵', description: 'Sturdy timber harvested from countryside trees. Useful for crafting.' },
-  { id: 'stone', name: 'River Stone', category: 'resources', count: 8, icon: '🪨', description: 'Smooth pebbles gathered from the riverbanks.' },
-  { id: 'flower', name: 'Chamomile Flower', category: 'resources', count: 25, icon: '🌼', description: 'Delicate fragrant blossoms blooming across the meadows.' },
-  { id: 'orange', name: 'Citrus Fruit', category: 'resources', count: 6, icon: '🍊', description: 'Sweet, juicy countryside fruit grown in Kerala orchards.' },
-  { id: 'book', name: 'Traveler Diary', category: 'tools', count: 1, icon: '📘', description: 'A handwritten journal of quiet memories, discoveries, and sketches.' },
-  { id: 'mushroom', name: 'Forest Mushroom', category: 'resources', count: 8, icon: '🍄', description: 'Earthy edible mushrooms found in damp mossy clearings.' },
-  { id: 'tea', name: 'Green Tea Leaves', category: 'resources', count: 14, icon: '🍃', description: 'Freshly plucked tender tea leaves from hillside slopes.' },
-  { id: 'bamboo', name: 'Bamboo', category: 'resources', count: 3, icon: '🎋', description: 'A versatile, lightweight material found in tranquil forest groves.' },
-  { id: 'scroll', name: 'Ancient Scroll', category: 'other', count: 2, icon: '📜', description: 'Parchment inscribed with old folk melodies and village tales.' },
-  { id: 'pot', name: 'Clay Pot', category: 'decor', count: 1, icon: '🏺', description: 'Handcrafted ceramic pot made by the village artisan.' },
+  { id: 'wood', name: 'Wood Log', category: 'materials', count: 12, icon: 'wood', description: 'Sturdy timber harvested from countryside trees. Useful for crafting.' },
+  { id: 'stone', name: 'River Stone', category: 'materials', count: 8, icon: 'stone', description: 'Smooth pebbles gathered from the riverbanks.' },
+  { id: 'flower', name: 'Chamomile Flower', category: 'materials', count: 25, icon: 'flower', description: 'Delicate fragrant blossoms blooming across the meadows.' },
+  { id: 'orange', name: 'Citrus Fruit', category: 'food', count: 6, icon: 'orange', description: 'Sweet, juicy countryside fruit grown in Kerala orchards.' },
+  { id: 'book', name: 'Traveler Diary', category: 'tools', count: 1, icon: 'book', description: 'A handwritten journal of quiet memories, discoveries, and sketches.' },
+  { id: 'mushroom', name: 'Forest Mushroom', category: 'food', count: 8, icon: 'mushroom', description: 'Earthy edible mushrooms found in damp mossy clearings.' },
+  { id: 'tea', name: 'Green Tea Leaves', category: 'food', count: 14, icon: 'tea', description: 'Freshly plucked tender tea leaves from hillside slopes.' },
+  { id: 'bamboo', name: 'Bamboo', category: 'materials', count: 3, icon: 'bamboo', description: 'A versatile, lightweight material found in tranquil forest groves.' },
+  { id: 'scroll', name: 'Ancient Scroll', category: 'tools', count: 2, icon: 'scroll', description: 'Parchment inscribed with old folk melodies and village tales.' },
+  { id: 'pot', name: 'Clay Pot', category: 'materials', count: 1, icon: 'pot', description: 'Handcrafted ceramic pot made by the village artisan.' },
 ]);
 
 const selectedItemId = ref<string>('bamboo');
@@ -86,11 +87,11 @@ function handleDrop() {
               All
             </button>
             <button
-              :class="['tab-pill', { active: activeCategory === 'resources' }]"
+              :class="['tab-pill', { active: activeCategory === 'food' }]"
               type="button"
-              @click="activeCategory = 'resources'"
+              @click="activeCategory = 'food'"
             >
-              Resources
+              Food
             </button>
             <button
               :class="['tab-pill', { active: activeCategory === 'tools' }]"
@@ -100,18 +101,11 @@ function handleDrop() {
               Tools
             </button>
             <button
-              :class="['tab-pill', { active: activeCategory === 'decor' }]"
+              :class="['tab-pill', { active: activeCategory === 'materials' }]"
               type="button"
-              @click="activeCategory = 'decor'"
+              @click="activeCategory = 'materials'"
             >
-              Decor
-            </button>
-            <button
-              :class="['tab-pill', { active: activeCategory === 'other' }]"
-              type="button"
-              @click="activeCategory = 'other'"
-            >
-              Other
+              Materials
             </button>
           </div>
 
@@ -123,7 +117,7 @@ function handleDrop() {
               :class="['item-slot', { selected: selectedItem?.id === item.id }]"
               @click="selectItem(item.id)"
             >
-              <div class="slot-icon">{{ item.icon }}</div>
+              <ItemGlyph :kind="item.icon" class="slot-icon" />
               <span class="slot-count">{{ item.count }}</span>
             </div>
           </div>
@@ -132,7 +126,7 @@ function handleDrop() {
         <!-- Right: Selected Item Details Card -->
         <div v-if="selectedItem" class="item-details-card">
           <div class="detail-icon-box">
-            <span class="detail-large-icon">{{ selectedItem.icon }}</span>
+            <ItemGlyph :kind="selectedItem.icon" class="detail-large-icon" />
           </div>
 
           <h3 class="detail-name">{{ selectedItem.name }}</h3>
@@ -140,7 +134,7 @@ function handleDrop() {
 
           <div class="detail-actions">
             <button class="btn-drop" type="button" @click="handleDrop">
-              <span>🗑 Drop</span>
+              <span>Drop</span>
             </button>
             <button class="btn-use" type="button" @click="handleUse">
               <span>Use</span>
@@ -153,8 +147,6 @@ function handleDrop() {
 </template>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap');
-
 .inventory-backdrop {
   position: fixed;
   inset: 0;
@@ -166,7 +158,7 @@ function handleDrop() {
   justify-content: center;
   z-index: 400;
   padding: 16px;
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-family: 'Zen Kaku Gothic New', system-ui, sans-serif;
   user-select: none;
 }
 
@@ -211,7 +203,7 @@ function handleDrop() {
 }
 
 .inventory-title {
-  font-family: 'Caveat', cursive, sans-serif;
+  font-family: Georgia, 'Shippori Mincho', serif;
   font-size: 32px;
   font-weight: 700;
   color: #2b221a;
@@ -307,9 +299,10 @@ function handleDrop() {
 }
 
 .slot-icon {
-  font-size: 28px;
-  line-height: 1;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+  width: 36px;
+  height: 36px;
+  color: #6a4e31;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.12));
 }
 
 .slot-count {
@@ -348,12 +341,13 @@ function handleDrop() {
 }
 
 .detail-large-icon {
-  font-size: 48px;
-  line-height: 1;
+  width: 62px;
+  height: 62px;
+  color: #7a5a36;
 }
 
 .detail-name {
-  font-family: 'Caveat', cursive, sans-serif;
+  font-family: Georgia, 'Shippori Mincho', serif;
   font-size: 28px;
   font-weight: 700;
   color: #271f18;

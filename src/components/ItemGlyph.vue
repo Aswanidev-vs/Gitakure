@@ -1,5 +1,5 @@
 <script setup lang="ts">
-export type InventoryIcon = 'wood' | 'stone' | 'flower' | 'orange' | 'book' | 'mushroom' | 'tea' | 'bamboo' | 'scroll' | 'pot';
+export type InventoryIcon = 'wood' | 'stone' | 'flower' | 'orange' | 'book' | 'mushroom' | 'tea' | 'bamboo' | 'scroll' | 'pot' | 'lantern' | 'pickaxe';
 
 defineProps<{ kind: InventoryIcon }>();
 </script>
@@ -15,6 +15,8 @@ defineProps<{ kind: InventoryIcon }>();
     <path v-else-if="kind === 'tea'" d="M6 8h10v7a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3V8Zm10 2h2a2 2 0 0 1 0 4h-2M8 5c0-1 1-2 2-2M12 5c0-1 1-2 2-2" />
     <path v-else-if="kind === 'bamboo'" d="M8 21V3M13 21V3M18 21V3M6 8h4M11 14h4M16 9h4M6 16h4" />
     <path v-else-if="kind === 'scroll'" d="M7 5h10v14H7a2 2 0 0 1 0-4h10M7 15a2 2 0 0 0 0 4M10 8h4M10 11h4" />
+    <path v-else-if="kind === 'lantern'" d="M9 3h6M12 3v2M8 6h8l1 3-1 8H8L7 9l1-3ZM9 17v3h6v-3M9 11h6M12 8v6" />
+    <path v-else-if="kind === 'pickaxe'" d="M12 8v13M4 7c3-3 13-3 16 0M4 7l3 3M20 7l-3 3M10 21h4" />
     <path v-else d="M6 8h12v9H6zM8 8V5h8v3M9 12h6M10 17v2h4v-2" />
   </svg>
 </template>

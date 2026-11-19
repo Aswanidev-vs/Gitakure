@@ -73,7 +73,7 @@ export const DEFAULT_SETTINGS: GameSettings = {
     maxPixelCount: 3840 * 2160,
   },
   audio: { master: 0.8, ambience: 0.7, sfx: 0.8, music: false },
-  camera: { mode: 'thirdPerson', followDistance: 6, fov: 50 },
+  camera: { mode: 'thirdPerson', followDistance: 5, fov: 50 },
   reducedMotion: false,
   showTime: true,
   showWeather: true,

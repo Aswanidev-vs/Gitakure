@@ -194,8 +194,6 @@ function toggleZoom() {
 </template>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap');
-
 .map-backdrop {
   position: fixed;
   inset: 0;
@@ -208,7 +206,7 @@ function toggleZoom() {
   z-index: 480;
   padding: 20px;
   user-select: none;
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-family: 'Zen Kaku Gothic New', system-ui, sans-serif;
 }
 
 /* Parchment Map Card Container (Image 9) */

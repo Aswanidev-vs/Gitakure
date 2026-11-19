@@ -20,16 +20,16 @@ export class Campfire {
 
     // Layered flame cones (additive, warm).
     const flameMat = new THREE.MeshBasicMaterial({
-      color: 0xff7a2a,
+      color: 0xff6a1e,
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.5,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
     const innerMat = new THREE.MeshBasicMaterial({
-      color: 0xffd24a,
+      color: 0xffb83a,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.55,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
@@ -43,7 +43,7 @@ export class Campfire {
     }
 
     // Warm point light.
-    this.light = new THREE.PointLight(0xff8a3a, 3, 12, 1.5);
+    this.light = new THREE.PointLight(0xff8a3a, 2.2, 10, 1.6);
     this.light.position.y = 0.8;
     this.group.add(this.light);
 
@@ -56,11 +56,25 @@ export class Campfire {
     }
     const smokeGeo = new THREE.BufferGeometry();
     smokeGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    // Soft round puff sprite instead of square gl_Points.
+    const smokeCanvas = document.createElement('canvas');
+    smokeCanvas.width = smokeCanvas.height = 64;
+    const sctx = smokeCanvas.getContext('2d')!;
+    const grad = sctx.createRadialGradient(32, 32, 2, 32, 32, 30);
+    grad.addColorStop(0, 'rgba(255,255,255,0.9)');
+    grad.addColorStop(0.55, 'rgba(255,255,255,0.35)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    sctx.fillStyle = grad;
+    sctx.fillRect(0, 0, 64, 64);
+    const smokeTex = new THREE.CanvasTexture(smokeCanvas);
+
     const smokeMat = new THREE.PointsMaterial({
-      color: 0x888888,
-      size: 0.3,
+      color: 0x9c8f84,
+      size: 0.7,
+      map: smokeTex,
       transparent: true,
-      opacity: 0.4,
+      opacity: 0.28,
       depthWrite: false,
     });
     this.smoke = new THREE.Points(smokeGeo, smokeMat);
@@ -82,7 +96,7 @@ export class Campfire {
 
   update(dt: number, elapsed: number): void {
     if (this.reducedMotion) {
-      this.light.intensity = 3;
+      this.light.intensity = 2.2;
       return;
     }
 
@@ -94,7 +108,7 @@ export class Campfire {
       flame.rotation.y += dt * (1.5 + i);
       flame.position.y = 0.2 + (flame.geometry as THREE.ConeGeometry).parameters.height / 2 + f * 0.1;
     });
-    this.light.intensity = 3 + f * 2;
+    this.light.intensity = 2.2 + f * 1.4;
 
     // Smoke rise.
     const pos = this.smoke.geometry.attributes.position as THREE.BufferAttribute;
